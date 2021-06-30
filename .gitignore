@@ -1,0 +1,16 @@
+**/target/**
+/target/
+/.metadata/
+logs/
+/.classpath
+/.project
+/bin/
+.com_puppetlabs_geppetto_pptp_target/
+RemoteSystemsTempFiles/
+.settings/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr

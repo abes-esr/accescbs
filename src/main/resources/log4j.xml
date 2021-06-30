@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration PUBLIC
+  "-//APACHE//DTD LOG4J 1.2//EN" "http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/xml/doc-files/log4j.dtd">
+<!--<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">-->
+<log4j:configuration>
+
+
+  <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+    <param name="Target" value="System.out"/>
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="%-5p [%t] %c - %m%n"/>
+    </layout>
+  </appender>
+
+  <appender name="LOGFILE" class="org.apache.log4j.rolling.RollingFileAppender">
+   <param name="file" value="./logs/accesscbs.log"/>
+   <param name="append" value="true" />
+   <param name="encoding" value="UTF-8" />
+   <rollingPolicy name="LOGFILE" class="org.apache.log4j.rolling.FixedWindowRollingPolicy">
+       <param name="FileNamePattern" value="./logs/accesscbs.%i.log" />
+	   <param name="MaxIndex" value="5"/>
+   </rollingPolicy>
+  <triggeringPolicy class="org.apache.log4j.rolling.SizeBasedTriggeringPolicy">
+  <param name="MaxFileSize" value="10000000"/>
+  </triggeringPolicy>
+   <layout class="org.apache.log4j.PatternLayout">
+      <param name="conversionPattern" value="%5p %d{ISO8601} [%t][%x] %c - %m%n"/>
+   </layout>
+  </appender>
+
+  <root>
+    <priority value ="info" />
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="LOGFILE"/>
+  </root>
+</log4j:configuration>

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:date="http://exslt.org/dates-and-times" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.loc.gov/MARC21/slim">
+    <datafield tag="002" ind1=" " ind2=" ">
+        <subfield code="a">STAR10007</subfield>
+        <subfield code="2">STAR</subfield>
+    </datafield>
+    <datafield tag="008" ind1=" " ind2=" ">
+        <subfield code="a">Oax3</subfield>
+    </datafield>
+    <datafield tag="029" ind1=" " ind2=" ">
+        <subfield code="a">FR</subfield>
+        <subfield code="b">2010ECAP0020</subfield>
+    </datafield>
+    <datafield tag="033" ind1=" " ind2=" ">
+        <subfield code="a">http://www.theses.fr/2010ECAP0020</subfield>
+    </datafield>
+    <datafield tag="035" ind1=" " ind2=" ">
+        <subfield code="a">STAR10007</subfield>
+    </datafield>
+    <datafield tag="100" ind1="0" ind2=" ">
+        <subfield code="a">2010</subfield>
+    </datafield>
+    <datafield tag="101" ind1="0" ind2=" ">
+        <subfield code="a">fre</subfield>
+        <subfield code="d">fre</subfield>
+        <subfield code="d">eng</subfield>
+    </datafield>
+    <datafield tag="102" ind1=" " ind2=" ">
+        <subfield code="a">FR</subfield>
+    </datafield>
+    <datafield tag="104" ind1=" " ind2=" ">
+        <subfield code="a">k</subfield>
+        <subfield code="b">y</subfield>
+        <subfield code="c">y</subfield>
+        <subfield code="d">ba</subfield>
+        <subfield code="e">0</subfield>
+        <subfield code="f">fre</subfield>
+    </datafield>
+    <datafield tag="105" ind1=" " ind2=" ">
+        <subfield code="b">m</subfield>
+        <subfield code="b">a</subfield>
+        <subfield code="c">0</subfield>
+        <subfield code="d">0</subfield>
+        <subfield code="f">y</subfield>
+        <subfield code="g">y</subfield>
+    </datafield>
+    <datafield tag="135" ind1=" " ind2=" ">
+        <subfield code="a">d</subfield>
+        <!--correspondance non établie dans la recommandation pour la position 0-->
+        <subfield code="b">r</subfield>
+    </datafield>
+    <datafield tag="181" ind1=" " ind2=" ">
+        <subfield code="P">01</subfield>
+        <subfield code="c">txt</subfield>
+    </datafield>
+    <datafield tag="182" ind1=" " ind2=" ">
+        <subfield code="P">01</subfield>
+        <subfield code="c">c</subfield>
+    </datafield>
+    <datafield tag="183" ind1=" " ind2=" ">
+        <subfield code="P">01</subfield>
+        <subfield code="a">ceb</subfield>
+    </datafield>
+    <datafield tag="200" ind1="1" ind2=" ">
+        <subfield code="a">@Contribution à l'élaboration d'un outil de simulation de procédés de transformation physico-chimique de matières premières issues des agro ressources</subfield>
+        <subfield code="e">application aux procédés de transformation de biopolymères par extrusion réactive</subfield>
+        <subfield code="f">Marie-Amélie De ville d'avray</subfield>
+        <subfield code="g">sous la direction de Arsène Isambert</subfield>
+    </datafield>
+    <datafield tag="219" ind1=" " ind2="1">
+        <subfield code="d">2010</subfield>
+    </datafield>
+    <datafield tag="230" ind1=" " ind2=" ">
+        <subfield code="a">Données textuelles</subfield>
+    </datafield>
+    <datafield tag="304" ind1=" " ind2=" ">
+        <subfield code="a">Titre provenant de l'écran-titre</subfield>
+    </datafield>
+    <datafield tag="310" ind1=" " ind2=" ">
+        <subfield code="a">Thèse confidentielle jusqu'au 05 juillet 2015</subfield>
+    </datafield>
+    <datafield tag="314" ind1=" " ind2=" ">
+        <subfield code="a">Ecole(s) Doctorale(s) : Sciences pour l'ingénieur</subfield>
+    </datafield>
+    <datafield tag="314" ind1=" " ind2=" ">
+        <subfield code="a">Partenaire(s) de recherche : Laboratoire Génie des Procédés et Matériaux (Laboratoire), Laboratoire de Genie des Procédés et Matériaux (Laboratoire)</subfield>
+    </datafield>
+    <datafield tag="314" ind1=" " ind2=" ">
+        <subfield code="a">Autre(s) contribution(s) : Gilles Trystram (Président du jury) ; Arsène Isambert, Hélène Ducatel, Stéphane Brochot (Membre(s) du jury) ; Yann Le gorrec, Xuân Meyer (Rapporteur(s))</subfield>
+    </datafield>
+    <datafield tag="328" ind1=" " ind2="0">
+        <subfield code="b">Thèse de doctorat</subfield>
+        <subfield code="c">Génie des procédés</subfield>
+        <subfield code="d">2010</subfield>
+        <subfield code="e">Ecole centrale Paris</subfield>
+    </datafield>>
+    <datafield tag="606" ind1=" " ind2=" ">
+        <subfield code="3">034228942</subfield>
+        <subfield code="3">027253139</subfield>
+        <subfield code="2">rameau</subfield>
+    </datafield>
+    <datafield tag="606" ind1=" " ind2=" ">
+        <subfield code="3">029677440</subfield>
+        <subfield code="3">027253139</subfield>
+        <subfield code="2">rameau</subfield>
+    </datafield>
+    <datafield tag="L035" ind1=" " ind2=" ">
+        <subfield code="a">123456789</subfield>
+    </datafield>
+<!--    <datafield tag="e01" ind1="" ind2="">
+        <subfield code="b">x</subfield>
+    </datafield>-->
+    <datafield tag="930" ind1=" " ind2=" ">
+        <subfield code="b">341725201</subfield>
+        <subfield code="j">g</subfield>
+    </datafield>
+    <datafield tag="930" ind1=" " ind2=" ">
+    <subfield code="b">341725202</subfield>
+    <subfield code="j">g</subfield>
+</datafield>
+</record>

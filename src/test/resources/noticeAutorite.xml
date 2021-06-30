@@ -1,0 +1,69 @@
+<record>
+    <leader>     cx  a22     3  45  </leader>
+    <controlfield tag="001">079695434</controlfield>
+    <controlfield tag="003">http://www.idref.fr/079695434</controlfield>
+    <controlfield tag="004">20040723</controlfield>
+    <controlfield tag="005">20200404052341.000</controlfield>
+    <controlfield tag="006">674822116</controlfield>
+    <controlfield tag="007">674822116</controlfield>
+    <controlfield tag="008">Tp5</controlfield>
+    <datafield tag="010" ind1=" " ind2=" ">
+        <subfield code="a">0000000004872894</subfield>
+        <subfield code="2">ISNI</subfield>
+        <subfield code="C">VIAF</subfield>
+        <subfield code="d">20200401</subfield>
+    </datafield>
+    <datafield tag="035" ind1=" " ind2=" ">
+        <subfield code="a">http://viaf.org/viaf/22507970</subfield>
+        <subfield code="2">VIAF</subfield>
+        <subfield code="C">VIAF</subfield>
+        <subfield code="d">20200401</subfield>
+    </datafield>
+    <datafield tag="100" ind1=" " ind2=" ">
+        <subfield code="a">20040723afrey50      ba0</subfield>
+    </datafield>
+    <datafield tag="101" ind1=" " ind2=" ">
+        <subfield code="a">ger</subfield>
+    </datafield>
+    <datafield tag="102" ind1=" " ind2=" ">
+        <subfield code="a">DE</subfield>
+    </datafield>
+    <datafield tag="106" ind1=" " ind2=" ">
+        <subfield code="a">0</subfield>
+        <subfield code="b">1</subfield>
+        <subfield code="c">0</subfield>
+    </datafield>
+    <datafield tag="120" ind1=" " ind2=" ">
+        <subfield code="a">ba</subfield>
+    </datafield>
+    <datafield tag="152" ind1=" " ind2=" ">
+        <subfield code="a">AFNOR</subfield>
+    </datafield>
+    <datafield tag="200" ind1=" " ind2="1">
+        <subfield code="a">Schröder</subfield>
+        <subfield code="b">Hugo</subfield>
+    </datafield>
+    <datafield tag="340" ind1=" " ind2=" ">
+        <subfield code="7">ba0yba0y</subfield>
+        <subfield code="a">Inspecteur de l'enseignement primaire à Halle (Allemagne) en 1928</subfield>
+    </datafield>
+    <datafield tag="400" ind1=" " ind2="1">
+        <subfield code="a">Schroeder</subfield>
+        <subfield code="b">Hugo</subfield>
+    </datafield>
+    <datafield tag="801" ind1=" " ind2="3">
+        <subfield code="a">FR</subfield>
+        <subfield code="b">Abes</subfield>
+        <subfield code="c">20200404</subfield>
+        <subfield code="g">AFNOR</subfield>
+    </datafield>
+    <datafield tag="810" ind1=" " ind2=" ">
+        <subfield code="a">Soziologie der Volksschulklasse / Hugo Schröder</subfield>
+    </datafield>
+    <datafield tag="900" ind1=" " ind2=" ">
+        <subfield code="a">Schröder, Hugo</subfield>
+    </datafield>
+    <datafield tag="901" ind1=" " ind2=" ">
+        <subfield code="a">Schroeder, Hugo</subfield>
+    </datafield>
+</record>
