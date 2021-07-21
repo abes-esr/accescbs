@@ -45,6 +45,7 @@ public class ZonesSpecifications {
                     new ZoneSpecification("023", "a"),
                     new ZoneSpecification("024", "abx3"),
                     new ZoneSpecification("029", "ab"),
+                    new ZoneSpecification("032", "a0"),
                     new ZoneSpecification("033", "az2d"),
                     new ZoneSpecification("034", "a0"),
                     new ZoneSpecification("035", "az2d"),
