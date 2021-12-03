@@ -1,8 +1,9 @@
 package fr.abes.cbs.notices;
 
-import fr.abes.cbs.utilitaire.Constants;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import fr.abes.cbs.utilitaire.Constants;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
@@ -450,5 +451,189 @@ public class BiblioTest {
                 "608 ##$302724640X\u001BIPériodiques\u001BN$2rameau\r" +
                 "676 ##$a071\r" +
                 "712 02$a@University of Maryland at College Park$bCollege of Journalism$4340\r" + Constants.STR_1E);
+    }
+
+    @Test
+    void testModifZone029() throws Exception {
+        String biblioStr = Constants.STR_1F +
+                "006 593502101:19-12-06\r" +
+                "008 $aAax3\r" +
+                "029 ##$aFR$b2006LIL2E104$eTH-PH-0086$mMEM-2006-0056$o459 (numéro d'ordre)$z2006LLL2E104\r" +
+                "034 $aOCoLC$0493718812\r" +
+                "100 0#$a2006\r" +
+                "101 0#$afre$dfre$deng\r" +
+                "102 ##$aFR\r" +
+                "104 ##$ak$by$cy$dba$ffre\r" +
+                "105 ##$aa$bm$ba$c0$d0$e0$fi$gy\r" +
+                "106 ##$ar\r" +
+                "200 1#$a@Régulation de la captation sélective des esters de cholestérol dans différents types cellulaires TEST$eimplication d'un réseau complexe de protéines (SR-BI, apolipoprotéine E, lipoprotéine lipase...)$fStéphanie Bultel$gsous la direction de Véronique Clavey\r" +
+                "214 #1$d2006\r" +
+                "215 ##$a1 vol. (239 f.)$cill. en noir et en coul.$d30 cm\r" +
+                "310 ##$aPublication autorisée par le jury\r" +
+                "328 #0$bThèse d'exercice$cPharmacie$eLille 2$d2006\r" +
+                "328 #0$bMémoire du diplôme d'études spécialisées$cPharmacie spécialisée$eLille 2$d2006\r" +
+                "328 #0$bThèse de doctorat$cSciences pharmaceutiques$eLille 2$d2006\r" +
+                "700 #1$3111475384$4070\r" +
+                "701 #1$3075890127$4727\r" +
+                "711 01$3026404389$4295\r" + Constants.STR_1E;
+
+        Biblio biblio = new Biblio(biblioStr);
+
+        assertThat(biblio.toString()).isEqualTo(Constants.STR_1F +
+                "006 593502101:19-12-06\r" +
+                "008 $aAax3\r" +
+                "029 ##$aFR$b2006LIL2E104$eTH-PH-0086$mMEM-2006-0056$o459 (numéro d'ordre)$z2006LLL2E104\r" +
+                "034 $aOCoLC$0493718812\r" +
+                "100 0#$a2006\r" +
+                "101 0#$afre$dfre$deng\r" +
+                "102 ##$aFR\r" +
+                "104 ##$ak$by$cy$dba$ffre\r" +
+                "105 ##$aa$bm$ba$c0$d0$e0$fi$gy\r" +
+                "106 ##$ar\r" +
+                "200 1#$a@Régulation de la captation sélective des esters de cholestérol dans différents types cellulaires TEST$eimplication d'un réseau complexe de protéines (SR-BI, apolipoprotéine E, lipoprotéine lipase...)$fStéphanie Bultel$gsous la direction de Véronique Clavey\r" +
+                "214 #1$d2006\r" +
+                "215 ##$a1 vol. (239 f.)$cill. en noir et en coul.$d30 cm\r" +
+                "310 ##$aPublication autorisée par le jury\r" +
+                "328 #0$bThèse d'exercice$cPharmacie$eLille 2$d2006\r" +
+                "328 #0$bMémoire du diplôme d'études spécialisées$cPharmacie spécialisée$eLille 2$d2006\r" +
+                "328 #0$bThèse de doctorat$cSciences pharmaceutiques$eLille 2$d2006\r" +
+                "700 #1$3111475384$4070\r" +
+                "701 #1$3075890127$4727\r" +
+                "711 01$3026404389$4295\r" + Constants.STR_1E);
+    }
+
+    @Test
+    void testAjoutZone325() throws Exception {
+        String biblioStr = Constants.STR_1F +
+                "003 201925001\r" +
+                "004 4018:19-06-17\r" +
+                "005 341720001:08-10-21 17:53:25.000\r" +
+                "006 4018:19-06-17\r" +
+                "008 $aOax3\r" +
+                "010 ##$A978-0-674-73442-5\r" +
+                "017 70$a10.4159/harvard.9780674734425$2doi\r" +
+                "100 1#$a1974\r" +
+                "101 0#$aeng\r" +
+                "102 ##$aDE$aUS\r" +
+                "104 ##$a|$b|$cy$ffre\r" +
+                "135 ##$ad$br\r" +
+                "181 ##$P01$ctxt\r" +
+                "182 ##$P01$cc\r" +
+                "183 ##$P01$aceb\r" +
+                "200 1#$aThe @Lyon Uprising of 1834 TEST AVEC 325$eSocial and Political Conflict in the Early July Monarchy$fRobert J. Bezucha\r" +
+                "214 #0$aCambridge, Mass.$cHarvard University Press$d[1974]\r" +
+                "325 ##$aNumérisation sur archive.org$uhttps://openlibrary.org/works/OL957949W/\r" +
+                "325 ##$bReproduction numérique$cLieu inconnu$dArchive.org$e2020$faccès en ligne$gCollection Lyon Social$h0$iNote pour info sur le caractère complet de la repro$j3pd06$nNote sur la reproduction$uhttps://openlibrary.org/works/OL957949W/Renoir$x1292-8399$z20210913\r" +
+                "801 #0$aDE$bIN-ChSCO$c20170329$grda\r" + Constants.STR_1E;
+        Biblio biblio = new Biblio(biblioStr);
+
+        assertThat(biblio.toString()).isEqualTo(Constants.STR_1F +
+                "003 201925001\r" +
+                "004 4018:19-06-17\r" +
+                "005 341720001:08-10-21 17:53:25.000\r" +
+                "006 4018:19-06-17\r" +
+                "008 $aOax3\r" +
+                "010 ##$A978-0-674-73442-5\r" +
+                "017 70$a10.4159/harvard.9780674734425$2doi\r" +
+                "100 1#$a1974\r" +
+                "101 0#$aeng\r" +
+                "102 ##$aDE$aUS\r" +
+                "104 ##$a|$b|$cy$ffre\r" +
+                "135 ##$ad$br\r" +
+                "181 ##$P01$ctxt\r" +
+                "182 ##$P01$cc\r" +
+                "183 ##$P01$aceb\r" +
+                "200 1#$aThe @Lyon Uprising of 1834 TEST AVEC 325$eSocial and Political Conflict in the Early July Monarchy$fRobert J. Bezucha\r" +
+                "214 #0$aCambridge, Mass.$cHarvard University Press$d[1974]\r" +
+                "325 ##$aNumérisation sur archive.org$uhttps://openlibrary.org/works/OL957949W/\r" +
+                "325 ##$bReproduction numérique$cLieu inconnu$dArchive.org$e2020$faccès en ligne$gCollection Lyon Social$h0$iNote pour info sur le caractère complet de la repro$j3pd06$nNote sur la reproduction$uhttps://openlibrary.org/works/OL957949W/Renoir$x1292-8399$z20210913\r" +
+                "801 #0$aDE$bIN-ChSCO$c20170329$grda\r" + Constants.STR_1E);
+    }
+
+    @Test
+    void testAjout371et338() throws Exception {
+        String biblioStr = Constants.STR_1F +
+                "002 $aFRBNF46624974000000X$2FRBNF\r" +
+                "003 http://www.sudoc.fr/232844194\r" +
+                "004 4994:19-11-20\r" +
+                "005 1837:23-11-21 16:40:10.000\r" +
+                "006 4994:19-11-20\r" +
+                "007 1837:23-11-21 16:40:10.000\r" +
+                "008 $aAax3\r" +
+                "010 ##$A978-2-35884-100-9$bbr.$d20 EUR\r" +
+                "020 ##$aFR$b02043044\r" +
+                "024 $aSIBB$bM$323306821X\r" +
+                "100 0#$a2021\r" +
+                "101 0#$afre\r" +
+                "102 ##$aFR\r" +
+                "104 ##$am$by$cy$dba$e0$ffre\r" +
+                "105 ##$aa$bz$c0$d0$e1$fc$gb\r" +
+                "106 ##$ar\r" +
+                "181 ##$P01$ctxt\r" +
+                "182 ##$P01$cn\r" +
+                "183 ##$P01$anga\r" +
+                "200 1#$a@Robert Schumann TEST$fJean Gallois\r" +
+                "214 #0$a[Paris]$cBleu nuit éditeur\r" +
+                "214 #4$dC 2021\r" +
+                "215 ##$a1 vol. (176 p.)$cill.$d20 cm\r" +
+                "320 ##$aBibliogr. p. 171. Discogr. p. 169-170. Index\r" +
+                "325 ##$bReproduction numérique$cParis$dBibliothèque nationale de France, Centre national de la littérature pour la jeunesse$e2005$h0$i1976-$j3py02$uhttp://www.tucliquesici$y978-2-03-598509-5$z20210109\r" +
+                "325 ##$bMicrofiche$cParis$dBnF$h0$i1888/11 (série 1, fasc. 2 -1936/12) (série 27, fasc. 6)$j1xx##$uhttp://gallica.bnf.fr/ark:/12148/cb343494147/1936$v20141202$x2419-6592\r" +
+                "325 ##$bFac-similé$cParis$dEditeur incroyable$e2008$f2 volumes (48 p.)$gCollection rigolote$j1xx##$x2419-6592\r" +
+                "325 ##$aReproduction numérique réalisée en 2021 par la bibliothèque$uhttp://www.labibliotheque.fr\r" +
+                "338 ##$bCommission européenne$eUnion européenne$bCommission ministerielle$eMESRI$eMInistère de la santé$cH2021$dH2020-SFS-2016-2017$fPromoting One Health in Europe through joint actions on foodborne zoonoses, antimicrobial resistance and emerging microbiological hazards$gOne Health EJP\r" +
+                "338 ##$bINCa$eMESRI$eMinistère des solidarités et de la santé$bIReSP$eINSERM$cSPADOC\r" +
+                "338 ##$bAID$bCEA$ccontrat de thèse CEA/AID$d2021-47\r" +
+                "371 0#$8PDF$aAccès réservé aux établissements ou bibliothèques abonnés\r" +
+                "371 1#$aReproduction interdite$dautorisée à des seules fins de recherche\r" +
+                "600 #1$3027128660Schumann, Robert (1810-1856 ; musicien)$2rameau\r" +
+                "608 ##$3027281558Biographies$2rameau\r" +
+                "700 #1$3026879972Gallois, Jean$4330 (Auteur prétendu)\r" +
+                "711 02$3027801411@Union européenne. Commission européenne$4723 (Mécène)\r" +
+                "801 #0$aFR$bFR-751131015$c20200929$gAFNOR$2intermrc\r" + Constants.STR_1E;
+
+        Biblio biblio = new Biblio(biblioStr);
+
+        assertThat(biblio.toString()).isEqualTo(
+                Constants.STR_1F +
+                        "002 $aFRBNF46624974000000X$2FRBNF\r" +
+                        "003 http://www.sudoc.fr/232844194\r" +
+                        "004 4994:19-11-20\r" +
+                        "005 1837:23-11-21 16:40:10.000\r" +
+                        "006 4994:19-11-20\r" +
+                        "007 1837:23-11-21 16:40:10.000\r" +
+                        "008 $aAax3\r" +
+                        "010 ##$A978-2-35884-100-9$bbr.$d20 EUR\r" +
+                        "020 ##$aFR$b02043044\r" +
+                        "024 $aSIBB$bM$323306821X\r" +
+                        "100 0#$a2021\r" +
+                        "101 0#$afre\r" +
+                        "102 ##$aFR\r" +
+                        "104 ##$am$by$cy$dba$e0$ffre\r" +
+                        "105 ##$aa$bz$c0$d0$e1$fc$gb\r" +
+                        "106 ##$ar\r" +
+                        "181 ##$P01$ctxt\r" +
+                        "182 ##$P01$cn\r" +
+                        "183 ##$P01$anga\r" +
+                        "200 1#$a@Robert Schumann TEST$fJean Gallois\r" +
+                        "214 #0$a[Paris]$cBleu nuit éditeur\r" +
+                        "214 #4$dC 2021\r" +
+                        "215 ##$a1 vol. (176 p.)$cill.$d20 cm\r" +
+                        "320 ##$aBibliogr. p. 171. Discogr. p. 169-170. Index\r" +
+                        "325 ##$bReproduction numérique$cParis$dBibliothèque nationale de France, Centre national de la littérature pour la jeunesse$e2005$h0$i1976-$j3py02$uhttp://www.tucliquesici$y978-2-03-598509-5$z20210109\r" +
+                        "325 ##$bMicrofiche$cParis$dBnF$h0$i1888/11 (série 1, fasc. 2 -1936/12) (série 27, fasc. 6)$j1xx##$uhttp://gallica.bnf.fr/ark:/12148/cb343494147/1936$v20141202$x2419-6592\r" +
+                        "325 ##$bFac-similé$cParis$dEditeur incroyable$e2008$f2 volumes (48 p.)$gCollection rigolote$j1xx##$x2419-6592\r" +
+                        "325 ##$aReproduction numérique réalisée en 2021 par la bibliothèque$uhttp://www.labibliotheque.fr\r" +
+                        "338 ##$bCommission européenne$eUnion européenne$bCommission ministerielle$eMESRI$eMInistère de la santé$cH2021$dH2020-SFS-2016-2017$fPromoting One Health in Europe through joint actions on foodborne zoonoses, antimicrobial resistance and emerging microbiological hazards$gOne Health EJP\r" +
+                        "338 ##$bINCa$eMESRI$eMinistère des solidarités et de la santé$bIReSP$eINSERM$cSPADOC\r" +
+                        "338 ##$bAID$bCEA$ccontrat de thèse CEA/AID$d2021-47\r" +
+                        "371 0#$8PDF$aAccès réservé aux établissements ou bibliothèques abonnés\r" +
+                        "371 1#$aReproduction interdite$dautorisée à des seules fins de recherche\r" +
+                        "600 #1$3027128660Schumann, Robert (1810-1856 ; musicien)$2rameau\r" +
+                        "608 ##$3027281558Biographies$2rameau\r" +
+                        "700 #1$3026879972Gallois, Jean$4330 (Auteur prétendu)\r" +
+                        "711 02$3027801411@Union européenne. Commission européenne$4723 (Mécène)\r" +
+                        "801 #0$aFR$bFR-751131015$c20200929$gAFNOR$2intermrc\r" + Constants.STR_1E
+        );
     }
 }

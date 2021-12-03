@@ -339,5 +339,33 @@ class ExemplaireTest {
         assertThat(exemp.getNumEx()).isEqualTo("01");
     }
 
+    @DisplayName("test ajout zone E325")
+    @Test
+    void testE325() throws Exception {
+        String exempStr = Constants.STR_1F +
+                "e01 $a27-11-20$bx\r" +
+                "930 ##$b341720001\r" +
+                "997 $balma$a2211189990000572\r" +
+                "A97 23-11-21 16:35:13.000\r" +
+                "A98 341720001:27-11-20\r" +
+                "A99 625586905\r" +
+                "E325 ##$aFac-similé par la maison d'édition Du pareil au même$uttp://www.dupareilaumeme$v20210916\r" +
+                "E325 ##$bFac-similé$cParis$dEdition du pareil au même$e2012$f1 vol. (338 p.)$gCollection L'Identique$h1$iA noter que c'est complet$j3ly04$nRien à dire sur la repro$uhttp://www.dupareilaumeme.fr$v20210404$x2419-6592\r" + Constants.STR_1E;
+        Exemplaire exemp = new Exemplaire(exempStr);
+
+        assertThat(exemp.toString()).isEqualTo(Constants.STR_1F +
+                "e01 $a27-11-20$bx\r" +
+                "930 ##$b341720001\r" +
+                "997 $balma$a2211189990000572\r" +
+                "A97 23-11-21 16:35:13.000\r" +
+                "A98 341720001:27-11-20\r" +
+                "A99 625586905\r" +
+                "E325 ##$aFac-similé par la maison d'édition Du pareil au même$uttp://www.dupareilaumeme$v20210916\r" +
+                "E325 ##$bFac-similé$cParis$dEdition du pareil au même$e2012$f1 vol. (338 p.)$gCollection L'Identique$h1$iA noter que c'est complet$j3ly04$nRien à dire sur la repro$uhttp://www.dupareilaumeme.fr$v20210404$x2419-6592\r" + Constants.STR_1E);
+
+
+
+    }
+
 
 }
