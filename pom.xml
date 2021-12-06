@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>fr.abes.api-communes</groupId>
     <artifactId>AccesCbs</artifactId>
-    <version>2.5.3-SNAPSHOT</version>
+    <version>2.5.3</version>
     <packaging>jar</packaging>
     <name>AccesCbs</name>
     <parent>
@@ -17,7 +17,7 @@
     </properties>
     <scm>
         <connection>scm:git:git@github.com:abes-esr/accescbs.git</connection>
-        <tag>AccesCbs-2.3.7</tag>
+        <tag>AccesCbs-2.5.3</tag>
     </scm>
 
     <build>
