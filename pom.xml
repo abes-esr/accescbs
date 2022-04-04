@@ -5,11 +5,7 @@
     <version>2.5.5-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>AccesCbs</name>
-    <parent>
-        <groupId>fr.abes</groupId>
-        <artifactId>abes</artifactId>
-        <version>1.0.7</version>
-    </parent>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.target>11</maven.compiler.target>
@@ -74,6 +70,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <version>1.18.10</version>
             <scope>provided</scope>
         </dependency>
         <!-- LOGS -->
@@ -92,10 +89,14 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
+            <version>5.5.2</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
+			<version>3.13.2</version>
+			<scope>test</scope>
         </dependency>
         <!-- MULTIMAP -->
         <dependency>
