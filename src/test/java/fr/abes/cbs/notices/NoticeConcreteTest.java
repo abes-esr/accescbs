@@ -1,6 +1,9 @@
 package fr.abes.cbs.notices;
 
+import fr.abes.cbs.exception.NoticeException;
+import fr.abes.cbs.exception.ZoneException;
 import fr.abes.cbs.utilitaire.Constants;
+import org.dom4j.DocumentException;
 import org.junit.jupiter.api.Test;
 
 import java.util.Scanner;
@@ -9,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class NoticeConcreteTest {
     @Test
-    void NoticeConcreteTest() {
+    void NoticeConcreteTest() throws DocumentException, NoticeException, ZoneException {
         Scanner scanner = new Scanner(BiblioTest.class.getResourceAsStream("/noticeXML.xml"), "UTF-8").useDelimiter("\\r");
         StringBuilder notice = new StringBuilder();
         while (scanner.hasNext()) {
@@ -45,7 +48,7 @@ public class NoticeConcreteTest {
     }
 
     @Test
-    void NoticeConcreteTest2() {
+    void NoticeConcreteTest2() throws DocumentException, NoticeException, ZoneException {
         Scanner scanner = new Scanner(BiblioTest.class.getResourceAsStream("/noticeConcreteXML.xml"), "UTF-8").useDelimiter("\\r");
         StringBuilder notice = new StringBuilder();
         while (scanner.hasNext()) {

@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 public class Commandes {
     @Getter
     @Setter
@@ -77,7 +76,7 @@ public class Commandes {
      * @param port1 port de connexion
      * @return Le message renvoyé par le serveur
      */
-    public String connect(String tip, int port1) {
+    public String connect(String tip, int port1) throws CBSException {
         String errorMsg = connector.connect(tip, port1);
         isConnected = errorMsg.isEmpty();
         return errorMsg;
@@ -86,7 +85,7 @@ public class Commandes {
     /**
      * Ferme la session TCPIP
      */
-    public void disconnect() {
+    public void disconnect() throws CBSException {
         connector.close();
         isConnected = false;
         isLogged = false;

@@ -2,7 +2,6 @@ package fr.abes.cbs.notices;
 
 import com.google.common.collect.ListMultimap;
 import fr.abes.cbs.exception.ZoneException;
-import fr.abes.cbs.zones.enumZones.EnumZones;
 import jdk.jshell.spi.ExecutionControl;
 
 import java.util.List;

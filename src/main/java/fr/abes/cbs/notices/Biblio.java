@@ -5,12 +5,12 @@ import fr.abes.cbs.utilitaire.Constants;
 import fr.abes.cbs.utilitaire.Utilitaire;
 import jdk.jshell.spi.ExecutionControl;
 import lombok.extern.slf4j.Slf4j;
+import org.dom4j.DocumentException;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-@Slf4j
 public class Biblio extends Notice {
     public Biblio() {
         super();
@@ -28,7 +28,7 @@ public class Biblio extends Notice {
      * @param format
      * @throws ExecutionControl.NotImplementedException
      */
-    public Biblio(String notice, FORMATS format) throws ZoneException {
+    public Biblio(String notice, FORMATS format) throws ZoneException, DocumentException {
         switch (format) {
             case UNM:
                 createBiblioFromUnm(notice);
@@ -104,7 +104,7 @@ public class Biblio extends Notice {
      *
      * @param noticeXml
      */
-    public void createBiblioFromXml(String noticeXml) {
+    public void createBiblioFromXml(String noticeXml) throws ZoneException, DocumentException {
         createNoticeFromXml(noticeXml);
     }
 

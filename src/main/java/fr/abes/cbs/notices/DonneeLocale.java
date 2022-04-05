@@ -3,6 +3,7 @@ package fr.abes.cbs.notices;
 import fr.abes.cbs.exception.ZoneException;
 import fr.abes.cbs.utilitaire.Constants;
 import jdk.jshell.spi.ExecutionControl;
+import org.dom4j.DocumentException;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,7 +14,7 @@ public class DonneeLocale extends Notice {
         createLocaleFromUnimarc(notice);
     }
 
-    public DonneeLocale(String notice, FORMATS format) throws ZoneException {
+    public DonneeLocale(String notice, FORMATS format) throws ZoneException, DocumentException {
         switch (format) {
             case UNM:createLocaleFromUnimarc(notice);
                 break;
@@ -24,7 +25,7 @@ public class DonneeLocale extends Notice {
         }
     }
 
-    private void createLocaleFromXml(String noticeXml) {
+    private void createLocaleFromXml(String noticeXml) throws ZoneException, DocumentException {
         createNoticeFromXml(noticeXml);
     }
 

@@ -8,7 +8,6 @@ import fr.abes.cbs.exception.ZoneException;
 import fr.abes.cbs.utilitaire.Constants;
 import fr.abes.cbs.zones.ZoneSpecification;
 import fr.abes.cbs.zones.ZonesSpecifications;
-import fr.abes.cbs.zones.enumZones.EnumZones;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

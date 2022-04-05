@@ -5,10 +5,7 @@ import fr.abes.cbs.utilitaire.Constants;
 import fr.abes.cbs.utilitaire.Utilitaire;
 import jdk.jshell.spi.ExecutionControl;
 import lombok.extern.slf4j.Slf4j;
-import org.dom4j.Document;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
-import org.dom4j.Node;
+import org.dom4j.*;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -17,7 +14,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Slf4j
 public class Autorite extends Notice {
     @Override
     public String getNumEx() throws ExecutionControl.NotImplementedException {
@@ -34,7 +30,7 @@ public class Autorite extends Notice {
         createAutoriteFromUnimarc(notice);
     }
 
-    public Autorite(String notice, FORMATS format) throws ZoneException {
+    public Autorite(String notice, FORMATS format) throws ZoneException, ParseException, DocumentException {
         switch (format) {
             case UNM:
                 createAutoriteFromUnimarc(notice);
@@ -47,29 +43,26 @@ public class Autorite extends Notice {
         }
     }
 
-    private void createAutoriteFromXml(String noticeXml) {
-        try {
-            Document doc = DocumentHelper.parseText(noticeXml);
-            List<Node> listeZone = doc.selectNodes("//record/*");
+    private void createAutoriteFromXml(String noticeXml) throws DocumentException, ZoneException, ParseException {
 
-            for (int i = 0; i < listeZone.size(); i++) {
-                Node zone = listeZone.get(i);
-                //cas ou la zone XML est de type datafield
-                if ("datafield".equals(zone.getName())) {
-                    generateDataField(zone);
-                } else if ("controlfield".equals(zone.getName())) {
-                    generateControlField(zone);
-                } else {
-                    //cas leader
-                    generateLeader(zone);
-                }
+        Document doc = DocumentHelper.parseText(noticeXml);
+        List<Node> listeZone = doc.selectNodes("//record/*");
 
+        for (int i = 0; i < listeZone.size(); i++) {
+            Node zone = listeZone.get(i);
+            //cas ou la zone XML est de type datafield
+            if ("datafield".equals(zone.getName())) {
+                generateDataField(zone);
+            } else if ("controlfield".equals(zone.getName())) {
+                generateControlField(zone);
+            } else {
+                //cas leader
+                generateLeader(zone);
             }
-            this.addZone("00A", "$0", "0");
-            this.addZone("00U", "$0", "utf8");
-        } catch (Exception ex) {
-            log.error("Error converting Xml to Marc ", ex);
+
         }
+        this.addZone("00A", "$0", "0");
+        this.addZone("00U", "$0", "utf8");
     }
 
     private void generateLeader(Node zone) {
@@ -166,14 +159,15 @@ public class Autorite extends Notice {
 
     /**
      * Méthode de génération de la zone 120 : suppression du dernier caractère en $a
-     * @return false si la zone n'a pas été générée
+     *
      * @param zoneId
      * @param node
      * @param indicateurs
+     * @return false si la zone n'a pas été générée
      */
     private boolean generate120(String zoneId, Node node, char[] indicateurs) throws ZoneException {
         if (zoneId.equals("120")) {
-            this.addZone("120", "$a", node.getStringValue().substring(0,1), indicateurs);
+            this.addZone("120", "$a", node.getStringValue().substring(0, 1), indicateurs);
             return true;
         }
         return false;

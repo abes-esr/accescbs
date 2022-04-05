@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -18,8 +19,7 @@ import java.util.Scanner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Slf4j
-public class CommandesTest {
+class CommandesTest {
 
     private ProcessCBS cmd;
     private Properties prop;
@@ -46,7 +46,7 @@ public class CommandesTest {
 
     @DisplayName("Connexion avec mauvais login/password/IP")
     @Test
-    void connectBadLogin() {
+    void connectBadLogin() throws CBSException {
         ProcessCBS com = new ProcessCBS();
         try {
             com.authenticate(prop.getProperty("connect.ip"), prop.getProperty("connect.port"), prop.getProperty("connect.login"), "BadPassword");
@@ -147,7 +147,7 @@ public class CommandesTest {
 
     @DisplayName("Affichage d'une notice en xml")
     @Test
-    void view() throws CBSException {
+    void view() throws CBSException, UnsupportedEncodingException {
         //Recherche de la notice a afficher
         cmd.search("che ppn 230721486");
         cmd.affUnma();
@@ -196,8 +196,6 @@ public class CommandesTest {
         //Récupération du prochain numéro d'exemplaire à créer
         String numEx = getLastNumEx().substring(1, 3);
         //Si e01, il n'y a donc aucun exemplaire existant sur cette notice, ça va être génant pour en modifier un...
-        if (numEx.equals("01"))
-            log.error("Pas d'exemplaire sur la notice 219041989, impossible d'en modifier/supprimer un");
         assertThat(numEx).isNotEqualTo("01");
         //On vérifie que CBS nous retourne bien l'exemplaire passé en édition, donc qu'il contient A99 et son numéro d'exemplaire, signe que tout s'est bien passé
         assertThat(cmd.editerExemplaire(numEx)).contains("A99 ").contains(numEx);
@@ -221,8 +219,6 @@ public class CommandesTest {
         noticeTestEnEdition();
         String nvExemplaire = getLastNumEx();
         //Si e01, il n'y a donc aucun exemplaire existant sur cette notice, ça va être génant pour en modifier un...
-        if (nvExemplaire.equals("e01"))
-            log.error("Pas d'exemplaire sur la notice 23073426X, impossible d'en modifier/supprimer un");
         assertThat(nvExemplaire).isNotEqualTo("e01");
         //On vérifie qu'après suppression que le numéro d'exemplaire n'apparait plus dans la notice
         assertThat(cmd.supExemplaire(nvExemplaire)).doesNotContain(nvExemplaire);
@@ -308,9 +304,9 @@ public class CommandesTest {
         if (!numEx.equals("e01")) {
             int num = Integer.parseInt(numEx.substring(1, 3));
             if (num <= 10) {
-                numEx = "e0" + String.valueOf(num - 1);
+                numEx = "e0" + (num - 1);
             } else {
-                numEx = "e" + String.valueOf(num - 1);
+                numEx = "e" + (num - 1);
             }
         }
         return numEx;

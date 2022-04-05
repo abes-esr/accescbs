@@ -14,7 +14,6 @@ import java.net.Socket;
 /** Représente une session au CBS
  */
 
-@Slf4j
 public class Cbs {
     @Getter @Setter private boolean cmdOk;
     @Getter @Setter private String errorMessage;
@@ -23,7 +22,7 @@ public class Cbs {
     /**
      * socket disconnection
      */
-    public void close() {
+    public void close() throws CBSException {
         disconnect();
     }
 
@@ -33,7 +32,7 @@ public class Cbs {
      * @param port is socket port
      * @return the error message
      */
-    public String connect(final String tip, final int port) {
+    public String connect(final String tip, final int port) throws CBSException {
         errorMessage = connectTcp(tip, port);
         return errorMessage;
     }
@@ -56,7 +55,7 @@ public class Cbs {
      * @return le résultat de la connexion tcp/ip
      *
      */
-    private String connectTcp(final String tip, final int port) {
+    private String connectTcp(final String tip, final int port) throws CBSException {
         try {
             s = new Socket(tip, port);
             if (s.isConnected()) {
@@ -65,8 +64,7 @@ public class Cbs {
                 return "connect ko";
             }
         } catch (Exception e) {
-        	log.error("Error connecting to "+tip+" "+port, e);
-            return "ko " + e.toString();
+        	throw new CBSException("Error connecting to " + tip + " " + port, e.getMessage());
         }
     }
 
@@ -74,13 +72,13 @@ public class Cbs {
      * la méthode ferme une connexion tcp/ip avec le CBS
      *
      */
-    private void disconnect() {
+    private void disconnect() throws CBSException {
         try {
             if (s.isConnected()) {
                 s.close();
             }
         } catch (Exception e) {
-        	log.error("Error disconnecting socket", e);
+            throw new CBSException("Error disconnecting socket", e.getMessage());
         }
     }
     /**
@@ -126,7 +124,6 @@ public class Cbs {
             cmdOk = true;
             return res;
         } catch (IOException | InterruptedException e) {
-        	log.error("Error executing query "+query, e);
             cmdOk = false;
             return new StringBuilder("Req ko " + e.toString()).toString();
         }

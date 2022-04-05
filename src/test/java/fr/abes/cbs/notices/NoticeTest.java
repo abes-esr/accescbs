@@ -1,8 +1,6 @@
 package fr.abes.cbs.notices;
 
 import fr.abes.cbs.utilitaire.Constants;
-import fr.abes.cbs.utilitaire.Utilitaire;
-import fr.abes.cbs.zones.enumZones.EnumZones;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
@@ -15,7 +13,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class NoticeTest {
+class NoticeTest {
     private static INotice notice;
 
     @BeforeEach

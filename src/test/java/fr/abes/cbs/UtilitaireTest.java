@@ -15,7 +15,7 @@ import java.util.Scanner;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class UtilitaireTest {
+class UtilitaireTest {
     private static ProcessCBS cmd;
     private static String noticeResource;
     private static String noticeResourceAvecExemplaire;

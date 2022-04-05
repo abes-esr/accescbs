@@ -8,10 +8,10 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
 public class ProcessCBS {
 	@Getter
 	private Commandes clientCBS;
@@ -75,7 +75,7 @@ public class ProcessCBS {
 		return clientCBS.isCmdOk();
 	}
 
-	public void disconnect() {
+	public void disconnect() throws CBSException {
 		clientCBS.disconnect();
 	}
 
@@ -115,7 +115,7 @@ public class ProcessCBS {
 	 * Initialise les tables de résultats
 	 * @param lstrecords liste des enregistrements
 	 */
-	private void initTablesResult(String[] lstrecords) {
+	private void initTablesResult(String[] lstrecords) throws CBSException {
 		// on réinitialise les tableaux de résultats et la liste des ppn
 		// courantes à chaque requête
 		resultatsTable.clear();

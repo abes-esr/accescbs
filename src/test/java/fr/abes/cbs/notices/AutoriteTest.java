@@ -2,10 +2,12 @@ package fr.abes.cbs.notices;
 
 import fr.abes.cbs.exception.ZoneException;
 import fr.abes.cbs.utilitaire.Constants;
+import org.dom4j.DocumentException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.util.Scanner;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -69,7 +71,7 @@ public class AutoriteTest {
     }
 
     @Test
-    void autoriteFromXmlTest() throws ZoneException {
+    void autoriteFromXmlTest() throws ZoneException, ParseException, DocumentException {
         Scanner scanner = new Scanner(BiblioTest.class.getResourceAsStream("/noticeAutorite.xml"), StandardCharsets.UTF_8).useDelimiter("\\r");
         StringBuilder notice = new StringBuilder();
         while (scanner.hasNext()) {

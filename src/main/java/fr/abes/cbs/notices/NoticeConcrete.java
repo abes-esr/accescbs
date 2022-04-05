@@ -1,21 +1,19 @@
 package fr.abes.cbs.notices;
 
+import fr.abes.cbs.exception.NoticeException;
+import fr.abes.cbs.exception.ZoneException;
 import fr.abes.cbs.models.ExemplaireFromXml;
 import fr.abes.cbs.utilitaire.Constants;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.dom4j.Document;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
-import org.dom4j.Node;
+import org.dom4j.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Slf4j
 @Getter
 @NoArgsConstructor
 public class NoticeConcrete extends Notice implements INotice {
@@ -23,51 +21,47 @@ public class NoticeConcrete extends Notice implements INotice {
     private DonneeLocale noticeLocale;
     private List<Exemplaire> exemplaires = new ArrayList<>();
 
-    public NoticeConcrete(String noticeXml) {
+    public NoticeConcrete(String noticeXml) throws DocumentException, ZoneException, NoticeException {
         StringBuilder biblio = new StringBuilder("<record>");
         StringBuilder locale = new StringBuilder("<record>");
         StringBuilder exemplairesXML = new StringBuilder("<record>");
         Matcher matcher;
-        try {
-            Document doc = DocumentHelper.parseText(noticeXml);
-            List<Node> listeZone = doc.selectNodes("//record/*");
+        Document doc = DocumentHelper.parseText(noticeXml);
+        List<Node> listeZone = doc.selectNodes("//record/*");
 
-            Pattern zoneBiblioPattern = Pattern.compile(Constants.ZONE_BIBLIO_NAME_REGEX);
-            Pattern zoneLocalePattern = Pattern.compile(Constants.ZONE_LOCALE_NAME_REGEX);
-            Pattern zoneExemplairePattern = Pattern.compile(Constants.ZONE_EXEMPLAIRE_NAME_REGEX);
+        Pattern zoneBiblioPattern = Pattern.compile(Constants.ZONE_BIBLIO_NAME_REGEX);
+        Pattern zoneLocalePattern = Pattern.compile(Constants.ZONE_LOCALE_NAME_REGEX);
+        Pattern zoneExemplairePattern = Pattern.compile(Constants.ZONE_EXEMPLAIRE_NAME_REGEX);
 
-            for (int i = 0; i < listeZone.size(); i++) {
-                Node zone = listeZone.get(i);
-                matcher = zoneBiblioPattern.matcher(((Element) zone).attributeValue("tag"));
+        for (int i = 0; i < listeZone.size(); i++) {
+            Node zone = listeZone.get(i);
+            matcher = zoneBiblioPattern.matcher(((Element) zone).attributeValue("tag"));
+            if (matcher.find()) {
+                biblio.append(zone.asXML());
+            } else {
+                matcher = zoneLocalePattern.matcher(((Element) zone).attributeValue("tag"));
                 if (matcher.find()) {
-                    biblio.append(zone.asXML());
+                    locale.append(zone.asXML());
                 } else {
-                    matcher = zoneLocalePattern.matcher(((Element) zone).attributeValue("tag"));
+                    matcher = zoneExemplairePattern.matcher(((Element) zone).attributeValue("tag"));
                     if (matcher.find()) {
-                        locale.append(zone.asXML());
-                    } else {
-                        matcher = zoneExemplairePattern.matcher(((Element) zone).attributeValue("tag"));
-                        if (matcher.find()) {
-                            exemplairesXML.append(zone.asXML());
-                        }
+                        exemplairesXML.append(zone.asXML());
                     }
                 }
             }
-            biblio.append("</record>");
-            locale.append("</record>");
-            exemplairesXML.append("</record>");
-            noticeBiblio = new Biblio(biblio.toString(), FORMATS.XML);
-            noticeLocale = new DonneeLocale(locale.toString(), FORMATS.XML);
-
-            List<ExemplaireFromXml> exemplairesFromXml = getListeExemplaireFromXml(exemplairesXML.toString());
-            for (ExemplaireFromXml exemplaireFromXml : exemplairesFromXml) {
-                String exemplaire = exemplaireXMLBuilder(exemplaireFromXml);
-                this.exemplaires.add(new Exemplaire(exemplaire, FORMATS.XML));
-            }
-
-        } catch (Exception e) {
-            log.error("Impossible de construire la notice, erreur XML", e);
         }
+        biblio.append("</record>");
+        locale.append("</record>");
+        exemplairesXML.append("</record>");
+        noticeBiblio = new Biblio(biblio.toString(), FORMATS.XML);
+        noticeLocale = new DonneeLocale(locale.toString(), FORMATS.XML);
+
+        List<ExemplaireFromXml> exemplairesFromXml = getListeExemplaireFromXml(exemplairesXML.toString());
+        for (ExemplaireFromXml exemplaireFromXml : exemplairesFromXml) {
+            String exemplaire = exemplaireXMLBuilder(exemplaireFromXml);
+            this.exemplaires.add(new Exemplaire(exemplaire, FORMATS.XML));
+        }
+
     }
 
     private String exemplaireXMLBuilder(ExemplaireFromXml exemplaireFromXml) {
@@ -123,24 +117,20 @@ public class NoticeConcrete extends Notice implements INotice {
         return noticeToReturn.toString();
     }
 
-    public List<ExemplaireFromXml> getListeExemplaireFromXml(String notices) {
+    public List<ExemplaireFromXml> getListeExemplaireFromXml(String notices) throws DocumentException {
         List<ExemplaireFromXml> listeExemp = new ArrayList<>();
-        try {
-            Matcher matcher;
+        Matcher matcher;
 
-            Document doc = DocumentHelper.parseText(notices);
-            List<Node> listeZone = doc.selectNodes("//record/*");
-            Pattern zoneExemplairePattern = Pattern.compile(Constants.ZONE_DEBUT_EXEMPLAIRE_XML_REGEX);
+        Document doc = DocumentHelper.parseText(notices);
+        List<Node> listeZone = doc.selectNodes("//record/*");
+        Pattern zoneExemplairePattern = Pattern.compile(Constants.ZONE_DEBUT_EXEMPLAIRE_XML_REGEX);
 
-            for (int i = 0; i < listeZone.size(); i++) {
-                Node zone = listeZone.get(i);
-                matcher = zoneExemplairePattern.matcher(((Element) zone).attributeValue("tag"));
-                if (matcher.find()) {
-                    listeExemp.add(new ExemplaireFromXml(zone.selectNodes("*").get(0).getStringValue()));
-                }
+        for (int i = 0; i < listeZone.size(); i++) {
+            Node zone = listeZone.get(i);
+            matcher = zoneExemplairePattern.matcher(((Element) zone).attributeValue("tag"));
+            if (matcher.find()) {
+                listeExemp.add(new ExemplaireFromXml(zone.selectNodes("*").get(0).getStringValue()));
             }
-        } catch (Exception e) {
-            log.error("Impossible de construire les exemplaires, erreur XML");
         }
         return listeExemp;
     }

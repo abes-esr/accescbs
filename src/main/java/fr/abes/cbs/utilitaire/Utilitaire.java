@@ -1,9 +1,6 @@
 package fr.abes.cbs.utilitaire;
 
-import fr.abes.cbs.notices.TYPE_NOTICE;
-import fr.abes.cbs.zones.enumZones.EnumZones;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.EnumUtils;
+import fr.abes.cbs.exception.CBSException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
@@ -23,19 +20,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
-@Slf4j
 public class Utilitaire {
     /***
      * Constructeur privé permet de rendre la classe non instantiable
      */
-    private Utilitaire(){}
+    private Utilitaire() {
+    }
 
 
-    public static String setStandardZoneRegex(int nombreSousZones){
+    public static String setStandardZoneRegex(int nombreSousZones) {
         StringBuilder regex = new StringBuilder("^(\\x1b[PD])?(?<zStaName>[^A]\\w{2,3})(?<zStaSpace>\\s*)(?<zStaHash>[\\d]{0,2}[#]*[\\d]{0,1})");
-        for (int i=0; i<=nombreSousZones; i++){
+        for (int i = 0; i <= nombreSousZones; i++) {
             regex.append(" *((?<szk").append(i).append(">[$]\\w)(?<szv").append(i).append(">[^$]*))?");
         }
 
@@ -44,26 +40,28 @@ public class Utilitaire {
 
     /**
      * Méthode permettant de construire une regexp permettant de matcher uniquement les sous zones d'une zone
+     *
      * @param nombreSousZones nombre maximum de sous zones pouvant matcher
      * @return la regexp
      */
     public static String setListeSousZoneRegex(int nombreSousZones) {
         StringBuilder regex = new StringBuilder("^");
-        for (int i=0; i<=nombreSousZones; i++){
+        for (int i = 0; i <= nombreSousZones; i++) {
             regex.append("((?<szk").append(i).append(">[$][a-z\\d])(?<szv").append(i).append(">[^$]*))? *");
         }
 
-        return regex.substring(0, regex.length()-2);
+        return regex.substring(0, regex.length() - 2);
     }
 
     /**
      * Méthode permettant de définir une regex correspondant à une liste de sous zones situées uniquement après n séquences dans une zone
+     *
      * @param sousZones sous zone à traiter
      * @return la regexp correspondante
      */
     public static String setEtatCollZoneRestantes(Enum[] sousZones) {
         StringBuilder regex = new StringBuilder();
-        for (int i=0; i< sousZones.length;i++) {
+        for (int i = 0; i < sousZones.length; i++) {
             regex.append("((?<szk").append(i).append(">[$][").append(sousZones[i]).append("])(?<szv").append(i).append(">[^$]*))?");
         }
         regex.append("$");
@@ -71,14 +69,15 @@ public class Utilitaire {
     }
 
 
-	/**
-	 * Récupère dans ligne entre tag et tagfin
-	 * @param ligne String sur laquelle appliquer recupEntre
-	 * @param tag tag de début
-	 * @param tagfin tag de fin
-	 * @return la string contenue entre tag et tagfin
-	 */
-	public static String recupEntre(final String ligne, final String tag, final String tagfin) {
+    /**
+     * Récupère dans ligne entre tag et tagfin
+     *
+     * @param ligne  String sur laquelle appliquer recupEntre
+     * @param tag    tag de début
+     * @param tagfin tag de fin
+     * @return la string contenue entre tag et tagfin
+     */
+    public static String recupEntre(final String ligne, final String tag, final String tagfin) {
         int posd = ligne.indexOf(tag);
         if (posd < 0) {
             return "";
@@ -94,51 +93,46 @@ public class Utilitaire {
         return ligne.substring(posd, posd + posf - posd).substring(tag.length());
     }
 
-	/**
-	 * retourne le nombre de résultats d'une commande CHE
-	 * 
-	 * @param resu
-	 *            chaine de résulat de la commande CHE
-	 * @return nombre de notices retourné par commande CHE
-	 */
-	public static Integer getNbNoticesFromChe(String resu) {
-		// un seul résultat
-		String nbResults = Utilitaire.recupEntre(resu, Constants.STR_1D + "VSZ", Constants.STR_1D);
-		if (resu.indexOf("LPP") != 0
-				&& "1".equals(nbResults)) {
-			return 1;
-		}
-		// plusieurs résultats
-		if (resu.contains(Constants.STR_1D + "VSZ")) {
-			return Integer.parseInt(nbResults);
-		}
-		// pas de résultats
-		return 0;
-	}
+    /**
+     * retourne le nombre de résultats d'une commande CHE
+     *
+     * @param resu chaine de résulat de la commande CHE
+     * @return nombre de notices retourné par commande CHE
+     */
+    public static Integer getNbNoticesFromChe(String resu) {
+        // un seul résultat
+        String nbResults = Utilitaire.recupEntre(resu, Constants.STR_1D + "VSZ", Constants.STR_1D);
+        if (resu.indexOf("LPP") != 0
+                && "1".equals(nbResults)) {
+            return 1;
+        }
+        // plusieurs résultats
+        if (resu.contains(Constants.STR_1D + "VSZ")) {
+            return Integer.parseInt(nbResults);
+        }
+        // pas de résultats
+        return 0;
+    }
+
     /**
      * Verifie que les données sont en UTF-8 et les convertit en ISO8859_1
+     *
      * @param str String a vérifier
      * @return String convertie
      */
-    public static String cv(final String str) {
-    	String resu = null;
+    public static String cv(final String str) throws CBSException {
         try {
             //pour verifier encodage
-            CharsetEncoder encoder = StandardCharsets.UTF_8.newEncoder();
-            boolean ok = encoder.canEncode(str);
-            if (!ok) {
-                log.info("ko:" + str);
-            }
             byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
-            resu = new String(utf8, "ISO8859_1");
-        } catch (UnsupportedEncodingException e) {
-            log.error("Error:" + e.getMessage(), e);
+            return new String(utf8, "ISO8859_1");
+        } catch (UnsupportedEncodingException ex) {
+            throw new CBSException("Impossible d'encoder la chaine en ISO", ex.getMessage());
         }
-        return resu;
     }
 
     /**
      * Convertit une notice native (pica) en XMLMARC
+     *
      * @param notice Notice pica
      * @return La notice en XML
      */
@@ -152,7 +146,7 @@ public class Utilitaire {
         boolean iscontrol;
 
         for (String tag : lstTags) {
-            tag=tag.replaceAll(Constants.DOUBLEDOLLAR, Constants.ONETWODOLLAR);
+            tag = tag.replaceAll(Constants.DOUBLEDOLLAR, Constants.ONETWODOLLAR);
             if (tag.length() >= 4) {
                 if ("   ".equals(tag.substring(1, 1 + 3))) {
                     ret.append("<leader>" + tag + "</leader>");
@@ -174,12 +168,12 @@ public class Utilitaire {
                         }
                         String[] lstdollar = tag.split("\\$");
 
-                        if ((lstdollar.length >= 1) &&(!iscontrol)) {
+                        if ((lstdollar.length >= 1) && (!iscontrol)) {
                             int i = 0;
                             for (String dollar : lstdollar) {
                                 if (i > 0) {
                                     ret.append("<subfield code=\"" + dollar.charAt(0) + "\">");
-                                    ret.append(suppInutile(dollar.substring(1).replaceAll(Constants.ONETWODOLLAR,Constants.DOUBLEDOLLAR)));
+                                    ret.append(suppInutile(dollar.substring(1).replaceAll(Constants.ONETWODOLLAR, Constants.DOUBLEDOLLAR)));
                                     ret.append("</subfield>");
                                 }
                                 i++;
@@ -202,6 +196,7 @@ public class Utilitaire {
 
     /**
      * Supprime des info inutiles
+     *
      * @param in String a nettoyer
      * @return La string nettoyée
      */
@@ -211,7 +206,7 @@ public class Utilitaire {
             return in;
         }
         if (in.substring(0, 1).equals(Constants.CR_152_S)) {
-           out = in.replaceFirst(Constants.CR_152_S, "").replaceFirst(Constants.CR_156_S, "");
+            out = in.replaceFirst(Constants.CR_152_S, "").replaceFirst(Constants.CR_156_S, "");
         } else {
             out = in;
         }
@@ -221,6 +216,7 @@ public class Utilitaire {
 
     /**
      * Retourne une liste de resultats courts en XML
+     *
      * @param resultatsTable Table des résultats
      * @return Résultats de la recherche au format XML
      */
@@ -249,8 +245,9 @@ public class Utilitaire {
 
     /**
      * Comme au dessus mais depuis jusque
+     *
      * @param from Index du 1er résultat à récuperer
-     * @param len Index du dernier résultat à récuperer
+     * @param len  Index du dernier résultat à récuperer
      * @return Résultats au format XML entre from et len
      */
     public static String getRecordSetAsXmlFromFor(int from, int len, List<List<String>> resultatsTable) {
@@ -289,9 +286,10 @@ public class Utilitaire {
 
     /**
      * Recup des tags marcs
+     *
      * @param notice Notice pica
-     * @param tag Tag à récuperer
-     * @param stag Sous tag
+     * @param tag    Tag à récuperer
+     * @param stag   Sous tag
      * @return Valeur du tag/sous-tag
      */
     public static String getTag(String notice, String tag, String stag) {
@@ -306,6 +304,7 @@ public class Utilitaire {
     /**
      * Convertit une notice en format natif vers du format XML pour une notive en edit
      * parametre: notice en edit sous forme native
+     *
      * @param notice Notice pica en mode édition
      * @return La notice au format XML
      */
@@ -318,20 +317,19 @@ public class Utilitaire {
 
         ret.append("<collection xmlns=\"http://www.loc.gov/MARC21/slim\"><record>");
         String tag;
-        StringBuilder mrq; 
+        StringBuilder mrq;
         boolean iscontrol;
-        for (String tagin : lstTags) 
-        {
+        for (String tagin : lstTags) {
             tag = tagin;
-            tag=tag.replaceAll(Constants.DOUBLEDOLLAR, Constants.ONETWODOLLAR);
+            tag = tag.replaceAll(Constants.DOUBLEDOLLAR, Constants.ONETWODOLLAR);
             mrq = new StringBuilder();
             if (tag.length() >= 4) {
                 if (tag.substring(0, 1).equals(Constants.STR_1B)) {
-                	mrq.append(tag.charAt(1));
+                    mrq.append(tag.charAt(1));
                     tag = tag.replaceAll(Constants.STR_1B + mrq, "");
                 }
                 if (tag.substring(0, 1).equals(Constants.STR_1B)) {
-                	mrq.append(tag.charAt(1));
+                    mrq.append(tag.charAt(1));
                     tag = tag.replaceAll(Constants.STR_1B + tag.substring(1, 1 + 1), "");
                 }
 
@@ -343,19 +341,19 @@ public class Utilitaire {
                     iscontrol = false;
 
                     if (!("").equals(mrq.toString())) {//cbd 18122014 tag.indexOf("$")<0 
-                        if ((("00").equals(tag.substring(0, 2))) || tag.indexOf('$')<0 || (("$").equals(tag.substring(4, 4 + 1))) || (("A").equals(tag.substring(0, 1)))) {
+                        if ((("00").equals(tag.substring(0, 2))) || tag.indexOf('$') < 0 || (("$").equals(tag.substring(4, 4 + 1))) || (("A").equals(tag.substring(0, 1)))) {
                             ret.append("<datafield tag=\"" + tag.substring(0, 3) + "\" act=\"" + mrq + "\" >");
                         } else {
                             ret.append("<datafield tag=\"" + tag.substring(0, 3) + "\" ind1=\"" + tag.charAt(4) + "\" ind2=\"" + tag.charAt(5) + "\" act=\"" + mrq + "\" >");
                         }
                     } else {
-                        if ((("00").equals(tag.substring(0, 2)))  || !tag.contains("$") || (("$").equals(tag.substring(4, 4 + 1))) || (("A").equals(tag.substring(0, 1))) || (("E").equals(tag.substring(0, 1)))) {
+                        if ((("00").equals(tag.substring(0, 2))) || !tag.contains("$") || (("$").equals(tag.substring(4, 4 + 1))) || (("A").equals(tag.substring(0, 1))) || (("E").equals(tag.substring(0, 1)))) {
                             ret.append("<datafield  tag=\"" + tag.substring(0, 3) + "\" >");
                         } else {
                             ret.append("<datafield  tag=\"" + tag.substring(0, 3) + "\" ind1=\"" + tag.charAt(4) + "\" ind2=\"" + tag.charAt(5) + "\">");
                         }
                     }
-                    
+
                     String[] lstdollar = tag.split("\\$");
                     int i = 0;
                     for (String dollar : lstdollar) //foreach (String dollar in lstdollar)
@@ -363,7 +361,7 @@ public class Utilitaire {
 
                         if (i > 0) {
                             ret.append("<subfield code=\"" + dollar.charAt(0) + "\">");
-                            ret.append(dollar.substring(1).replaceAll("&", "&amp;").replaceAll(">", "&gt;").replaceAll("<", "&lt;").replaceAll("'", "&apos;").replace("\"", "&quot;").replaceAll("1dollar2","\\$\\$"));
+                            ret.append(dollar.substring(1).replaceAll("&", "&amp;").replaceAll(">", "&gt;").replaceAll("<", "&lt;").replaceAll("'", "&apos;").replace("\"", "&quot;").replaceAll("1dollar2", "\\$\\$"));
                             ret.append("</subfield>");
                         }
                         i++;
@@ -394,8 +392,9 @@ public class Utilitaire {
 
     /**
      * Pour la présentation padd les infos..
+     *
      * @param inn String à raccourcir
-     * @param lg Taille souhaitée
+     * @param lg  Taille souhaitée
      * @return La string inn raccourcie à la longueur lg
      */
     public static String format(String inn, int lg) {
@@ -411,6 +410,7 @@ public class Utilitaire {
 
     /**
      * Convertit une notice en edit du format XML vers du natif
+     *
      * @param noticeXml Notice au format XML
      * @return La notice en pica
      */
@@ -436,23 +436,31 @@ public class Utilitaire {
                     if (tag.getNodeValue().length() >= 10) {
                         ttmp = tag.getNodeValue().substring(9, 9 + 1);
                     }
-                    switch(ttmp){
-	                    case "b": ttmp = "Tb";
-	                    	break;
-				        case "f": ttmp = "Tu";
-				          	break;
-				        case "h": ttmp = "Tq";
-						  	break;
-				        case "j": ttmp = "Td";
-							break;
-				        case "c": ttmp = "Tg";
-					        break;
-				        case "e": ttmp = "Ta";
-				            break;
-				        case "d": ttmp = "Tm";
-				            break;
-				        default:  ttmp = "Tp";
-                        	break;
+                    switch (ttmp) {
+                        case "b":
+                            ttmp = "Tb";
+                            break;
+                        case "f":
+                            ttmp = "Tu";
+                            break;
+                        case "h":
+                            ttmp = "Tq";
+                            break;
+                        case "j":
+                            ttmp = "Td";
+                            break;
+                        case "c":
+                            ttmp = "Tg";
+                            break;
+                        case "e":
+                            ttmp = "Ta";
+                            break;
+                        case "d":
+                            ttmp = "Tm";
+                            break;
+                        default:
+                            ttmp = "Tp";
+                            break;
                     }
                     notice.append("008" + " " + "$a" + ttmp + "6" + Constants.STR_0D); //6 pour cree, 5 validation standard
                 }
@@ -484,21 +492,20 @@ public class Utilitaire {
                     org.w3c.dom.NodeList lstdollar = tag.getChildNodes();
 
                     boolean estpasse = false;
-                    for (int k = 0; k < lstdollar.getLength(); k++)
-                    {
+                    for (int k = 0; k < lstdollar.getLength(); k++) {
                         if (Constants.SUBFIELD.equals(lstdollar.item(k).getNodeName())) {
                             estpasse = true;
                             Node codeid = lstdollar.item(k).getAttributes().getNamedItem("code");
-                            if (lstdollar.item(k).getFirstChild()!=null){
+                            if (lstdollar.item(k).getFirstChild() != null) {
                                 notice.append(Constants.DOLLAR + codeid.getNodeValue() + lstdollar.item(k).getFirstChild().getNodeValue().replaceAll("#27#", Constants.STR_1B));
                             } else {
-                                 notice.append(Constants.DOLLAR + codeid.getNodeValue());
+                                notice.append(Constants.DOLLAR + codeid.getNodeValue());
                             }
                         }
 
                     }
-                    if (!estpasse && tag.getFirstChild()!=null){
-                            notice.append(tag.getFirstChild().getNodeValue().replaceAll("#27#", Constants.STR_1B));
+                    if (!estpasse && tag.getFirstChild() != null) {
+                        notice.append(tag.getFirstChild().getNodeValue().replaceAll("#27#", Constants.STR_1B));
                     }
                     notice.append(Constants.STR_0D);
 
@@ -524,7 +531,7 @@ public class Utilitaire {
                         ind2 = ind2id.getNodeValue();
                     }
                     //pour la zone de d exemplaire exx on supprime les indicateurs
-                    if ("e".equalsIgnoreCase(tagid.getNodeValue().substring(0, 1))  || "A".equals(tagid.getNodeValue().substring(0, 1))) {
+                    if ("e".equalsIgnoreCase(tagid.getNodeValue().substring(0, 1)) || "A".equals(tagid.getNodeValue().substring(0, 1))) {
                         ind1 = "";
                         ind2 = "";
                     }
@@ -534,20 +541,19 @@ public class Utilitaire {
                         notice.append(actStr + tagid.getNodeValue() + " " + ind1 + ind2);
                         org.w3c.dom.NodeList lstdollar = tag.getChildNodes();
                         boolean estpasse = false;
-                        for (int k = 0; k < lstdollar.getLength(); k++)
-                        {
+                        for (int k = 0; k < lstdollar.getLength(); k++) {
                             org.w3c.dom.Node lenode = lstdollar.item(k);
                             if (Constants.SUBFIELD.equals(lenode.getNodeName())) {
                                 estpasse = true;
-                                 org.w3c.dom.Node codeid =  lenode.getAttributes().getNamedItem("code");
-                                  if ((codeid != null) && (lenode.getFirstChild() != null)) {
+                                org.w3c.dom.Node codeid = lenode.getAttributes().getNamedItem("code");
+                                if ((codeid != null) && (lenode.getFirstChild() != null)) {
                                     notice.append(Constants.DOLLAR + codeid.getNodeValue() + lenode.getFirstChild().getNodeValue().replaceAll("#27#", Constants.STR_1B));
                                 }
                             }
                         }
 
-                        if (!estpasse && tag.getFirstChild()!=null){
-                                notice.append(tag.getFirstChild().getNodeValue().replaceAll("#27#", Constants.STR_1B));
+                        if (!estpasse && tag.getFirstChild() != null) {
+                            notice.append(tag.getFirstChild().getNodeValue().replaceAll("#27#", Constants.STR_1B));
                         }
                     }
                     notice.append(Constants.STR_0D);
@@ -556,7 +562,6 @@ public class Utilitaire {
             return notice.toString();
 
         } catch (Exception ex) {
-        	log.error("",ex);
             return null;
         }
     }
@@ -564,11 +569,12 @@ public class Utilitaire {
 
     /**
      * Convertit une notice qui n'est pas en edit de XML vers natif
+     *
      * @param noticeXml Notice au format XML
      * @return La notice en pica
      */
     public static String xml2Marc(final String noticeXml) {
-         try {
+        try {
             DocumentBuilderFactory fabrique = DocumentBuilderFactory.newInstance();
             DocumentBuilder constructeur = fabrique.newDocumentBuilder();
             // lecture du contenu d'un fichier XML avec DOM
@@ -588,23 +594,31 @@ public class Utilitaire {
                     if (tag.getNodeValue().length() >= 10) {
                         ttmp = tag.getNodeValue().substring(9, 9 + 1);
                     }
-                    switch(ttmp){
-	                    case "b": ttmp = "Tb";
-	                              break;
-	                    case "f": ttmp = "Tu";
-	                    		  break;
-	                    case "h": ttmp = "Tq";
-	          		  			  break;
-	                    case "j": ttmp = "Td";
-			  			          break;
-	                    case "c": ttmp = "Tg";
-				                  break;
-	                    case "e": ttmp = "Ta";
-		                          break;
-	                    case "d": ttmp = "Tm";
-	                              break;
-	                    default:  ttmp = "Tp";
-	                              break;
+                    switch (ttmp) {
+                        case "b":
+                            ttmp = "Tb";
+                            break;
+                        case "f":
+                            ttmp = "Tu";
+                            break;
+                        case "h":
+                            ttmp = "Tq";
+                            break;
+                        case "j":
+                            ttmp = "Td";
+                            break;
+                        case "c":
+                            ttmp = "Tg";
+                            break;
+                        case "e":
+                            ttmp = "Ta";
+                            break;
+                        case "d":
+                            ttmp = "Tm";
+                            break;
+                        default:
+                            ttmp = "Tp";
+                            break;
                     }
                     //6 pour cree, 5 validation standard
                     notice.append("008").append(" ").append("$a").append(ttmp).append("6").append(Constants.STR_0D);
@@ -631,8 +645,7 @@ public class Utilitaire {
                     }
                 }
 
-                if ("datafield".equals(tag.getNodeName()))
-                {
+                if ("datafield".equals(tag.getNodeName())) {
 
                     Node tagid = tag.getAttributes().getNamedItem("tag");
                     Node act = tag.getAttributes().getNamedItem("act");
@@ -671,18 +684,17 @@ public class Utilitaire {
 
                     //ici
                     boolean estpasse = false;
-                    for (int k = 0; k < lstdollar.getLength(); k++)
-                    {
+                    for (int k = 0; k < lstdollar.getLength(); k++) {
                         if (Constants.SUBFIELD.equals(lstdollar.item(k).getNodeName())) {
                             estpasse = true;
                             Node codeid = lstdollar.item(k).getAttributes().getNamedItem("code");
-                            if (lstdollar.item(k).getFirstChild()!=null){
+                            if (lstdollar.item(k).getFirstChild() != null) {
                                 notice.append(Constants.DOLLAR).append(codeid.getNodeValue()).append(lstdollar.item(k).getFirstChild().getNodeValue().replaceAll("#27#", Constants.STR_1B));
                             }
                         }
                     }
 
-                    if (!estpasse && tag.getFirstChild()!=null){
+                    if (!estpasse && tag.getFirstChild() != null) {
                         notice.append(tag.getFirstChild().getNodeValue().replaceAll("#27#", Constants.STR_1B));
                     }
                     notice.append(Constants.STR_0D);
@@ -690,35 +702,36 @@ public class Utilitaire {
             }
             return notice.toString();
         } catch (Exception ex) {
-        	log.error("Error converting Xml to Marc ",ex);
-        	return null;
+            return null;
         }
     }
 
-    /**     * Récupère une zone / sous zone dans une notice
+    /**
+     * Récupère une zone / sous zone dans une notice
      * en cas de zone ou de sous zone répétable, ne renvoie que la première trouvée
+     *
      * @param notice : chaine de la notice dans laquelle chercher
-     * @param tag : zone à chercher
+     * @param tag    : zone à chercher
      * @param subTag : sous zone à chercher (avec le $)
      * @return chaine correspondant à la sous zone, null si pas de sous zone trouvée
      */
     public static String getZone(String notice, String tag, String subTag) {
         String ligne = recupEntre(recupNoticeBib(notice), tag, Constants.STR_0D);
         //si pas de sous zone en paramètre, retour zone entière
-        if (subTag.isEmpty()){
+        if (subTag.isEmpty()) {
             return ligne.substring(1);
         }
         //si sous zone seule
         if (ligne.indexOf(subTag) == ligne.lastIndexOf('$')) {
-            return ligne.substring(ligne.indexOf(subTag)+subTag.length());
+            return ligne.substring(ligne.indexOf(subTag) + subTag.length());
         }
         //si sous zone répétée, on retourne uniquement la première instance
         if (ligne.indexOf(subTag) != ligne.lastIndexOf(subTag)) {
-            ligne = ligne.substring(ligne.indexOf(subTag)+subTag.length());
+            ligne = ligne.substring(ligne.indexOf(subTag) + subTag.length());
             return ligne.substring(0, ligne.indexOf('$'));
         }
         //récupération portion de la ligne à partir de la sous zone recherchée
-        ligne = ligne.substring(ligne.indexOf(subTag)+subTag.length());
+        ligne = ligne.substring(ligne.indexOf(subTag) + subTag.length());
         //retourne ligne jusqu'au prochain $
         return ligne.substring(0, ligne.indexOf('$'));
     }
@@ -727,14 +740,15 @@ public class Utilitaire {
      * Récupère une zone / sous zone dans une notice contenant une chaine passée en paramètre
      * en cas de zone / sous zone répétable, parcours toutes les répétitions, et retourne la première qui contient la valeur
      * si pas de sous zone en paramètre, on cherche dans toutes les sous zones de la zone
+     *
      * @param notice : chaine de la notice dans laquelle chercher
-     * @param tag : zone à chercher
+     * @param tag    : zone à chercher
      * @param subTag : sous zone à chercher (avec le $)
-     * @param value : chaine à rechercher dans la sous zone
+     * @param value  : chaine à rechercher dans la sous zone
      * @return true si la chaine est trouvée, false sinon
      */
     public static boolean getZoneWithValue(String notice, String tag, String subTag, String value) {
-         return getZone(notice, tag, subTag).contains(value);
+        return getZone(notice, tag, subTag).contains(value);
     }
 
     /**
@@ -742,8 +756,8 @@ public class Utilitaire {
      * @return la notice sans les informations autour
      */
     public static String recupNoticeBib(final String notice) {
-       //si notice sans exemplaire, chaine de fin différente
-        if (notice.contains(Constants.STR_1E + Constants.VMC)){
+        //si notice sans exemplaire, chaine de fin différente
+        if (notice.contains(Constants.STR_1E + Constants.VMC)) {
             return recupEntre(notice, Constants.VTXTBIB, Constants.STR_1E + Constants.VMC);
         } else {
             return recupEntre(notice, Constants.VTXTBIB, Constants.STR_1E + Constants.VTXTE);
@@ -752,22 +766,24 @@ public class Utilitaire {
 
     /**
      * Ajoute une zone à une notice bibliographique
+     *
      * @param notice notice biblio à modifier (résultat de la commande mod)
-     * @param tag intitulé de la zone à ajouter
+     * @param tag    intitulé de la zone à ajouter
      * @param subTag intitulé de la sous zone à ajouter (avec le $)
      * @param valeur valeur de la zone/sous zone à insérer
      * @return notice modifiée, prête à être validée
      */
     public static String ajoutZoneBiblio(final String notice, final String tag, final String subTag, final String valeur) {
         return (new StringBuilder().append(recupEntre(notice, Constants.STR_1F, Constants.STR_0D + Constants.STR_0D + Constants.STR_1E))
-        		.append(Constants.SEP_CHAMP).append(tag).append(" ").append(subTag)
-        		.append(valeur).append(Constants.SEP_CHAMP)).toString();
+                .append(Constants.SEP_CHAMP).append(tag).append(" ").append(subTag)
+                .append(valeur).append(Constants.SEP_CHAMP)).toString();
     }
 
     /**
      * Ajout une sous zone dans une notice d'exemplaire
-     * @param exemp : notice d'exemplaire, préfixée de STR_1F et suffixée de STR_1E
-     * @param tag : zone concernée par l'ajout
+     *
+     * @param exemp  : notice d'exemplaire, préfixée de STR_1F et suffixée de STR_1E
+     * @param tag    : zone concernée par l'ajout
      * @param subTag : sous zone à ajouter
      * @param valeur : valeur de la sous-zone
      * @return : l'exemplaire modifié
@@ -776,7 +792,7 @@ public class Utilitaire {
         List<String> zonesExemp = cutExemp(exemp);
         Iterator itZones = zonesExemp.iterator();
         while (itZones.hasNext()) {
-            String zone = (String)itZones.next();
+            String zone = (String) itZones.next();
             if (getLabelZone(zone).equals(tag)) {
                 List<String> sousZones = cutZone(zone);
 
@@ -787,18 +803,19 @@ public class Utilitaire {
 
     /**
      * Découpe un exemplaire en une liste chainée de ses zones
+     *
      * @param exemp : exemplaire à découper
      * @return : liste chainée des zones de l'exemplaire
      */
     private static List<String> cutExemp(String exemp) {
         //on supprime le premier et le dernier caractère (STR_1F et STR_1E) pour traitement
-        String newExemp = exemp.substring(1 , exemp.length() - 1);
+        String newExemp = exemp.substring(1, exemp.length() - 1);
         List<String> zonesExemp = new LinkedList<>();
         //on découpe l'exemplaire en plusieurs zones
         String[] tabLignesExemp = newExemp.split(Constants.STR_0D);
         //on constitue une liste chainée des zones de l'exemplaire
-        for (int i=0;i<tabLignesExemp.length;i++) {
-            if (tabLignesExemp[i].length() >=3 ) {
+        for (int i = 0; i < tabLignesExemp.length; i++) {
+            if (tabLignesExemp[i].length() >= 3) {
                 zonesExemp.add(tabLignesExemp[i]);
             }
         }
@@ -807,13 +824,14 @@ public class Utilitaire {
 
     /**
      * découpe une zone en une liste chainée contenant ses sous zones
+     *
      * @param zone : zone à découper
      * @return : liste chainée des sous zones composant la zone
      */
     private static List<String> cutZone(String zone) {
         List<String> sousZones = new LinkedList<>();
         String[] tabSousZones = zone.split("$");
-        for (int i=0;i<tabSousZones.length;i++) {
+        for (int i = 0; i < tabSousZones.length; i++) {
             sousZones.add(tabSousZones[i]);
         }
         return sousZones;
@@ -821,16 +839,17 @@ public class Utilitaire {
 
     /**
      * méthode de suppresion d'une zone / sous zone d'une notice d'exemplaire
+     *
      * @param exemp : exemplaire à modifier, il doit être borné par STR_1F et STR_1E
-     * @param tag : zone à supprimer
+     * @param tag   : zone à supprimer
      * @return : chaine modifiée de l'exemplaire amputé de la zone / sous zone,  il sera borné par STR_1F et STR_1E
      */
     public static String suppZoneExemp(final String exemp, final String tag) {
-        List<String>zonesExemp = cutExemp(exemp);
+        List<String> zonesExemp = cutExemp(exemp);
         StringBuilder exempModifie = new StringBuilder();
         Iterator values = zonesExemp.listIterator();
         while (values.hasNext()) {
-            String zone = (String)values.next();
+            String zone = (String) values.next();
             if (!getLabelZone(zone).equals(tag)) {
                 exempModifie.append(zone).append(Constants.STR_0D);
             }
@@ -844,31 +863,32 @@ public class Utilitaire {
     /**
      * Modifie une zone / sous zone à une notice bibliographique. on part du principe que la zone / sous zone existe.
      * la méthode ne fait rien si ce n'est pas le cas
+     *
      * @param notice : notice biblio à modifier (résultat de la commande mod)
-     * @param tag : intitulé de la zone à modifier
+     * @param tag    : intitulé de la zone à modifier
      * @param subTag : intitulé de la sous zone à modifier (avec le $)
      * @param valeur : nouvelle valeur de la zone / sous zone à modifier
-     * @return  notice modifiée, prête à être validée
+     * @return notice modifiée, prête à être validée
      */
     public static String modifZoneBiblio(final String notice, final String tag, final String subTag, final String valeur) {
         //on stocke la notice dans un tableau où chaque indice contient 1 zone
         String[] resuEdit = recupEntre(notice, Constants.STR_1F, Constants.STR_0D + Constants.STR_0D + Constants.STR_1E).split(Constants.STR_0D);
         for (int i = 1; i < resuEdit.length; i++) {
-            if (resuEdit[i].length() > 0 && resuEdit[i].substring(0,3).equals(tag)) {
-            	//zone trouvée
+            if (resuEdit[i].length() > 0 && resuEdit[i].substring(0, 3).equals(tag)) {
+                //zone trouvée
                 String[] xx = resuEdit[i].split("\\$");
                 for (int j = 1; j < xx.length; j++) {
-                 //sous zone trouvée
-                 if (xx[j].substring(0, 1).equals(subTag.substring(1,2))) {
-                     xx[j]=subTag.substring(1,2)+valeur;
-                     break;
-                 }
+                    //sous zone trouvée
+                    if (xx[j].substring(0, 1).equals(subTag.substring(1, 2))) {
+                        xx[j] = subTag.substring(1, 2) + valeur;
+                        break;
+                    }
                 }
                 StringBuilder zoneamodif = new StringBuilder();
                 for (String xx1 : xx) {
                     zoneamodif.append(xx1).append(Constants.DOLLAR);
                 }
-                resuEdit[i]=zoneamodif.substring(0,zoneamodif.length()-1);
+                resuEdit[i] = zoneamodif.substring(0, zoneamodif.length() - 1);
             }
         }
         StringBuilder newNotice = new StringBuilder();
@@ -881,8 +901,9 @@ public class Utilitaire {
 
     /**
      * Méthode de suppression d'une zone / sous zone dans une notice biblio
+     *
      * @param notice : notice à modifier
-     * @param tag : zone à supprimer : si zone répétée, toutes les instances sont concernées
+     * @param tag    : zone à supprimer : si zone répétée, toutes les instances sont concernées
      * @param subTag : sous zone à supprimer : si sous zone vide, on supprime toute la zone !
      * @return : chaine de la notice modifiée, prête à être validée
      */
@@ -890,8 +911,8 @@ public class Utilitaire {
         //on stocke la notice dans un tableau où chaque indice contient 1 zone
         String[] resuEdit = recupEntre(notice, Constants.STR_1F, Constants.STR_0D + Constants.STR_0D + Constants.STR_1E).split(Constants.STR_0D);
         for (int i = 0; i < resuEdit.length; i++) {
-        	//zone trouvée
-            if (resuEdit[i].substring(0,3).equals(tag)) {
+            //zone trouvée
+            if (resuEdit[i].substring(0, 3).equals(tag)) {
                 if (subTag.isEmpty()) {
                     resuEdit[i] = "";
                 } else {
@@ -899,7 +920,7 @@ public class Utilitaire {
                     String[] newTabSousZone = new String[xx.length];
                     int cpt = 0;
                     for (String xx1 : xx) {
-                        if (xx1.substring(0, 1).equals(subTag.substring(1,2))) {
+                        if (xx1.substring(0, 1).equals(subTag.substring(1, 2))) {
                             //sous zone trouvée
                             //on ne fait rien
                             continue;
@@ -910,14 +931,13 @@ public class Utilitaire {
                     //si une seule sous zone dans la zone, on supprime la zone entière
                     if (newTabSousZone.length <= 2) {
                         resuEdit[i] = "";
-                    }
-                    else {
-                    	StringBuilder zoneamodif = new StringBuilder();
+                    } else {
+                        StringBuilder zoneamodif = new StringBuilder();
                         for (String newTabSousZone1 : newTabSousZone) {
                             if (newTabSousZone1 != null)
                                 zoneamodif.append(newTabSousZone1).append(Constants.DOLLAR);
                         }
-                        resuEdit[i]=zoneamodif.substring(0,zoneamodif.length()-1);
+                        resuEdit[i] = zoneamodif.substring(0, zoneamodif.length() - 1);
                     }
                 }
             }
@@ -933,9 +953,10 @@ public class Utilitaire {
 
     /**
      * Supprime une zone d'une notice biblio dont la sous zone subtag contient la chaine pattern
-     * @param notice notice sur laquelle supprimer la zone
-     * @param tag zone à supprimer
-     * @param subTag sous zone dans laquelle chercher la chaine validant la suppression
+     *
+     * @param notice  notice sur laquelle supprimer la zone
+     * @param tag     zone à supprimer
+     * @param subTag  sous zone dans laquelle chercher la chaine validant la suppression
      * @param pattern chaine à rechercher dans la sous zone pour valider la suppression
      * @return notice modifiée
      */
@@ -943,8 +964,8 @@ public class Utilitaire {
         //on stocke la notice dans un tableau où chaque indice contient 1 zone
         String[] resuEdit = recupEntre(notice, Constants.STR_1F, Constants.STR_0D + Constants.STR_0D + Constants.STR_1E).split(Constants.STR_0D);
         for (int i = 0; i < resuEdit.length; i++) {
-        	//zone trouvée
-            if (resuEdit[i].substring(0,3).equals(tag)) {
+            //zone trouvée
+            if (resuEdit[i].substring(0, 3).equals(tag)) {
                 if (subTag.isEmpty()) {
                     resuEdit[i] = "";
                 } else {
@@ -953,7 +974,7 @@ public class Utilitaire {
                     String[] newTabSousZone = new String[xx.length];
                     int cpt = 0;
                     for (String xx1 : xx) {
-                        if (xx1.substring(0, 1).equals(subTag.substring(1,2))) {
+                        if (xx1.substring(0, 1).equals(subTag.substring(1, 2))) {
                             //sous zone trouvée
                             if (xx1.contains(pattern)) {
                                 // pattern trouvé
@@ -969,7 +990,7 @@ public class Utilitaire {
                     for (String newTabSousZone1 : newTabSousZone) {
                         zoneamodif.append(newTabSousZone1).append(Constants.DOLLAR);
                     }
-                    resuEdit[i] = zoneASupp ? "" : zoneamodif.substring(0,zoneamodif.length()-1);
+                    resuEdit[i] = zoneASupp ? "" : zoneamodif.substring(0, zoneamodif.length() - 1);
                 }
             }
         }
@@ -985,6 +1006,7 @@ public class Utilitaire {
     /**
      * Renvoie le numéro du prochain exemplaire à créer d'une notice passée en paramêtre
      * <p>Va renseigner NbExPpnEncours et NvNumEx</p>
+     *
      * @param notice notice dont on veut connaître le numéro du prochain exemplaire
      * @return NvNumEx le numéro du prochain exemplaire sous la forme e<i>XX</i>
      */
@@ -996,7 +1018,7 @@ public class Utilitaire {
             //la notice a déjà un exemplaire
             posLastEx = notice.lastIndexOf("<BR>e");
             //num de l'exemplaire en cours
-            int nbExPPnEncours = Integer.parseInt(notice.substring(posLastEx + 5, posLastEx + 7)) +1;
+            int nbExPPnEncours = Integer.parseInt(notice.substring(posLastEx + 5, posLastEx + 7)) + 1;
             if (String.valueOf(nbExPPnEncours).length() == 1) {
                 nvNumEx.append("0").append(nbExPPnEncours);
             } else {
@@ -1012,10 +1034,10 @@ public class Utilitaire {
     /**
      * Renvoie le numéro de l'exemplaire correspondant à l'EPN passé en paramètre
      * Retourne une chaine de la forme exx (xx = numéro d'exemplaire)
-     * @param notice notice à parcourir
-     * @param epn numéro d'epn à trouver dans la notice pour trouver le numéro d'exemplaire
-     * @return : numEx : numéro d'exemplaire correspondant
      *
+     * @param notice notice à parcourir
+     * @param epn    numéro d'epn à trouver dans la notice pour trouver le numéro d'exemplaire
+     * @return : numEx : numéro d'exemplaire correspondant
      */
     public static String epnToExemplaire(String notice, String epn) {
         // on détermine la position de l'EPN passé en paramètre dans la notice
@@ -1027,41 +1049,42 @@ public class Utilitaire {
         while (matcher.find()) {
             if (matcher.start() < posEpn) {
                 indexExemp = matcher.start();
-            }
-            else break;
+            } else break;
         }
-        return "e"+notice.substring(indexExemp+5, indexExemp+7);
+        return "e" + notice.substring(indexExemp + 5, indexExemp + 7);
     }
-    
+
     /**
-   * Renvoi le texte du message retour du CBS suite à l'envoi d'une commande
-   * @param resCommande le résultat de l'exécution d'une commande avec tous les codes
-   * @return le texte du message renvoyé par le CBS suite à l'exécution d'une commande
-   */
-  public static String messageCommande(final String resCommande) {
-      return resCommande.substring(2, resCommande.indexOf(Constants.STR_1D + "V"));
-  }
+     * Renvoi le texte du message retour du CBS suite à l'envoi d'une commande
+     *
+     * @param resCommande le résultat de l'exécution d'une commande avec tous les codes
+     * @return le texte du message renvoyé par le CBS suite à l'exécution d'une commande
+     */
+    public static String messageCommande(final String resCommande) {
+        return resCommande.substring(2, resCommande.indexOf(Constants.STR_1D + "V"));
+    }
 
     /**
      * renvoie le label d'une zone passée en paramètre (en prenant en compte les zones XXX, EXXX, LXXX, exx)
+     *
      * @param zone zone à analyser
      * @return label de la zone
      */
-  public static String getLabelZone(final String zone) {
-      if (zone.substring(0,3).matches("\\d{3}")) {
-          return zone.substring(0,3);
-      }
-      if (zone.substring(0,3).matches("e\\d{2}")){
-          return zone.substring(0,3);
-      }
-      if (zone.substring(0,4).matches("E\\d{3}")){
-          return zone.substring(0,4);
-      }
-      if (zone.substring(0,4).matches("L\\d{3}")){
-          return zone.substring(0,4);
-      }
-      return "";
-  }
+    public static String getLabelZone(final String zone) {
+        if (zone.substring(0, 3).matches("\\d{3}")) {
+            return zone.substring(0, 3);
+        }
+        if (zone.substring(0, 3).matches("e\\d{2}")) {
+            return zone.substring(0, 3);
+        }
+        if (zone.substring(0, 4).matches("E\\d{3}")) {
+            return zone.substring(0, 4);
+        }
+        if (zone.substring(0, 4).matches("L\\d{3}")) {
+            return zone.substring(0, 4);
+        }
+        return "";
+    }
 
     public static Boolean isZoneProtegee(String zone) {
         Pattern pattern1 = Pattern.compile("\\x1bP\\p{Digit}\\p{Digit}\\p{Digit}");
@@ -1073,42 +1096,21 @@ public class Utilitaire {
 
     /**
      * Déterminer si un paramètre passé en paramètre est non vide et non null
+     *
      * @param parameter
      * @return
      */
-    public static boolean isCorectParameter(String parameter){
-        if (parameter == null || parameter.isEmpty()){
+    public static boolean isCorectParameter(String parameter) {
+        if (parameter == null || parameter.isEmpty()) {
             return false;
-        }else {
+        } else {
             return true;
         }
     }
 
-    public static String getStringFromZone(String zone, TYPE_NOTICE type) {
-        List<EnumZones> listeZones = EnumUtils.getEnumList(EnumZones.class);
-        Stream<EnumZones> zonesProteges = listeZones.stream().filter(p -> p.toString().startsWith("P") && p.toString().contains(zone));
-
-        if (zonesProteges.toArray().length != 0){
-            return "P" + zone;
-        }
-        if (zone.matches("9\\d\\d")) {
-            return "Z" + zone;
-        }
-        if (zone.matches("\\d\\d\\w")) {
-            if (type.equals(TYPE_NOTICE.BIBLIOGRAPHIQUE)) {
-                return "B" + zone;
-            }
-            else {
-                return "A" + zone;
-            }
-        } else {
-            return zone;
-        }
-    }
-
     public static String deleteExpensionFromValue(String value) {
-        if (value.indexOf(Constants.STR_1B+"I@") != -1) {
-            return value.substring(0, value.indexOf(Constants.STR_1B+"I@"));
+        if (value.indexOf(Constants.STR_1B + "I@") != -1) {
+            return value.substring(0, value.indexOf(Constants.STR_1B + "I@"));
         }
         return value;
     }

@@ -10,10 +10,7 @@ import fr.abes.cbs.utilitaire.Utilitaire;
 import fr.abes.cbs.zones.ZonesSpecifications;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.dom4j.Document;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
-import org.dom4j.Node;
+import org.dom4j.*;
 
 import java.text.Normalizer;
 import java.util.*;
@@ -21,7 +18,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Slf4j
 public abstract class Notice implements INotice {
     @Getter
     protected ListMultimap<String, Zone> listeZones;
@@ -49,26 +45,22 @@ public abstract class Notice implements INotice {
         }).linkedListValues().build();
     }
 
-    protected void createNoticeFromXml(String noticeXml) {
-        try {
-            Document doc = DocumentHelper.parseText(noticeXml);
-            List<Node> listeZone = doc.selectNodes("//record/*");
+    protected void createNoticeFromXml(String noticeXml) throws DocumentException, ZoneException {
+        Document doc = DocumentHelper.parseText(noticeXml);
+        List<Node> listeZone = doc.selectNodes("//record/*");
 
-            for (int i = 0; i < listeZone.size(); i++) {
-                Node zone = listeZone.get(i);
-                //cas ou la zone XML est de type datafield
-                if ("datafield".equals(zone.getName())) {
-                    String zoneId = ((Element) zone).attributeValue("tag");
-                    //récupération du nombre de zones déjà existantes dans la notice avec ce label
-                    int indexZone = this.findZones(zoneId).size();
-                    char[] indicateurs = getIndicateurs(zone);
-                    List<Node> listeSousZones = zone.selectNodes("*");
-                    traiterSousZonesXml(zoneId, indicateurs, listeSousZones, indexZone);
-                }
-
+        for (int i = 0; i < listeZone.size(); i++) {
+            Node zone = listeZone.get(i);
+            //cas ou la zone XML est de type datafield
+            if ("datafield".equals(zone.getName())) {
+                String zoneId = ((Element) zone).attributeValue("tag");
+                //récupération du nombre de zones déjà existantes dans la notice avec ce label
+                int indexZone = this.findZones(zoneId).size();
+                char[] indicateurs = getIndicateurs(zone);
+                List<Node> listeSousZones = zone.selectNodes("*");
+                traiterSousZonesXml(zoneId, indicateurs, listeSousZones, indexZone);
             }
-        } catch (Exception ex) {
-            log.error("Error converting Xml to Marc ", ex);
+
         }
     }
 
@@ -360,7 +352,7 @@ public abstract class Notice implements INotice {
                                 }
                             }
                         });
-                if (ex.get().getMessage() != null){
+                if (ex.get().getMessage() != null) {
                     throw ex.get();
                 }
                 zonesToBeAdded.put(zone, localZone);
@@ -434,7 +426,6 @@ public abstract class Notice implements INotice {
             }
         }
     }
-
 
 
     /**

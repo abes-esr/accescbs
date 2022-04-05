@@ -1,7 +1,6 @@
 package fr.abes.cbs.notices;
 
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.MultimapBuilder;
 import fr.abes.cbs.exception.NoticeException;
 import fr.abes.cbs.exception.ZoneException;
 import fr.abes.cbs.notices.sequences.SequenceEtatColl;
@@ -13,7 +12,7 @@ import fr.abes.cbs.zones.enumSousZones.Zone_955;
 import fr.abes.cbs.zones.enumSousZones.Zone_956;
 import fr.abes.cbs.zones.enumSousZones.Zone_957;
 import fr.abes.cbs.zones.enumSousZones.Zone_959;
-import fr.abes.cbs.zones.enumZones.EnumZones;
+import org.dom4j.DocumentException;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -40,7 +39,7 @@ public class Exemplaire extends Notice {
         createExemplaireFromUnimarc(notice);
     }
 
-    public Exemplaire(String notice, FORMATS format) throws ZoneException, NoticeException {
+    public Exemplaire(String notice, FORMATS format) throws ZoneException, NoticeException, DocumentException {
         super();
         switch (format) {
             case UNM:
@@ -54,7 +53,7 @@ public class Exemplaire extends Notice {
         }
     }
 
-    private void createExemplaireFromXml(String noticeXml) {
+    private void createExemplaireFromXml(String noticeXml) throws ZoneException, DocumentException {
         createNoticeFromXml(noticeXml);
     }
 
