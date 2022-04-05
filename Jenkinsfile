@@ -222,11 +222,11 @@ node {
 			}
 		}
 
-		stage('---- send to sonarqube ----'){
+		/*stage('---- send to sonarqube ----'){
 		   withSonarQubeEnv('SonarQube Server'){
 			  sh "${maventool}/bin/mvn sonar:sonar"
 		  }
-		 }
+		 }*/
 
 		stage ('---- send to Artifactory ---- ') {
 			try {
