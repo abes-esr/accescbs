@@ -28,6 +28,14 @@ jobs:
         # https://stackoverflow.com/questions/67550727/push-event-doesnt-trigger-workflow-on-push-paths-github-actions
         token: ${{ secrets.TOKEN_GITHUB_FOR_GITHUB_ACTION }}
 
+
+
+    - name: 'Verify release is created only on "main" or "master" git branch'
+      run: |
+        CURRENT_GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+        echo $CURRENT_GIT_BRANCH
+        [[ "$CURRENT_GIT_BRANCH" == "main" || "$CURRENT_GIT_BRANCH" == "master" ]] && exit 0 || exit 1
+
     - name: 'Verify version is semver formatted (X.X.X)'
       env:
         NEW_TAG:  ${{ github.event.inputs.releaseVersion }}
@@ -40,6 +48,8 @@ jobs:
       run: |
         [[ "$(git tag --list | grep $NEW_TAG)" == "" ]] && exit 0 || exit 1
 
+
+
     - name: 'Generate the new version (patch few files + git tag)'
       env:
         NEW_TAG: ${{ github.event.inputs.releaseVersion }}
@@ -51,6 +61,7 @@ jobs:
         git config --global user.email "github-action@noreply"
         git config --global user.name "Github Action"
         mvn release:prepare \
+          --batch-mode \
           -DreleaseVersion=$NEW_TAG \
           -Darguments=-DskipTests \
           -DtagNameFormat="@{project.version}"
