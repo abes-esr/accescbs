@@ -29,8 +29,8 @@
     <scm>
         <connection>scm:git:https://github.com/abes-esr/accescbs.git</connection>
 	<developerConnection>scm:git:https://github.com/abes-esr/accescbs</developerConnection>
-      <tag>HEAD</tag>
-  </scm>
+	<url>https://github.com/abes-esr/accescbs</url>
+    </scm>
 
     <build>
         <finalName>AccesCbs</finalName>
