@@ -65,11 +65,14 @@ jobs:
           -DreleaseVersion=$NEW_TAG \
           -Darguments=-DskipTests \
           -DtagNameFormat="@{project.version}"
-        # merge la nouvelle version sur develop
-        # (pour pas que la branche main soit en "avance" sur develop)
-        git switch develop
-        git merge main
-        git push
+          # merge la préparation de la nouvelle version sur develop
+          # (version X.X.X-SNAPSHOT)
+          # CURRENT_GIT_BRANCH vaut main ou master, c'est la où est créé la release
+          CURRENT_GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          git switch develop
+          git merge $CURRENT_GIT_BRANCH
+          git push
+
         
     - name: 'Create the github release'
       uses: softprops/action-gh-release@v1
