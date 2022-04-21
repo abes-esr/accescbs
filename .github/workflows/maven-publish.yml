@@ -60,11 +60,11 @@ jobs:
         git merge main
         git push
         
-     - name: 'Create the github release'
-       uses: softprops/action-gh-release@v1
-       with:
-          tag_name: ${{ github.event.inputs.releaseVersion }}
-          generate_release_notes: true
+    - name: 'Create the github release'
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ github.event.inputs.releaseVersion }}
+        generate_release_notes: true
         
     - name: Set up Maven Central Repository
       uses: actions/setup-java@v3
