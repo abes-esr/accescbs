@@ -12,7 +12,7 @@ on:
         default: 'x.x.x'
 
 jobs:
-  build:
+  maven-publish:
 
     runs-on: ubuntu-latest
     permissions:
