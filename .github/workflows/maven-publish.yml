@@ -79,6 +79,7 @@ jobs:
       with:
         tag_name: ${{ github.event.inputs.releaseVersion }}
         generate_release_notes: true
+        token: ${{ secrets.TOKEN_GITHUB_FOR_GITHUB_ACTION }}
         
     - name: Set up Maven Central Repository
       uses: actions/setup-java@v3
