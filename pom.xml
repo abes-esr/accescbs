@@ -5,13 +5,15 @@
     <version>2.5.12-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>AccesCbs</name>
+    <description>AccesCbs allows programs to interract with Sudoc French bibliographic database.</description>
+    <url>https://github.com/abes-esr/accescbs</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.target>11</maven.compiler.target>
     </properties>
-	
-	 <licenses>
+
+    <licenses>
         <license>
             <name>The MIT License</name>
             <url>https://github.com/abes-esr/accescbs/blob/main/LICENSE</url>
@@ -26,6 +28,7 @@
     </developers>
     <scm>
         <connection>scm:git:https://github.com/abes-esr/accescbs.git</connection>
+	<developerConnection>scm:git:https://github.com/abes-esr/accescbs</developerConnection>
       <tag>HEAD</tag>
   </scm>
 
