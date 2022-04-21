@@ -3,9 +3,13 @@
 
 name: Maven Package
 
-on:
-  release:
-    types: [created]
+on: 
+  workflow_dispatch:
+    inputs:
+      releaseVersion:
+        description: 'Version de la release (semver)'
+        required: true
+        default: 'x.x.x'
 
 jobs:
   build:
@@ -16,7 +20,52 @@ jobs:
       packages: write
 
     steps:
-    - uses: actions/checkout@v3
+    
+    - name: 'Checkout source code'
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: '0' # to get all the tags locally
+        # https://stackoverflow.com/questions/67550727/push-event-doesnt-trigger-workflow-on-push-paths-github-actions
+        token: ${{ secrets.TOKEN_GITHUB_FOR_GITHUB_ACTION }}
+
+    - name: 'Verify version is semver formatted (X.X.X)'
+      env:
+        NEW_TAG:  ${{ github.event.inputs.releaseVersion }}
+      run: |
+        echo $NEW_TAG | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$'
+        
+    - name: 'Verify version is not already used as a git tag'
+      env:
+        NEW_TAG:  ${{ github.event.inputs.releaseVersion }}
+      run: |
+        [[ "$(git tag --list | grep $NEW_TAG)" == "" ]] && exit 0 || exit 1
+
+    - name: 'Generate the new version (patch few files + git tag)'
+      env:
+        NEW_TAG: ${{ github.event.inputs.releaseVersion }}
+      run: |
+        # préparation de la release qui va :
+        # - modifier le numéro de version dans les pom.xml du projet
+        # - créer un tag git du numéro de version en question
+        # - pousser le tout sur le dépôt github
+        git config --global user.email "github-action@noreply"
+        git config --global user.name "Github Action"
+        mvn release:prepare \
+          -DreleaseVersion=$NEW_TAG \
+          -Darguments=-DskipTests \
+          -DtagNameFormat="@{project.version}"
+        # merge la nouvelle version sur develop
+        # (pour pas que la branche main soit en "avance" sur develop)
+        git switch develop
+        git merge main
+        git push
+        
+    - name: 'Create the github release'
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ github.event.inputs.releaseVersion }}
+        generate_release_notes: true
+        
     - name: Set up Maven Central Repository
       uses: actions/setup-java@v3
       with:
@@ -26,6 +75,7 @@ jobs:
         server-password: MAVEN_PASSWORD
         gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
         gpg-passphrase: MAVEN_GPG_PASSPHRASE
+        
     - name: Deploy with Maven
       run: mvn -B clean deploy -PtoOSSRH
       env:
