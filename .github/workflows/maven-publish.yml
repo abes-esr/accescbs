@@ -72,7 +72,7 @@ jobs:
         gpg-passphrase: MAVEN_GPG_PASSPHRASE
         
     - name: Deploy with Maven
-      run: mvn -B clean deploy -PtoOSSRH
+      run: mvn -B release:perform -PtoOSSRH
       env:
         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
