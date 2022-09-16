@@ -340,6 +340,7 @@ public class ZonesSpecifications {
                     new ZoneSpecification("990", "a", false, TYPE_NOTICE.EXEMPLAIRE),
                     new ZoneSpecification("991", "abcdlezijfghtv28", false, TYPE_NOTICE.EXEMPLAIRE),
                     new ZoneSpecification("992", "a2", false, TYPE_NOTICE.EXEMPLAIRE),
+                    new ZoneSpecification("995", "a", false, TYPE_NOTICE.EXEMPLAIRE),
                     new ZoneSpecification("997", "ba", false, TYPE_NOTICE.EXEMPLAIRE),
                     new ZoneSpecification("999", "abcdefghijklmnopqrstuvwxyzAB15", false, TYPE_NOTICE.EXEMPLAIRE),
                     new ZoneSpecification("Axx", "", false, TYPE_NOTICE.EXEMPLAIRE),
