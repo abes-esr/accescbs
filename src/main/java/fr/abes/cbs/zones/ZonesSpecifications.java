@@ -223,6 +223,7 @@ public class ZonesSpecifications {
                     new ZoneSpecification("839", ""),
                     new ZoneSpecification("856", "abcdefhijklmnopqrstuvwxyz2"),
                     new ZoneSpecification("859", "abcdefhijklmnopqrstuvwxyz2"),
+                    new ZoneSpecification("896", "abcdefghijklmnopqrstuvwxyz"),
                     //format d'exemplaire
                     new ZoneSpecification("exx", "ab", false, TYPE_NOTICE.EXEMPLAIRE, "900"),
                     new ZoneSpecification("e01", "ab", false, TYPE_NOTICE.EXEMPLAIRE, "900aa"),
