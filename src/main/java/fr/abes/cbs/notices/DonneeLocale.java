@@ -37,8 +37,7 @@ public class DonneeLocale extends Notice {
         Pattern pattern;
         Matcher matcher;
 
-        String donneesLocalesToCreate = donneesLocales.substring(donneesLocales.indexOf(Constants.STR_1F) + 1, donneesLocales.indexOf(Constants.STR_1E));
-        String[] tabZonesDonneesLocales = donneesLocalesToCreate.split("\\r");
+        String[] tabZonesDonneesLocales = donneesLocales.split("\\r");
 
         Pattern standardZoneRegexPattern = Pattern.compile("^[L]?[0-9][0-9][0-9]");
         Pattern systemZonesRegexPattern = Pattern.compile("L005");

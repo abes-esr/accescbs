@@ -43,9 +43,9 @@ public class ZoneEtatCollTest {
     @DisplayName("Test ajout zone état de collection")
     @Test
     void addZone() throws ZoneException {
-        Exemplaire exemp = new Exemplaire(Constants.STR_1F + "930 ##$aPAR 3933$jg" + Constants.STR_1E);
+        Exemplaire exemp = new Exemplaire("930 ##$aPAR 3933$jg");
         exemp.addZoneEtatCollection("955", "$a", "2000", new char[]{'4', '1'});
-        assertThat(exemp.toString()).isEqualTo(Constants.STR_1F + "930 ##$aPAR 3933$jg\r" +
-                "955 41$a2000" + Constants.STR_0D + Constants.STR_1E);
+        assertThat(exemp.toString()).isEqualTo("930 ##$aPAR 3933$jg\r" +
+                "955 41$a2000\r");
     }
 }

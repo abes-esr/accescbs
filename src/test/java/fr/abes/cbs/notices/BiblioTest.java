@@ -14,7 +14,7 @@ public class BiblioTest {
     @DisplayName("Test création notice biblio à partir d'une chaine")
     @Test
     void biblioFromStringBasique() throws Exception {
-        String biblioStr = Constants.STR_1F +
+        String biblioStr =
                 "000 $01\r" +
                 "002 $aFRBNF455216030000003$2FRBNF\r" +
                 "003 http://www.sudoc.fr/230362532\r" +
@@ -44,12 +44,11 @@ public class BiblioTest {
                 "686 ##$a809$2Cadre de classement de la Bibliographie nationale française\r" +
                 "700 #1$3086100106Aubinais, Marie$4070\r" +
                 "702 #1$3026744813Bour, Danièle (1939-....)$4440\r" +
-                "801 #0$aFR$bFR-751131015$c20180608$gAFNOR$2intermrc\r" + Constants.STR_1E;
+                "801 #0$aFR$bFR-751131015$c20180608$gAFNOR$2intermrc\r";
         Biblio biblio = new Biblio(biblioStr, FORMATS.UNM);
         assertThat(biblio.getListeZones().size()).isEqualTo(30);
         assertThat(biblio.findZones("200").get(0).getSubLabelList().size()).isEqualTo(3);
-        biblio.getListeZones().values();
-        assertThat(biblio.toString()).isEqualTo(Constants.STR_1F +
+        assertThat(biblio.toString()).isEqualTo(
                 Constants.STR_1B + "P000 $01\r" +
                 Constants.STR_1B + "D002 $aFRBNF455216030000003$2FRBNF\r" +
                 "003 http://www.sudoc.fr/230362532\r" +
@@ -79,12 +78,12 @@ public class BiblioTest {
                 "686 ##$a809$2Cadre de classement de la Bibliographie nationale française\r" +
                 "700 #1$3086100106Aubinais, Marie$4070\r" +
                 "702 #1$3026744813Bour, Danièle (1939-....)$4440\r" +
-                "801 #0$aFR$bFR-751131015$c20180608$gAFNOR$2intermrc\r" + Constants.STR_1E);
+                "801 #0$aFR$bFR-751131015$c20180608$gAFNOR$2intermrc\r");
     }
 
     @Test
     void biblioFromStringWithRepeatedTag() throws Exception {
-        String biblioStr = Constants.STR_1F +
+        String biblioStr =
                 "000 $01\r" +
                 "002 $aFRBNF455216030000003$2FRBNF\r" +
                 "003 http://www.sudoc.fr/230362532\r" +
@@ -114,12 +113,12 @@ public class BiblioTest {
                 "686 ##$a809$2Cadre de classement de la Bibliographie nationale française\r" +
                 "700 #1$3086100106Aubinais, Marie$4070\r" +
                 "702 #1$3026744813Bour, Danièle (1939-....)$4440\r" +
-                "801 #0$aFR$bFR-751131015$c20180608$gAFNOR$2intermrc\r" + Constants.STR_1E;
+                "801 #0$aFR$bFR-751131015$c20180608$gAFNOR$2intermrc\r";
         Biblio biblio = new Biblio(biblioStr, FORMATS.UNM);
         assertThat(biblio.getListeZones().size()).isEqualTo(30);
         assertThat(biblio.findZones("200").get(0).getSubLabelList().size()).isEqualTo(3);
         assertThat(biblio.findZones("215").size()).isEqualTo(2);
-        assertThat(biblio.toString()).isEqualTo(Constants.STR_1F +
+        assertThat(biblio.toString()).isEqualTo(
                 Constants.STR_1B + "P000 $01\r" +
                 Constants.STR_1B + "D002 $aFRBNF455216030000003$2FRBNF\r" +
                 "003 http://www.sudoc.fr/230362532\r" +
@@ -149,12 +148,12 @@ public class BiblioTest {
                 "686 ##$a809$2Cadre de classement de la Bibliographie nationale française\r" +
                 "700 #1$3086100106Aubinais, Marie$4070\r" +
                 "702 #1$3026744813Bour, Danièle (1939-....)$4440\r" +
-                "801 #0$aFR$bFR-751131015$c20180608$gAFNOR$2intermrc\r" + Constants.STR_1E);
+                "801 #0$aFR$bFR-751131015$c20180608$gAFNOR$2intermrc\r");
     }
 
     @Test
     void biblioFromStringWithRepeatedSubTag() throws Exception {
-        String biblioStr = Constants.STR_1F +
+        String biblioStr =
                 "003 231924682\r" +
                 "004 341720001:21-11-19\r" +
                 "005 341720001:21-11-19 14:08:09.000\r" +
@@ -164,11 +163,11 @@ public class BiblioTest {
                 "00U $0utf8\r" +
                 "100 0#$a2019\r" +
                 "101 ##$afre\r" +
-                "200 0#$a@Petit ours brun à la ferme$aOTto\r" + Constants.STR_1E;
+                "200 0#$a@Petit ours brun à la ferme$aOTto\r";
         Biblio biblio = new Biblio(biblioStr, FORMATS.UNM);
         assertThat(biblio.getListeZones().size()).isEqualTo(10);
         assertThat(biblio.findZones("200").get(0).getSubLabelList().size()).isEqualTo(2);
-        assertThat(biblio.toString()).isEqualTo(Constants.STR_1F +
+        assertThat(biblio.toString()).isEqualTo(
                 "003 231924682\r" +
                 "004 341720001:21-11-19\r" +
                 "005 341720001:21-11-19 14:08:09.000\r" +
@@ -178,12 +177,12 @@ public class BiblioTest {
                 Constants.STR_1B + "D" + Constants.STR_1B + "P00U $0utf8\r" +
                 Constants.STR_1B + "D100 0#$a2019\r" +
                 "101 ##$afre\r" +
-                "200 0#$a@Petit ours brun à la ferme$aOTto\r" + Constants.STR_1E);
+                "200 0#$a@Petit ours brun à la ferme$aOTto\r");
     }
 
     @Test
     void biblioFromStringWithRepeatedRameau() throws Exception {
-        String biblioStr = Constants.STR_1F +
+        String biblioStr =
                 "003 231924682\r" +
                 "004 341720001:21-11-19\r" +
                 "005 341720001:21-11-19 14:08:09.000\r" +
@@ -198,13 +197,12 @@ public class BiblioTest {
                 "606 ##$302747562XJustice distributive$3027253139Thèses et écrits académiques$2rameau\r" +
                 "606 ##$3027233103Émigration et immigration$3027253139Thèses et écrits académiques$2rameau\r" +
                 "606 ##$3034228942$3027253139$2rameau\r" +
-                "606 ##$3029677440$3027253139$2rameau\r"
-                + Constants.STR_1E;
+                "606 ##$3029677440$3027253139$2rameau\r";
         Biblio biblio = new Biblio(biblioStr, FORMATS.UNM);
         assertThat(biblio.getListeZones().size()).isEqualTo(15);
         assertThat(biblio.findZones("606").get(0).getSubLabelList().size()).isEqualTo(4);
         assertThat(biblio.findZones("606").get(5).getSubLabelList().size()).isEqualTo(3);
-        assertThat(biblio.toString()).isEqualTo(Constants.STR_1F +
+        assertThat(biblio.toString()).isEqualTo(
                 "003 231924682\r" +
                 "004 341720001:21-11-19\r" +
                 "005 341720001:21-11-19 14:08:09.000\r" +
@@ -219,8 +217,7 @@ public class BiblioTest {
                 "606 ##$302747562XJustice distributive$3027253139Thèses et écrits académiques$2rameau\r" +
                 "606 ##$3027233103Émigration et immigration$3027253139Thèses et écrits académiques$2rameau\r" +
                 "606 ##$3034228942$3027253139$2rameau\r" +
-                "606 ##$3029677440$3027253139$2rameau\r"
-                + Constants.STR_1E);
+                "606 ##$3029677440$3027253139$2rameau\r");
     }
 
     @Test
@@ -231,7 +228,7 @@ public class BiblioTest {
             notice.append(scanner.next());
         }
         Biblio biblio = new Biblio(notice.toString(), FORMATS.XML);
-        assertThat(biblio.toString()).isEqualTo(Constants.STR_1F +
+        assertThat(biblio.toString()).isEqualTo(
                 "002 ##$aSTAR10007$2STAR\r" +
                 "008 ##$aOax3\r" +
                 "029 ##$aFR$b2010ECAP0020\r" +
@@ -256,7 +253,7 @@ public class BiblioTest {
                 "314 ##$aAutre(s) contribution(s) : Gilles Trystram (Président du jury) ; Arsène Isambert, Hélène Ducatel, Stéphane Brochot (Membre(s) du jury) ; Yann Le gorrec, Xuân Meyer (Rapporteur(s))\r" +
                 "328 #0$bThèse de doctorat$cGénie des procédés$eEcole centrale Paris$d2010\r" +
                 "606 ##$3034228942$3027253139$2rameau\r" +
-                "606 ##$3029677440$3027253139$2rameau\r" + Constants.STR_1E);
+                "606 ##$3029677440$3027253139$2rameau\r");
     }
 
     @Test
@@ -277,7 +274,7 @@ public class BiblioTest {
 
     @Test
     void biblioFromStringWithProtectedTag() throws Exception {
-        String biblioStr = Constants.STR_1F +
+        String biblioStr =
                 "003 231924682\r" +
                 "004 341720001:21-11-19\r" +
                 "005 341720001:21-11-19 14:08:09.000\r" +
@@ -287,11 +284,11 @@ public class BiblioTest {
                 Constants.STR_1B + "D00U $0utf8\r" +
                 "100 0#$a2019\r" +
                 "101 ##$afre\r" +
-                "200 0#$a@Petit ours brun à la ferme$aOTto\r" + Constants.STR_1E;
+                "200 0#$a@Petit ours brun à la ferme$aOTto\r";
         Biblio biblio = new Biblio(biblioStr, FORMATS.UNM);
         assertThat(biblio.getListeZones().size()).isEqualTo(10);
         assertThat(biblio.findZones("200").get(0).getSubLabelList().size()).isEqualTo(2);
-        assertThat(biblio.toString()).isEqualTo(Constants.STR_1F +
+        assertThat(biblio.toString()).isEqualTo(
                 "003 231924682\r" +
                 "004 341720001:21-11-19\r" +
                 "005 341720001:21-11-19 14:08:09.000\r" +
@@ -301,25 +298,23 @@ public class BiblioTest {
                 Constants.STR_1B + "D" + Constants.STR_1B + "P00U $0utf8\r" +
                 Constants.STR_1B + "D100 0#$a2019\r" +
                 "101 ##$afre\r" +
-                "200 0#$a@Petit ours brun à la ferme$aOTto\r" + Constants.STR_1E);
+                "200 0#$a@Petit ours brun à la ferme$aOTto\r");
     }
 
     @Test
     void biblioFromStringWithTransliteration() throws Exception {
-        String biblioStr = Constants.STR_1F +
+        String biblioStr =
                 "200 #1$601$7ba$aKazantzakīs$fNikos$f1883-1957\r" +
-                "200 #1$601$7ga$aΚαζαντζακης$fΝικος$f1883-1957\r" +
-                Constants.STR_1E;
+                "200 #1$601$7ga$aΚαζαντζακης$fΝικος$f1883-1957\r";
         Biblio biblio = new Biblio(biblioStr, FORMATS.UNM);
-        assertThat(biblio.toString()).isEqualTo(Constants.STR_1F +
+        assertThat(biblio.toString()).isEqualTo(
                 "200 #1$601$7ba$aKazantzakīs$fNikos$f1883-1957\r" +
-                "200 #1$601$7ga$aΚαζαντζακης$fΝικος$f1883-1957\r" +
-                Constants.STR_1E);
+                "200 #1$601$7ga$aΚαζαντζακης$fΝικος$f1883-1957\r");
     }
 
     @Test
     void biblioRareSubLabel() throws Exception {
-        String biblioStr = Constants.STR_1F +
+        String biblioStr =
                 Constants.STR_1B + "P000 $04,41,51,74,86,88,102,130,159,173\r" +
                 Constants.STR_1B + "D" +"003 http://www.sudoc.fr/134381246\r" +
                 "004 693872101:22-06-09\r" +
@@ -356,57 +351,56 @@ public class BiblioTest {
                 "801 #0$bAUXAM$gAACR2\r" +
                 "801 #1$bAUXAM$gAACR2\r" +
                 "830 ##$aABES NE PAS SUPPRIMER Réforme Rameau retournement 607 juillet 2019\r" +
-                "830 ##$aABES NE PAS SUPPRIMER Réforme Rameau Tg préconstruites avec subd. aux lieux 2019-06-14\r" +
-                Constants.STR_1E;
+                "830 ##$aABES NE PAS SUPPRIMER Réforme Rameau Tg préconstruites avec subd. aux lieux 2019-06-14\r";
         Biblio biblio = new Biblio(biblioStr, FORMATS.UNM);
         assertThat(biblio.toString()).isEqualTo(biblioStr);
     }
 
     @Test
     void biblioFromString214() throws Exception {
-        String biblioStr = Constants.STR_1F + "214 #4$dC 2000\r" + Constants.STR_1E;
+        String biblioStr = "214 #4$dC 2000\r";
         Biblio biblio = new Biblio(biblioStr, FORMATS.UNM);
-        assertThat(biblio.toString()).isEqualTo(Constants.STR_1F + "214 #4$dC 2000\r" + Constants.STR_1E);
+        assertThat(biblio.toString()).isEqualTo("214 #4$dC 2000\r");
     }
 
     @Test
     void biblioFromString214Test2() throws Exception {
-        String biblioStr = Constants.STR_1F + "214 #4$dc1990$dC 2000\r" + Constants.STR_1E;
+        String biblioStr = "214 #4$dc1990$dC 2000\r";
         Biblio biblio = new Biblio(biblioStr, FORMATS.UNM);
-        assertThat(biblio.toString()).isEqualTo(Constants.STR_1F + "214 #4$dc1990$dC 2000\r" + Constants.STR_1E);
+        assertThat(biblio.toString()).isEqualTo("214 #4$dc1990$dC 2000\r");
     }
 
     @Test
     void biblioFromString214Test3() throws Exception {
-        String biblioStr = Constants.STR_1F + "214 #3$aCastres$bla bas$clui$atoulouse$cmoi\r" + Constants.STR_1E;
+        String biblioStr = "214 #3$aCastres$bla bas$clui$atoulouse$cmoi\r";
         Biblio biblio = new Biblio(biblioStr);
-        assertThat(biblio.toString()).isEqualTo(Constants.STR_1F + "214 #3$aCastres$bla bas$clui$atoulouse$cmoi\r" + Constants.STR_1E);
+        assertThat(biblio.toString()).isEqualTo("214 #3$aCastres$bla bas$clui$atoulouse$cmoi\r");
     }
 
     @Test
     void biblioFromString214Test4() throws Exception {
-        String biblioStr = Constants.STR_1F + "214 #3$aCastres$bla bas$clui$atoulouse$cmoi$dC 2009\r" + Constants.STR_1E;
+        String biblioStr = "214 #3$aCastres$bla bas$clui$atoulouse$cmoi$dC 2009\r";
         Biblio biblio = new Biblio(biblioStr);
-        assertThat(biblio.toString()).isEqualTo(Constants.STR_1F + "214 #3$aCastres$bla bas$clui$atoulouse$cmoi$dC 2009\r" + Constants.STR_1E);
+        assertThat(biblio.toString()).isEqualTo("214 #3$aCastres$bla bas$clui$atoulouse$cmoi$dC 2009\r");
     }
 
     @Test
     void biblioFromString214Test5() throws Exception {
-        String biblioStr = Constants.STR_1F + "214 ##$rA Paris, chez Masson, libraire, rue Gallande, n° 27. An IX de la République [1800 ou 1801]$sDe l'imprimerie de Richard, place Cambrai, n° 4.\r" + Constants.STR_1E;
+        String biblioStr = "214 ##$rA Paris, chez Masson, libraire, rue Gallande, n° 27. An IX de la République [1800 ou 1801]$sDe l'imprimerie de Richard, place Cambrai, n° 4.\r";
         Biblio biblio = new Biblio(biblioStr);
-        assertThat(biblio.toString()).isEqualTo(Constants.STR_1F + "214 ##$rA Paris, chez Masson, libraire, rue Gallande, n° 27. An IX de la République [1800 ou 1801]$sDe l'imprimerie de Richard, place Cambrai, n° 4.\r" + Constants.STR_1E);
+        assertThat(biblio.toString()).isEqualTo("214 ##$rA Paris, chez Masson, libraire, rue Gallande, n° 27. An IX de la République [1800 ou 1801]$sDe l'imprimerie de Richard, place Cambrai, n° 4.\r");
     }
 
     @Test
     void biblioFromString214Test6() throws Exception {
-        String biblioStr = Constants.STR_1F + "214 #3$aCastres$clui$atoulouse$cmoi\r" + Constants.STR_1E;
+        String biblioStr = "214 #3$aCastres$clui$atoulouse$cmoi\r";
         Biblio biblio = new Biblio(biblioStr);
-        assertThat(biblio.toString()).isEqualTo(Constants.STR_1F + "214 #3$aCastres$clui$atoulouse$cmoi\r" + Constants.STR_1E);
+        assertThat(biblio.toString()).isEqualTo("214 #3$aCastres$clui$atoulouse$cmoi\r");
     }
     
     @Test
     void biblioFromString214Test7() throws Exception {
-        String biblioStr = Constants.STR_1F +
+        String biblioStr =
                 "006 341720001:24-11-20\r" +
                 "008 $aObx3\r" +
                 "033 ##$ahttps://reseau-mirabel.info/revue/titre-id/2785$2Mir@bel$d20200421\r" +
@@ -427,9 +421,9 @@ public class BiblioTest {
                 "532 ##$a@WJR\r" +
                 "608 ##$302724640X\u001BIPériodiques\u001BN$2rameau\r" +
                 "676 ##$a071\r" +
-                "712 02$a@University of Maryland at College Park$bCollege of Journalism$4340" + Constants.STR_1E;
+                "712 02$a@University of Maryland at College Park$bCollege of Journalism$4340";
         Biblio biblio = new Biblio(biblioStr);
-        assertThat(biblio.toString()).isEqualTo(Constants.STR_1F +
+        assertThat(biblio.toString()).isEqualTo(
                 "006 341720001:24-11-20\r" +
                 "008 $aObx3\r" +
                 "033 ##$ahttps://reseau-mirabel.info/revue/titre-id/2785$2Mir@bel$d20200421\r" +
@@ -450,12 +444,12 @@ public class BiblioTest {
                 "532 ##$a@WJR\r" +
                 "608 ##$302724640X\u001BIPériodiques\u001BN$2rameau\r" +
                 "676 ##$a071\r" +
-                "712 02$a@University of Maryland at College Park$bCollege of Journalism$4340\r" + Constants.STR_1E);
+                "712 02$a@University of Maryland at College Park$bCollege of Journalism$4340\r");
     }
 
     @Test
     void testModifZone029() throws Exception {
-        String biblioStr = Constants.STR_1F +
+        String biblioStr =
                 "006 593502101:19-12-06\r" +
                 "008 $aAax3\r" +
                 "029 ##$aFR$b2006LIL2E104$eTH-PH-0086$mMEM-2006-0056$o459 (numéro d'ordre)$z2006LLL2E104\r" +
@@ -475,11 +469,11 @@ public class BiblioTest {
                 "328 #0$bThèse de doctorat$cSciences pharmaceutiques$eLille 2$d2006\r" +
                 "700 #1$3111475384$4070\r" +
                 "701 #1$3075890127$4727\r" +
-                "711 01$3026404389$4295\r" + Constants.STR_1E;
+                "711 01$3026404389$4295\r";
 
         Biblio biblio = new Biblio(biblioStr);
 
-        assertThat(biblio.toString()).isEqualTo(Constants.STR_1F +
+        assertThat(biblio.toString()).isEqualTo(
                 "006 593502101:19-12-06\r" +
                 "008 $aAax3\r" +
                 "029 ##$aFR$b2006LIL2E104$eTH-PH-0086$mMEM-2006-0056$o459 (numéro d'ordre)$z2006LLL2E104\r" +
@@ -499,12 +493,12 @@ public class BiblioTest {
                 "328 #0$bThèse de doctorat$cSciences pharmaceutiques$eLille 2$d2006\r" +
                 "700 #1$3111475384$4070\r" +
                 "701 #1$3075890127$4727\r" +
-                "711 01$3026404389$4295\r" + Constants.STR_1E);
+                "711 01$3026404389$4295\r");
     }
 
     @Test
     void testAjoutZone325() throws Exception {
-        String biblioStr = Constants.STR_1F +
+        String biblioStr =
                 "003 201925001\r" +
                 "004 4018:19-06-17\r" +
                 "005 341720001:08-10-21 17:53:25.000\r" +
@@ -524,10 +518,10 @@ public class BiblioTest {
                 "214 #0$aCambridge, Mass.$cHarvard University Press$d[1974]\r" +
                 "325 ##$aNumérisation sur archive.org$uhttps://openlibrary.org/works/OL957949W/\r" +
                 "325 ##$bReproduction numérique$cLieu inconnu$dArchive.org$e2020$faccès en ligne$gCollection Lyon Social$h0$iNote pour info sur le caractère complet de la repro$j3pd06$nNote sur la reproduction$uhttps://openlibrary.org/works/OL957949W/Renoir$x1292-8399$z20210913\r" +
-                "801 #0$aDE$bIN-ChSCO$c20170329$grda\r" + Constants.STR_1E;
+                "801 #0$aDE$bIN-ChSCO$c20170329$grda\r";
         Biblio biblio = new Biblio(biblioStr);
 
-        assertThat(biblio.toString()).isEqualTo(Constants.STR_1F +
+        assertThat(biblio.toString()).isEqualTo(
                 "003 201925001\r" +
                 "004 4018:19-06-17\r" +
                 "005 341720001:08-10-21 17:53:25.000\r" +
@@ -547,12 +541,12 @@ public class BiblioTest {
                 "214 #0$aCambridge, Mass.$cHarvard University Press$d[1974]\r" +
                 "325 ##$aNumérisation sur archive.org$uhttps://openlibrary.org/works/OL957949W/\r" +
                 "325 ##$bReproduction numérique$cLieu inconnu$dArchive.org$e2020$faccès en ligne$gCollection Lyon Social$h0$iNote pour info sur le caractère complet de la repro$j3pd06$nNote sur la reproduction$uhttps://openlibrary.org/works/OL957949W/Renoir$x1292-8399$z20210913\r" +
-                "801 #0$aDE$bIN-ChSCO$c20170329$grda\r" + Constants.STR_1E);
+                "801 #0$aDE$bIN-ChSCO$c20170329$grda\r");
     }
 
     @Test
     void testAjout371et338() throws Exception {
-        String biblioStr = Constants.STR_1F +
+        String biblioStr =
                 "002 $aFRBNF46624974000000X$2FRBNF\r" +
                 "003 http://www.sudoc.fr/232844194\r" +
                 "004 4994:19-11-20\r" +
@@ -590,12 +584,11 @@ public class BiblioTest {
                 "608 ##$3027281558Biographies$2rameau\r" +
                 "700 #1$3026879972Gallois, Jean$4330 (Auteur prétendu)\r" +
                 "711 02$3027801411@Union européenne. Commission européenne$4723 (Mécène)\r" +
-                "801 #0$aFR$bFR-751131015$c20200929$gAFNOR$2intermrc\r" + Constants.STR_1E;
+                "801 #0$aFR$bFR-751131015$c20200929$gAFNOR$2intermrc\r";
 
         Biblio biblio = new Biblio(biblioStr);
 
         assertThat(biblio.toString()).isEqualTo(
-                Constants.STR_1F +
                         "002 $aFRBNF46624974000000X$2FRBNF\r" +
                         "003 http://www.sudoc.fr/232844194\r" +
                         "004 4994:19-11-20\r" +
@@ -633,7 +626,6 @@ public class BiblioTest {
                         "608 ##$3027281558Biographies$2rameau\r" +
                         "700 #1$3026879972Gallois, Jean$4330 (Auteur prétendu)\r" +
                         "711 02$3027801411@Union européenne. Commission européenne$4723 (Mécène)\r" +
-                        "801 #0$aFR$bFR-751131015$c20200929$gAFNOR$2intermrc\r" + Constants.STR_1E
-        );
+                        "801 #0$aFR$bFR-751131015$c20200929$gAFNOR$2intermrc\r");
     }
 }
