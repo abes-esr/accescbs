@@ -66,9 +66,7 @@ public class Exemplaire extends Notice {
         Pattern pattern;
         Matcher matcher;
 
-        //suppression du caractère STR_1F et STR_1E de la chaine
-        String exempToCreate = exemplaire.substring(exemplaire.indexOf(Constants.STR_1F) + 1, exemplaire.indexOf(Constants.STR_1E));
-        String[] tabZonesExemp = exempToCreate.split("\\r");
+        String[] tabZonesExemp = exemplaire.split("\\r");
         //Regex qui identifie les zones non systemes,
         //elles peuvent commencer par un E majuscule ou minuscule excepté le A, et contenir une serie de chiffres.
         Pattern standardZoneRegexPattern = Pattern.compile("^[^A][E/i]?\\d*");

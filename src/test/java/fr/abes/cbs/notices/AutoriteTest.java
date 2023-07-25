@@ -16,7 +16,7 @@ public class AutoriteTest {
     @DisplayName("Test création autorité à partir d'une chaine")
     @Test
     void autoriteFromStringBasique() throws ZoneException {
-        String autoriteStr = Constants.STR_1F +
+        String autoriteStr =
                 "003 232801398\r" +
                 "004 341720001:16-10-20\r" +
                 "005 341720001:16-10-20 10:02:01.000\r" +
@@ -39,12 +39,12 @@ public class AutoriteTest {
                 "801 ##$aFR$bFR-751131015$c20110609\r" +
                 "810 ##$aL'amour sorcier [Enregistrement sonore]... Hugo Rignold, dir. Mode MD6008\r" +
                 "810 ##$aGrove\r" +
-                "899 ##$aNotice BnF dérivée via IdRef, le 16/10/2020\r" + Constants.STR_1E;
+                "899 ##$aNotice BnF dérivée via IdRef, le 16/10/2020\r";
         Autorite autorite = new Autorite(autoriteStr);
         assertThat(autorite.getListeZones().size()).isEqualTo(23);
         assertThat(autorite.findZones("200").get(0).getSubLabelList().size()).isEqualTo(4);
         autorite.getListeZones().values();
-        assertThat(autorite.toString()).isEqualTo(Constants.STR_1F +
+        assertThat(autorite.toString()).isEqualTo(
                 "003 232801398\r" +
                 "004 341720001:16-10-20\r" +
                 "005 341720001:16-10-20 10:02:01.000\r" +
@@ -67,7 +67,7 @@ public class AutoriteTest {
                 "801 ##$aFR$bFR-751131015$c20110609\r" +
                 "810 ##$aL'amour sorcier [Enregistrement sonore]... Hugo Rignold, dir. Mode MD6008\r" +
                 "810 ##$aGrove\r" +
-                "899 ##$aNotice BnF dérivée via IdRef, le 16/10/2020\r" + Constants.STR_1E);
+                "899 ##$aNotice BnF dérivée via IdRef, le 16/10/2020\r");
     }
 
     @Test
@@ -78,7 +78,7 @@ public class AutoriteTest {
             notice.append(scanner.next());
         }
         Autorite autorite = new Autorite(notice.toString(), FORMATS.XML);
-        assertThat(autorite.toString()).isEqualTo(Constants.STR_1F +
+        assertThat(autorite.toString()).isEqualTo(
                 "003 079695434\r" +
                 "004 674822116:23-07-04\r" +
                 "005 674822116:04-04-20 05:23:41.000\r" +
@@ -95,7 +95,6 @@ public class AutoriteTest {
                 "200 #1$aSchröder$bHugo\r" +
                 "340 ##$aInspecteur de l'enseignement primaire à Halle (Allemagne) en 1928\r" +
                 "400 #1$aSchroeder$bHugo\r" +
-                "810 ##$aSoziologie der Volksschulklasse / Hugo Schröder\r" +
-                Constants.STR_1E);
+                "810 ##$aSoziologie der Volksschulklasse / Hugo Schröder\r");
     }
 }

@@ -19,7 +19,7 @@ public class NoticeConcreteTest {
             notice.append(scanner.next());
         }
         NoticeConcrete noticeConcrete = new NoticeConcrete(notice.toString());
-        assertThat(noticeConcrete.getNoticeBiblio().toString()).isEqualTo(Constants.STR_1F +
+        assertThat(noticeConcrete.getNoticeBiblio().toString()).isEqualTo(
                 "002 ##$aSTAR10007$2STAR\r" +
                 "008 ##$aOax3\r" +
                 "029 ##$aFR$b2010ECAP0020\r" +
@@ -44,7 +44,7 @@ public class NoticeConcreteTest {
                 "314 ##$aAutre(s) contribution(s) : Gilles Trystram (Président du jury) ; Arsène Isambert, Hélène Ducatel, Stéphane Brochot (Membre(s) du jury) ; Yann Le gorrec, Xuân Meyer (Rapporteur(s))\r" +
                 "328 #0$bThèse de doctorat$cGénie des procédés$eEcole centrale Paris$d2010\r" +
                 "606 ##$3034228942$3027253139$2rameau\r" +
-                "606 ##$3029677440$3027253139$2rameau\r" + Constants.STR_1E);
+                "606 ##$3029677440$3027253139$2rameau\r");
     }
 
     @Test
@@ -56,20 +56,16 @@ public class NoticeConcreteTest {
         }
         NoticeConcrete noticeConcrete = new NoticeConcrete(notice.toString());
 
-        assertThat(noticeConcrete.getNoticeLocale().toString()).isEqualTo(Constants.STR_1F +
-                "L035 ##$a123456789\r" + Constants.STR_1E);
+        assertThat(noticeConcrete.getNoticeLocale().toString()).isEqualTo(
+                "L035 ##$a123456789\r");
 
-        assertThat(noticeConcrete.getExemplaires().get(0).toString()).isEqualTo(Constants.STR_1F +
+        assertThat(noticeConcrete.getExemplaires().get(0).toString()).isEqualTo(
                 //"e01 $bx\r" +
-                "930 ##$b341725201$jg\r" +
-                Constants.STR_1E
+                "930 ##$b341725201$jg\r"
         );
 
-        assertThat(noticeConcrete.getExemplaires().get(1).toString()).isEqualTo(Constants.STR_1F +
-                //"e02 $bx\r" +
-                "930 ##$b341725202$jg\r" +
-                Constants.STR_1E
-        );
+        assertThat(noticeConcrete.getExemplaires().get(1).toString()).isEqualTo(
+                "930 ##$b341725202$jg\r");
 
     }
 

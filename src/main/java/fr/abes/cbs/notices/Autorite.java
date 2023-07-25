@@ -177,9 +177,7 @@ public class Autorite extends Notice {
         Pattern pattern;
         Matcher matcher;
 
-        //suppression des caractères du protocole pica3 présent en préfixe et suffixe de la notice
-        String autoriteToCreate = autoriteUnm.substring(autoriteUnm.indexOf(Constants.STR_1F) + 1, autoriteUnm.indexOf(Constants.STR_1E));
-        String[] tabAutorite = autoriteToCreate.split("\\r");
+        String[] tabAutorite = autoriteUnm.split("\\r");
 
         Pattern standarZoneRegexPattern = Pattern.compile("[0-8][\\d][\\w]\\s.*[$].*");
         Pattern standarZoneSansSousZonePattern = Pattern.compile("[0-8][\\d]{2}\\s[^$].*");

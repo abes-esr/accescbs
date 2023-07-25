@@ -50,9 +50,7 @@ public class Biblio extends Notice {
         Pattern pattern;
         Matcher matcher;
 
-        //suppression des caractères du protocole pica3 présent en préfixe et suffixe de la notice
-        String biblioToCreate = biblioUnm.substring(biblioUnm.indexOf(Constants.STR_1F) + 1, biblioUnm.indexOf(Constants.STR_1E));
-        String[] tabBiblio = biblioToCreate.split("\\r");
+        String[] tabBiblio = biblioUnm.split("\\r");
 
         Pattern standarZoneRegexPattern = Pattern.compile("[0-8][\\d][\\w]\\s.*[$].*");
         Pattern standarZoneSansSousZonePattern = Pattern.compile("[0-8][\\d]{2}\\s[^$].*");

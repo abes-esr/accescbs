@@ -446,19 +446,19 @@ public abstract class Notice implements INotice {
     @Override
     public String toString() {
         boolean zoneProtege = false;
-        StringBuilder notice = new StringBuilder(Constants.STR_1F);
+        StringBuilder notice = new StringBuilder();
         for (Zone zoneATraiter : listeZones.values()) {
             //on traite différemment l'affichage des zones classiques et des zones d'état de collection à cause des zones protégées
             if (zoneATraiter.getClass().isInstance(ZoneEtatColl.class)) {
                 ZoneEtatColl zoneEnCours = (ZoneEtatColl) zoneATraiter;
-                notice.append(zoneEnCours.toString());
+                notice.append(zoneEnCours);
             } else {
                 zoneProtege = genererZoneProtegee(zoneProtege, notice, zoneATraiter);
-                notice.append(zoneATraiter.toString());
+                notice.append(zoneATraiter);
             }
 
         }
-        return notice.append(Constants.STR_1E).toString();
+        return notice.toString();
     }
 
     /**

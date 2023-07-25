@@ -1,16 +1,16 @@
 package fr.abes.cbs;
 
 import fr.abes.cbs.exception.CBSException;
+import fr.abes.cbs.exception.ZoneException;
+import fr.abes.cbs.notices.Exemplaire;
 import fr.abes.cbs.process.ProcessCBS;
 import fr.abes.cbs.utilitaire.Constants;
 import fr.abes.cbs.utilitaire.Utilitaire;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -147,7 +147,7 @@ class CommandesTest {
 
     @DisplayName("Affichage d'une notice en xml")
     @Test
-    void view() throws CBSException, UnsupportedEncodingException {
+    void view() throws CBSException {
         //Recherche de la notice a afficher
         cmd.search("che ppn 230721486");
         cmd.affUnma();
@@ -159,7 +159,7 @@ class CommandesTest {
         assertThat(resu).contains(xmlResult);
 
         resu = cmd.view("1", false, "UNMA");
-        assertThat(resu).contains("003 http://www.sudoc.fr/230721486");
+        assertThat(resu).contains("003 https://www.sudoc.fr/230721486");
     }
 
     @DisplayName("Next()")
@@ -209,6 +209,24 @@ class CommandesTest {
         //On modifie le dernier exemplaire en changeant la valeur de $j en b (sans trop savoir à quoi cela correspond)
         //Puis on regarde dans le retour du CBS si la modif a bien été effectué (et donc si on a $jb)
         assertThat(cmd.modifierExemp(getLastNumEx() + " $bx" + Constants.STR_0D + "930 $b341720001$jb", numEx)).contains("$jb");
+        //Enfin on remet l'exemplaire dans son état initial ($jg) pour les prochains passages, et on vérifie que cela a bien fonctionné à nouveau
+        assertThat(cmd.modifierExemp(getLastNumEx() + " $bx" + Constants.STR_0D + "930 $b341720001$jg", numEx)).contains("$jg");
+    }
+
+    @DisplayName("Modification d'exemplaire avec construction d'un objet")
+    @Test
+    void modifierExempAvecContructionObjet() throws CBSException, ZoneException {
+        noticeTestEnEdition();
+        String exemplaireStr = getLastNumEx() + " $bx";
+        Exemplaire exemplaire = new Exemplaire(exemplaireStr);
+
+        exemplaire.addZone("930", "b", "341720001");
+        exemplaire.addSousZone("930", "$j", "b");
+
+        String numEx = getLastNumEx().substring(1, 3);
+        //On modifie le dernier exemplaire en changeant la valeur de $j en b (sans trop savoir à quoi cela correspond)
+        //Puis on regarde dans le retour du CBS si la modif a bien été effectué (et donc si on a $jb)
+        assertThat(cmd.modifierExemp(exemplaire.toString(), numEx)).contains("$jb");
         //Enfin on remet l'exemplaire dans son état initial ($jg) pour les prochains passages, et on vérifie que cela a bien fonctionné à nouveau
         assertThat(cmd.modifierExemp(getLastNumEx() + " $bx" + Constants.STR_0D + "930 $b341720001$jg", numEx)).contains("$jg");
     }
