@@ -115,6 +115,7 @@ public class Constants {
     public static final String ZONE_EXEMPLAIRE_NAME_REGEX = "^([A|e]\\d{2})|^([E]\\d{3})|^([9]\\d{2})";
     //public static final String ZONE_DEBUT_EXEMPLAIRE_REGEX = "^[e]\\d{2}";
     public static final String ZONE_DEBUT_EXEMPLAIRE_XML_REGEX = "930";
+    public static final String VTXTLOK = "VTXTLOK";
 
     /***
      * Constructeur privé permet de rendre la classe non instantiable

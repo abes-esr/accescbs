@@ -3,9 +3,11 @@ package fr.abes.cbs;
 import fr.abes.cbs.exception.CBSException;
 import fr.abes.cbs.exception.ZoneException;
 import fr.abes.cbs.notices.Exemplaire;
+import fr.abes.cbs.notices.NoticeConcrete;
 import fr.abes.cbs.process.ProcessCBS;
 import fr.abes.cbs.utilitaire.Constants;
 import fr.abes.cbs.utilitaire.Utilitaire;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,6 +20,7 @@ import java.util.Properties;
 import java.util.Scanner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.not;
 
 class CommandesTest {
 
@@ -317,7 +320,7 @@ class CommandesTest {
      *
      * @return Le dernier numéro d'exemplaire, sous forme d'une string (ex : e07)
      */
-    private String getLastNumEx() {
+    String getLastNumEx() {
         String numEx = cmd.getNvNumEx();
         if (!numEx.equals("e01")) {
             int num = Integer.parseInt(numEx.substring(1, 3));
@@ -331,12 +334,55 @@ class CommandesTest {
     }
 
     /**
+     * teste le passage en mode édition d'une notice et la récupération sous forme d'objet
+     */
+    @Test
+    @DisplayName("test editerNoticeConcrete")
+    void editerNoticeConcreteTest() throws CBSException, ZoneException {
+        cmd.search("che ppn 23073426X");
+        NoticeConcrete notice = cmd.editerNoticeConcrete("1");
+        Assertions.assertEquals(4, notice.getExemplaires().size());
+
+        String biblioExpected = "100 0#$a2018\r" +
+                "101 0#$aeng\r" +
+                "200 0#$aNotice de test de modification dans API Sudoc@testmodifier Notice\r";
+        Assertions.assertTrue(notice.getNoticeBiblio().toString().contains(biblioExpected));
+
+        String donneesLocExpected = "L005 27-07-23 08:54:47.000\r" +
+                "L035 ##$a123456789\r";
+        Assertions.assertTrue(notice.getNoticeLocale().toString().contains(donneesLocExpected));
+    }
+
+    @Test
+    @DisplayName("test edition avec notice concrète")
+    void modifierNoticeConcreteTest() throws CBSException, ZoneException {
+        //Date du jour
+        DateFormat dateFormat = new SimpleDateFormat("dd-MM-yy");
+        Date date = new Date();
+
+        //Recherche de la notice a modifier
+        cmd.search("che ppn 23073426X");
+        NoticeConcrete notice = cmd.editerNoticeConcrete("1");
+        cmd.back();
+        notice.getNoticeBiblio().addSousZone("200", "c", "test");
+        String resu = cmd.modifierNoticeConcrete("1", notice);
+
+        //On vérifie la date de modification et le contenu de la notice pour voir si la modification a bien fonctionné
+        assertThat(resu).contains("008 $aAax").contains("Modifié: 341720001:" + dateFormat.format(date));
+
+        //2nde modification de la notice pour remise en état précédent
+        notice.getNoticeBiblio().deleteSousZone("200", "c");
+        resu = cmd.modifierNoticeConcrete("1", notice);
+        assertThat(resu).contains("008 $aAax").contains("Modifié: 341720001:" + dateFormat.format(date));
+    }
+
+    /**
      * Recherche la notice utilisé pour les tests et la retourne, utile pour factoriser les TU ici
      *
      * @return La notice utilisé pour les tests (ppn 219041989)
      * @throws CBSException si erreur lors de la recherche (pas connecté, pas de résultat, etc.)
      */
-    private String noticeTestEnEdition() throws CBSException {
+    String noticeTestEnEdition() throws CBSException {
         cmd.search("che ppn 23073426X");
         cmd.affUnma();
         return cmd.editer("1");

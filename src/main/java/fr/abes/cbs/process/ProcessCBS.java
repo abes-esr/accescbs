@@ -2,6 +2,8 @@ package fr.abes.cbs.process;
 
 import fr.abes.cbs.commandes.Commandes;
 import fr.abes.cbs.exception.CBSException;
+import fr.abes.cbs.exception.ZoneException;
+import fr.abes.cbs.notices.*;
 import fr.abes.cbs.utilitaire.Constants;
 import fr.abes.cbs.utilitaire.Utilitaire;
 import lombok.Getter;
@@ -93,20 +95,20 @@ public class ProcessCBS {
 
 		nbNotices = Utilitaire.getNbNoticesFromChe(resu);
 		switch (nbNotices) {
-		case 1:
-			nbNotices = 1;
-			lotEncours = Integer.parseInt(Utilitaire.recupEntre(resu, Constants.STR_1D + "VSIS", Constants.STR_1D));
-			ppnEncours = Utilitaire.recupEntre(resu, "LPP", Constants.STR_1B);
-			lgNoticeSearch = resu.length();
-			break;
-		case 0:
-			nbNotices = 0;
-			break;
-		default:
-			lotEncours = Integer.parseInt(Utilitaire.recupEntre(resu, "VSIS", Constants.STR_1D + "KTA"));
-			String[] lstrecords = resu.split(Constants.STR_1B + "H" + Constants.STR_1B + "LPP");
-			initTablesResult(lstrecords);
-			lgNoticeSearch = resu.length();
+			case 1:
+				nbNotices = 1;
+				lotEncours = Integer.parseInt(Utilitaire.recupEntre(resu, Constants.STR_1D + "VSIS", Constants.STR_1D));
+				ppnEncours = Utilitaire.recupEntre(resu, "LPP", Constants.STR_1B);
+				lgNoticeSearch = resu.length();
+				break;
+			case 0:
+				nbNotices = 0;
+				break;
+			default:
+				lotEncours = Integer.parseInt(Utilitaire.recupEntre(resu, "VSIS", Constants.STR_1D + "KTA"));
+				String[] lstrecords = resu.split(Constants.STR_1B + "H" + Constants.STR_1B + "LPP");
+				initTablesResult(lstrecords);
+				lgNoticeSearch = resu.length();
 		}
 		return resu;
 	}
@@ -161,7 +163,7 @@ public class ProcessCBS {
 	/**
 	 * authentifie un utilisateur au CBS de bout en bout (sélection base
 	 * incluse)
-	 * 
+	 *
 	 * @param serveur IP du serveur CBS
 	 * @param port Port du serveur CBS
 	 * @param login Utilisateur
@@ -191,7 +193,7 @@ public class ProcessCBS {
 	/**
 	 * Visualiser une notice parametres: no de record dans le liste
 	 * courte,retour en xml ou natif,format de recup:UNMA, UNX..
-	 * 
+	 *
 	 * @param noLigne Numéro du résultat à retourner
 	 * @param xml format natif ou XML
 	 * @param formatOrigine format d'origine de la notice
@@ -223,7 +225,7 @@ public class ProcessCBS {
 
 	/**
 	 * Affiche la liste des resultats suivants après une première recherche
-	 * 
+	 *
 	 * @return Retourne les 16 prochains résultats
 	 * @throws CBSException Erreur CBS
 	 */
@@ -240,7 +242,7 @@ public class ProcessCBS {
 	/**
 	 * Met une notice en edit sur le CBS et la retourne en XML le numero de
 	 * record est la position dans la liste courte
-	 * 
+	 *
 	 * @param noRecord Numéro de la notice souhaitée
 	 * @return notice en XML en édition
 	 * @throws CBSException Erreur CBS
@@ -252,7 +254,7 @@ public class ProcessCBS {
 	}
 
 	/**
-	 * Crée une notice dans le CBS 
+	 * Crée une notice dans le CBS
 	 * @param notice Notice pica
 	 * @return Résultat de la création
 	 * @throws CBSException Erreur CBS
@@ -269,7 +271,7 @@ public class ProcessCBS {
 	/**
 	 * Enregistrer une notice en edit
 	 * (pica)
-	 * 
+	 *
 	 * @param notice Notice au format natif
 	 * @return Réponse du CBS
 	 * @throws CBSException Erreur CBS
@@ -290,7 +292,7 @@ public class ProcessCBS {
 
 	/**
 	 * Enregistrer une nouvelle notice d'autorites
-	 * 
+	 *
 	 * @param notice notice au format natif
 	 * @return Réponse du CBS
 	 * @throws CBSException Erreur CBS
@@ -305,7 +307,7 @@ public class ProcessCBS {
 
 	/**
 	 * envoi commande de translitération
-	 * 
+	 *
 	 * @param notice Notice au format natif
 	 * @return Réponse du CBS
 	 */
@@ -322,7 +324,7 @@ public class ProcessCBS {
 
 	/**
 	 * envoi commande de translitération sans ppn
-	 * 
+	 *
 	 * @param notice Notice au format natif
 	 * @return Réponse du CBS
 	 * @throws CBSException Erreur CBS
@@ -336,7 +338,7 @@ public class ProcessCBS {
 
 	/**
 	 * Supprime une notice
-	 * 
+	 *
 	 * @param nonotice position de la notice dans le liste de resultats
 	 * @return Réponse du CBS
 	 * @throws CBSException Erreur CBS
@@ -352,7 +354,7 @@ public class ProcessCBS {
 	/**
 	 * Permet de passer des parametres par defaut (utilisé dans wini par un
 	 * ecran de parametres)
-	 * 
+	 *
 	 * @param params Tableau des paramètres pour le CBS
 	 * @return Réponse du CBS
 	 * @throws CBSException Erreur CBS
@@ -363,7 +365,7 @@ public class ProcessCBS {
 
 	/**
 	 * Envoi au CBS la commande "mod" suivi de validation de la modification
-	 * 
+	 *
 	 * @param norecord Position de la notice dans la liste
 	 * @param notice Notice au format natif
 	 * @return le message renvoyé par le CBS suite à la modification
@@ -383,9 +385,49 @@ public class ProcessCBS {
 	}
 
 	/**
+	 *	Envoie au CBS la modification d'une notice sous forme d'objet
+	 * @param norecord position de la notice dans le jeu de résultat
+	 * @param notice notice au format NoticeConcrete
+	 * @return le message renvoyé par le CBS suite à la validation
+	 * @throws CBSException erreur de validation CBS
+	 */
+	public String modifierNoticeConcrete(String norecord, NoticeConcrete notice) throws CBSException {
+		String resu = clientCBS.mod(norecord, String.valueOf(lotEncours));
+		String noticeStr = notice.getNoticeBiblio().toString();
+		String noticedeb = Utilitaire.recupEntre(resu, "VTXT", Constants.STR_1F);
+		int lgnotice;
+		// on regarde si la lg de la notice a plus ou moins de 9999 caractères
+		if (Integer.parseInt(noticedeb.substring(3, 7)) >= 9999) {
+			lgnotice = lgNoticeSearch + 5000;
+		} else {
+			lgnotice = Integer.parseInt(noticedeb.substring(3, 7)) - 1;
+		}
+		String noticeLocDeb = resu.substring(resu.indexOf("VTXTLOK") + 7);
+		noticeLocDeb = noticeLocDeb.substring(0, noticeLocDeb.indexOf(Constants.STR_1F));
+		int lgNoticeLoc = notice.getNoticeLocale().toString().length() + 1;
+		if (lgNoticeLoc != 1) {
+			noticeStr += Constants.STR_1F + Constants.STR_1E;
+			noticeStr += "VTX0TLOK" + noticeLocDeb + "D" + lgNoticeLoc + Constants.STR_1F + "I" + notice.getNoticeLocale().toString() + Constants.STR_1D + Constants.STR_1D;
+		}
+
+		if (!notice.getExemplaires().isEmpty()) {
+			noticeStr += Constants.STR_1F + Constants.STR_1E;
+			for (Exemplaire exemplaire : notice.getExemplaires()) {
+				String noticeExempDeb = resu.substring(resu.indexOf("VTXTE" + exemplaire.getNumEx()) + 7);
+				noticeExempDeb = noticeExempDeb.substring(0, noticeExempDeb.indexOf(Constants.STR_1F));
+				int lgNoticeExemp = exemplaire.toString().length() + 1;
+				noticeStr += "VTXT0TE" + exemplaire.getNumEx() + noticeExempDeb + "D" + lgNoticeExemp + Constants.STR_1F + "I" + exemplaire + Constants.STR_1D+ Constants.STR_1D;
+			}
+		}
+		return clientCBS.valMod(noticeStr, lgnotice, String.valueOf(lotEncours), ppnEncours, norecord, noticedeb, "");
+	}
+
+
+
+	/**
 	 * Retourne l'iln de rattachement d'un rcr passé en paramètre envoi la
 	 * commande "aff bib + n° rcr"
-	 * 
+	 *
 	 * @param rcr
 	 *            le rcr concerné
 	 * @return l'ILN de rattachement
@@ -398,7 +440,7 @@ public class ProcessCBS {
 
 	/**
 	 * Passe en édition un exemplaire
-	 * 
+	 *
 	 * @param numEx
 	 *            : numéro de l'exemplaire à modifier
 	 * @return : exemplaire sélectionné
@@ -419,7 +461,7 @@ public class ProcessCBS {
 	/**
 	 * Passe en édition une notice et renvoi la notice
 	 * Le numéro d'exemplaire est dans un champ de la classe
-	 * 
+	 *
 	 * @param noRecord notice au format natif, en mode édition
 	 * @return Notice éditée
 	 * @throws CBSException Erreur CBS
@@ -468,6 +510,67 @@ public class ProcessCBS {
 	}
 
 	/**
+	 * Passe en édition une notice et renvoi la notice sous forme d'objet avec les exemplaires et les données locales
+	 * Le numéro d'exemplaire est dans un champ de la classe
+	 *
+	 * @param noRecord notice au format natif, en mode édition
+	 * @return Notice éditée
+	 * @throws CBSException Erreur CBS
+	 */
+	public NoticeConcrete editerNoticeConcrete(final String noRecord) throws CBSException, ZoneException {
+		// num de l'exemplaire en cours
+		nbExPPnEncours = 0;
+		// num du prochain exemplaire
+		nvNumEx = "";
+		int posLastEx;
+		String resu = clientCBS.mod(noRecord, String.valueOf(lotEncours));
+		//on récupère la notice bibliographique
+		String biblio = Utilitaire.recupEntre(resu, Constants.VTXTBIB, Constants.STR_1E);
+		Biblio noticeBiblio = new Biblio(biblio.substring(biblio.indexOf(Constants.STR_1F) + 1));
+		String donneesLoc = Utilitaire.recupEntre(resu, Constants.VTXTLOK, Constants.STR_1E);
+		DonneeLocale donneeLocale = new DonneeLocale(donneesLoc.substring(donneesLoc.indexOf(Constants.STR_1F) + 1));
+		// on récupère les données locales
+		String exemps;
+		// on récupère les exemplaires
+		if (resu.contains(Constants.STR_1E + Constants.VMC)) {
+			exemps = Constants.VTXTE + Utilitaire.recupEntre(resu, Constants.VTXTE, Constants.STR_1E + Constants.VMC);
+		} else {
+			exemps = Constants.VTXTE
+					+ Utilitaire.recupEntre(resu, Constants.VTXTE, Constants.STR_1E + Constants.STR_1D + "VV");
+		}
+		List<Exemplaire> exemplaires = new ArrayList<>();
+		if (!exemps.equals("VTXTE")) {
+			hasExpl = exemps.contains(rcr);
+			// la notice a au moins 1 exemplaire pour le rcr d'iln
+			posLastEx = exemps.lastIndexOf(Constants.VTXTE);
+			if (posLastEx < 0) {
+				nbExPPnEncours = 1;
+			} else {
+				nbExPPnEncours = Integer.parseInt(exemps.substring(posLastEx + 5, posLastEx + 7));
+			}
+
+			nbExPPnEncours = nbExPPnEncours + 1;
+			if (String.valueOf(nbExPPnEncours).length() == 1) {
+				nvNumEx = "e0" + nbExPPnEncours;
+			} else {
+				nvNumEx = "e" + nbExPPnEncours;
+			}
+			for (String exemp : exemps.split(Constants.STR_1E)) {
+				Exemplaire exemplaire = new Exemplaire(exemp.substring(exemp.indexOf(Constants.STR_1F) + 1));
+				exemplaires.add(exemplaire);
+			}
+		} else {
+			// il n'y a pas d'exemplaire de la notice le rcr d'iln
+			nvNumEx = "e01";
+			hasExpl = false;
+		}
+
+		onEdit = true;
+		onNew = false;
+		return new NoticeConcrete(noticeBiblio, donneeLocale, exemplaires);
+	}
+
+	/**
 	 * Passage en édition comme utilisé dans JCBS (comptabilité IDRef
 	 * @return Notice au format édition
 	 */
@@ -482,30 +585,26 @@ public class ProcessCBS {
 			notice = Utilitaire.recupEntre(resu, Constants.STR_1F + Constants.STR_1B +"P", Constants.STR_0D +Constants.STR_0D + Constants.STR_1E);
 			//on suprime le P et le dernier caractere parasite
 			actEncours="P";
+		} else if (resu.contains(Constants.STR_1B +"P003")){
+			ppnEncours = Utilitaire.recupEntre(resu, Constants.STR_1B +"P003", Constants.STR_1B);
+			ppnEncours = ppnEncours.substring(0, ppnEncours.length() - 1).trim().replaceAll("\\$a", "");
+			//entre 1F1B et 0D0E donne la notice avec le P001
+			notice = Utilitaire.recupEntre(resu, Constants.STR_1F+ Constants.STR_1B +"P", Constants.STR_0D +Constants.STR_0D + Constants.STR_1E);
+			if (("").equals(notice)) {
+				notice = Utilitaire.recupEntre(resu, Constants.STR_1F+ Constants.STR_1B +"P", Constants.STR_0D + Constants.STR_1E);
+			}
+			if (("").equals(notice)) {
+				//cas ou la notice termine par une zone protégée
+				notice = Utilitaire.recupEntre(resu, Constants.STR_1F+ Constants.STR_1B +"P", Constants.STR_0D + Constants.STR_1B + "D" + Constants.STR_1E);
+			}
+			//on suprime le P et le dernier caractere parasite
+			actEncours="P";
+		} else {
+			ppnEncours = Utilitaire.recupEntre(resu, Constants.STR_1F+"003", Constants.STR_0D);
+			ppnEncours = ppnEncours.trim().replaceAll("\\$a", "");
+			notice = Utilitaire.recupEntre(resu, Constants.STR_1F, Constants.STR_0D +Constants.STR_0D + Constants.STR_1E);
+			actEncours="";
 		}
-		else
-			if (resu.contains(Constants.STR_1B +"P003")){
-				ppnEncours = Utilitaire.recupEntre(resu, Constants.STR_1B +"P003", Constants.STR_1B);
-				ppnEncours = ppnEncours.substring(0, ppnEncours.length() - 1).trim().replaceAll("\\$a", "");
-				//entre 1F1B et 0D0E donne la notice avec le P001
-				notice = Utilitaire.recupEntre(resu, Constants.STR_1F+ Constants.STR_1B +"P", Constants.STR_0D +Constants.STR_0D + Constants.STR_1E);
-				if (("").equals(notice)) {
-					notice = Utilitaire.recupEntre(resu, Constants.STR_1F+ Constants.STR_1B +"P", Constants.STR_0D + Constants.STR_1E);
-				}
-				if (("").equals(notice)) {
-					//cas ou la notice termine par une zone protégée
-					notice = Utilitaire.recupEntre(resu, Constants.STR_1F+ Constants.STR_1B +"P", Constants.STR_0D + Constants.STR_1B + "D" + Constants.STR_1E);
-				}
-				//on suprime le P et le dernier caractere parasite
-				actEncours="P";
-			}
-			else
-			{
-				ppnEncours = Utilitaire.recupEntre(resu, Constants.STR_1F+"003", Constants.STR_0D);
-				ppnEncours = ppnEncours.trim().replaceAll("\\$a", "");
-				notice = Utilitaire.recupEntre(resu, Constants.STR_1F, Constants.STR_0D +Constants.STR_0D + Constants.STR_1E);
-				actEncours="";
-			}
 		timeStpEncours = Utilitaire.recupEntre(resu, "VTXTBIB", Constants.STR_1F);
 
 		//pour recupere les exemplaires a faire....
@@ -556,7 +655,7 @@ public class ProcessCBS {
 	 * succès - false si échec renseigne le ppn de la notice créée dans
 	 * PpnEncours si la création a réussi
 	 * utilisée uniquement par IdRef
-	 * 
+	 *
 	 * @param exemplaire
 	 *            le nouveau num. d'exemplaire en concaténant "e" et NvNumEx
 	 * @return le message renvoyé par le CBS suite à la création de l'exemplaire
@@ -568,7 +667,7 @@ public class ProcessCBS {
 
 	/**
 	 * Modifie un exemplaire dans le CBS
-	 * 
+	 *
 	 * @param exemplaire
 	 *            : l'exemplaire à modifier
 	 * @param numEx Numéro d'exemplaire
@@ -591,7 +690,7 @@ public class ProcessCBS {
 	 * renvoie dans ErrorMessage, le message renvoyé par le CBS suite au rajout
 	 * de l'utilisateur modifie la valeur de CmdOk : true si succès - false si
 	 * échec
-	 * 
+	 *
 	 * @param user Tableau contenant les infos de l'utilisateur à créer
 	 * @return le message renvoyé par le CBS suite à la création de
 	 *         l'utilisateur
@@ -633,7 +732,7 @@ public class ProcessCBS {
 	 * unma" renvoie dans ErrorMessage, le message renvoyé par le CBS suite au
 	 * changement de format modifie la valeur de CmdOk : true si succès - false
 	 * si échec
-	 * 
+	 *
 	 * @return la notice au format unimarc
 	 * @throws CBSException Erreur CBS
 	 */
@@ -646,7 +745,7 @@ public class ProcessCBS {
 	 * "aff format" renvoie dans ErrorMessage, le message renvoyé par le CBS
 	 * suite au changement de format modifie la valeur de CmdOk : true si succès
 	 * - false si échec
-	 * 
+	 *
 	 * @param format
 	 *            format à afficher
 	 * @return la notice au format unimarc
@@ -661,7 +760,7 @@ public class ProcessCBS {
 	 * le message renvoyé par le CBS suite à la suppression de l'exemplaire
 	 * modifie la valeur de CmdOk : true si succès - false si échec PpnEncours
 	 * doit contenir un ppn, suite à une recherche de notice par exemple
-	 * 
+	 *
 	 * @param exemplaire
 	 *            numéro de l'exemplaire à supprimer
 	 * @return le résultat de la suppression
@@ -676,7 +775,7 @@ public class ProcessCBS {
 	 * message renvoyé par le CBS suite à la suppression de la notice modifie la
 	 * valeur de CmdOk : true si succès - false si échec PpnEncours doit
 	 * contenir un ppn, suite à une recherche de notice par exemple
-	 * 
+	 *
 	 * @return le résultat de la suppression
 	 * @throws CBSException Erreur CBS
 	 */
@@ -690,7 +789,7 @@ public class ProcessCBS {
 	 * modification de la donnée locale modifie la valeur de CmdOk : true si
 	 * succès - false si échec PpnEncours doit contenir un ppn, suite à une
 	 * recherche de notice par exemple
-	 * 
+	 *
 	 * @param vloc
 	 *            !!!!!!!!!!!!
 	 * @return le message renvoyé par le CBS suite à la modification
