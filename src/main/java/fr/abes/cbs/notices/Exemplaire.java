@@ -120,7 +120,7 @@ public class Exemplaire extends Notice {
                                     }
                                     firstSousZone = false;
                                 } else {
-                                    this.addSousZone(labelZone, matcher.group("szk" + i), matcher.group("szv" + i),  indexZone);
+                                    this.addSousZone(labelZone, matcher.group("szk" + i), matcher.group("szv" + i), indexZone);
                                 }
                             }
                         }
@@ -141,7 +141,8 @@ public class Exemplaire extends Notice {
 
     /**
      * Méthode permettant de générer une zone A99 d'exemplaire
-     * @param lineZone ligne de la notice contenant la zone
+     *
+     * @param lineZone  ligne de la notice contenant la zone
      * @param labelZone intitulé de la zone
      */
     private void genererZoneA99(String lineZone, String labelZone) throws ZoneException {
@@ -162,7 +163,8 @@ public class Exemplaire extends Notice {
 
     /**
      * Méthode permettant de générer une zone A98 d'exemplaire
-     * @param lineZone ligne de la notice contenant la zone
+     *
+     * @param lineZone  ligne de la notice contenant la zone
      * @param labelZone intitulé de la zone
      */
     private void genererZoneA98(String lineZone, String labelZone) throws ZoneException {
@@ -183,7 +185,8 @@ public class Exemplaire extends Notice {
 
     /**
      * Méthode permettant de générer une zone A97 d'exemplaire
-     * @param lineZone ligne de la notice contenant la zone
+     *
+     * @param lineZone  ligne de la notice contenant la zone
      * @param labelZone intitulé de la zone
      */
     private void genererZoneA97(String lineZone, String labelZone) throws ZoneException {
@@ -197,13 +200,14 @@ public class Exemplaire extends Notice {
                 labelZone = matcher.group("zSysName");
             }
             if (matcher.group("zSysv0") != null && matcher.group("zSysv1") != null) {
-                this.addZone(labelZone,matcher.group("zSysv0") + " " + matcher.group("zSysv1"));
+                this.addZone(labelZone, matcher.group("zSysv0") + " " + matcher.group("zSysv1"));
             }
         }
     }
 
     /**
      * Méthode de génération d'une zone d'état de collection : 955, 956, 957, 959
+     *
      * @param lineZone
      */
     private void genererEtatCollection(String lineZone) throws ZoneException {
@@ -241,8 +245,7 @@ public class Exemplaire extends Notice {
                 if (tabNumerotationPara.length == 2) {
                     sequenceParaStr = tabNumerotationPara[1];
                     sequencePrimaireStr = tabNumerotationPara[0];
-                }
-                else {
+                } else {
                     sequencePrimaireStr = tabNumerotationPara[0];
                 }
                 //si on a trouvé de séquence de numérotation parallèle
@@ -280,7 +283,7 @@ public class Exemplaire extends Notice {
 
         matcher = pattern.matcher(lineZone);
         if (matcher.find()) {
-            for (int i = 0; i< nbSousZones ; i++) {
+            for (int i = 0; i < nbSousZones; i++) {
                 if (matcher.group("szk" + i) != null) {
                     zoneEtatColl.addSubLabel(matcher.group("szk" + i), matcher.group("szv" + i));
                 }
