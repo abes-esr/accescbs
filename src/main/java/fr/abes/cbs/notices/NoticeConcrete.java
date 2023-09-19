@@ -108,9 +108,11 @@ public class NoticeConcrete extends Notice implements INotice {
     public String toString() {
         StringBuilder noticeToReturn = new StringBuilder();
         noticeToReturn.append(noticeBiblio.toString())
-                .append("\r\n\r\n")
-                .append(noticeLocale.toString())
                 .append("\r\n\r\n");
+        if (noticeLocale != null) {
+            noticeToReturn.append(noticeLocale)
+                    .append("\r\n\r\n");
+        }
         for (Exemplaire exemp : exemplaires) {
             noticeToReturn.append(exemp.toString()).append("\r\n");
         }
