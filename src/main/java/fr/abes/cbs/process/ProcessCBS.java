@@ -404,12 +404,13 @@ public class ProcessCBS {
 		}
 		String noticeLocDeb = resu.substring(resu.indexOf("VTXTLOK") + 7);
 		noticeLocDeb = noticeLocDeb.substring(0, noticeLocDeb.indexOf(Constants.STR_1F));
-		int lgNoticeLoc = notice.getNoticeLocale().toString().length() + 1;
-		if (lgNoticeLoc != 1) {
-			noticeStr += Constants.STR_1F + Constants.STR_1E;
-			noticeStr += "VTX0TLOK" + noticeLocDeb + "D" + lgNoticeLoc + Constants.STR_1F + "I" + notice.getNoticeLocale().toString() + Constants.STR_1D + Constants.STR_1D;
+		if (notice.getNoticeLocale() != null) {
+			int lgNoticeLoc = notice.getNoticeLocale().toString().length() + 1;
+			if (lgNoticeLoc != 1) {
+				noticeStr += Constants.STR_1F + Constants.STR_1E;
+				noticeStr += "VTX0TLOK" + noticeLocDeb + "D" + lgNoticeLoc + Constants.STR_1F + "I" + notice.getNoticeLocale().toString() + Constants.STR_1D + Constants.STR_1D;
+			}
 		}
-
 		if (!notice.getExemplaires().isEmpty()) {
 			noticeStr += Constants.STR_1F + Constants.STR_1E;
 			for (Exemplaire exemplaire : notice.getExemplaires()) {
