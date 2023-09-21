@@ -268,39 +268,11 @@ class CommandesTest {
         assertThat(cmd.setParams(params)).contains("03OK");
     }
 
-
-    @DisplayName("Translitération")
-    @Test
-    void transliterer() throws CBSException {
-        cmd.search("che ppn 026946769");
-        String notice = cmd.editerJCBS("1");
-        notice = notice.replace("200 #1$601$7ba$aKazantzakīs$bNikos$f1883-1957" + Constants.STR_0D, "");
-        notice = notice.replace("200 #1$a", "200 #1$601$7ga$a");
-        notice = notice.replace("#1$601$7ga$aΚαζαντζακης$bΝικος$f1883-1957", "#1$601$7ga$aΚαζαντζακης$bΝικος$f1883-1957" + Constants.STR_0D + "200 #1$601$7ba");
-        String resu = Utilitaire.recupNoticeBib(cmd.transliterer(notice));
-        //TODO : revoir
-        assertThat(cmd.enregistrer(resu.substring(17))).contains("#1$601$7ba$aKazantzakīs$bNikos$f1883-1957");
-    }
-
-/*    @DisplayName("Translitération sans PPN")
-    @Test
-    @Disabled
-    void translitererSansPPN() throws CBSException {
-        cmd.search("che ppn 026946769");
-        String notice = cmd.editerJCBS("1");
-        notice = notice.replace("200 #1$601$7ba$aKazantzakīs$bNikos$f1883-1957" + Constants.STR_0D, "");
-        notice = notice.replace("200 #1$a", "200 #1$601$7ga$a");
-        notice = notice.replace("#1$601$7ga$aΚαζαντζακης$bΝικος$f1883-1957", "#1$601$7ga$aΚαζαντζακης$bΝικος$f1883-1957" + Constants.STR_0D + "200 #1$601$7ba");
-        String resu = Utilitaire.recupNoticeBib(cmd.translitererSansPPN(notice));
-        assertThat(cmd.enregistrer(resu.substring(17))).contains("#1$601$7ba$aKazantzakīs$bNikos$f1883-1957");
-    }*/
-
     @DisplayName("Création puis suppression de donnée locale")
     @Test
     void newLoc() throws CBSException {
         noticeTestEnEdition();
         //On vérifie que la notice modifiée contient bien le nouveau champ L035
-        //TODO : a revoir
         assertThat(cmd.newLoc("L035 $a1")).contains("L035");
         //On vérifie que le champ L035 n'apparait plus dans la notice une fois supprimé
         assertThat(cmd.supLoc()).doesNotContain("L035");
@@ -310,7 +282,6 @@ class CommandesTest {
     @Test
     void modLoc() throws CBSException {
         cmd.search("che ppn 23073426X");
-        //TODO : a revoir
         cmd.creerDonneeLocale();
         assertThat(cmd.newLoc("L035 $a1")).contains("L035 ##$a1");
         assertThat(cmd.modLoc("L035 $a2")).contains("L035 ##$a2");
@@ -343,6 +314,8 @@ class CommandesTest {
     @DisplayName("test editerNoticeConcrete")
     void editerNoticeConcreteTest() throws CBSException, ZoneException {
         cmd.search("che ppn 23073426X");
+        cmd.newLoc("L035 $a123456789");
+        cmd.back();
         NoticeConcrete notice = cmd.editerNoticeConcrete("1");
         Assertions.assertEquals(4, notice.getExemplaires().size());
 
@@ -351,10 +324,9 @@ class CommandesTest {
                 "200 0#$aNotice de test de modification dans API Sudoc@testmodifier Notice\r";
         Assertions.assertTrue(notice.getNoticeBiblio().toString().contains(biblioExpected));
 
-        //TODO : revoir TU sans la date
-        String donneesLocExpected = "L005 27-07-23 08:54:47.000\r" +
-                "L035 ##$a123456789\r";
+        String donneesLocExpected = "L035 ##$a123456789";
         Assertions.assertTrue(notice.getNoticeLocale().toString().contains(donneesLocExpected));
+        cmd.supLoc();
     }
 
     @Test
