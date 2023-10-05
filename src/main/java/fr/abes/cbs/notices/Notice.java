@@ -227,6 +227,8 @@ public abstract class Notice implements INotice {
                 zonesFinded.add(localZone);
             }
         }
+        if (zonesFinded.size() == 0)
+            return null;
         if (index < zonesFinded.size()) {
             return zonesFinded.get(index);
         }
