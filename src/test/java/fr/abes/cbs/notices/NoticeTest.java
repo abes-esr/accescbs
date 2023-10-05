@@ -1,5 +1,6 @@
 package fr.abes.cbs.notices;
 
+import fr.abes.cbs.exception.ZoneException;
 import fr.abes.cbs.utilitaire.Constants;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -21,6 +22,14 @@ class NoticeTest {
         notice = new Biblio();
         notice.addZone("200", "$a", "test");
         notice.addSousZone("200", "$e", "toto");
+    }
+
+    @Test
+    void findZone() throws ZoneException {
+        assertThat(notice.findZone("200", 0).label).isEqualTo("200");
+        assertThat(notice.findZone("300", 0)).isNull();
+        notice.addZone("200", "$c", "test200dollarc");
+        assertThat(notice.findZone("200", 1).findSubLabel("$c")).isEqualTo("test200dollarc");
     }
 
     @Test
