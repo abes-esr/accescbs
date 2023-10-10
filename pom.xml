@@ -10,7 +10,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>17</java.version>
     </properties>
 
     <licenses>
@@ -41,8 +40,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version>
                 <configuration>
-                    <target>17</target>
-                    <source>17</source>
+                    <release>17</release>
                 </configuration>
             </plugin>
             <plugin>
