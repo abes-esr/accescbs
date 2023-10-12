@@ -16,11 +16,11 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Scanner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.not;
 
 class CommandesTest {
 
@@ -28,13 +28,9 @@ class CommandesTest {
     private Properties prop;
 
     @BeforeEach
-    void initAll() throws CBSException {
+    void initAll() throws CBSException, IOException {
         prop = new Properties();
-        try {
-            prop.load(CommandesTest.class.getResource("/CommandesTest.properties").openStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        prop.load(Objects.requireNonNull(CommandesTest.class.getResource("/CommandesTest.properties")).openStream());
 
         cmd = new ProcessCBS();
         cmd.authenticate(prop.getProperty("connect.ip"), prop.getProperty("connect.port"), prop.getProperty("connect.login"), prop.getProperty("connect.password"));
@@ -108,6 +104,20 @@ class CommandesTest {
 
     }
 
+    @DisplayName("Noticées liées : REL")
+    @Test
+    void rel() throws CBSException {
+        cmd.search("che mti testtcn");
+        assertThat(cmd.rel()).isEqualTo(2);
+    }
+
+    @DisplayName("Notices liées : REL aucune résultat")
+    @Test
+    void relNoResult() throws CBSException {
+        cmd.search("che mti trioptjldksjlk"); //aucune réponse trouvé
+        assertThat(cmd.rel()).isEqualTo(0);
+    }
+
     @DisplayName("ILN Rattachement")
     @Test
     void ilnRattachement() throws CBSException {
@@ -158,7 +168,7 @@ class CommandesTest {
         String resu = cmd.view("1", true, "UNMA");
 
         //On vérifie que l'on a bien récupéré la bonne notice au format XML
-        String xmlResult = new Scanner(CommandesTest.class.getResourceAsStream("/viewXml.txt"), "UTF-8").useDelimiter("\\A").next();
+        String xmlResult = new Scanner(Objects.requireNonNull(CommandesTest.class.getResourceAsStream("/viewXml.txt")), "UTF-8").useDelimiter("\\A").next();
         assertThat(resu).contains(xmlResult);
 
         resu = cmd.view("1", false, "UNMA");

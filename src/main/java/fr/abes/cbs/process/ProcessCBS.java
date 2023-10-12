@@ -757,6 +757,18 @@ public class ProcessCBS {
 	}
 
 	/**
+	 * Récupère la liste des notices liées
+	 * @return le nombre de notices liées
+	 */
+	public Integer rel() throws CBSException {
+		String result = clientCBS.rel(String.valueOf(lotEncours));
+		try {
+			return Integer.parseInt(Utilitaire.recupEntre(result, "VSZ", Constants.STR_1D));
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+	/**
 	 * Supprime un exemplaire d'une notice en cours, renvoie dans ErrorMessage,
 	 * le message renvoyé par le CBS suite à la suppression de l'exemplaire
 	 * modifie la valeur de CmdOk : true si succès - false si échec PpnEncours
