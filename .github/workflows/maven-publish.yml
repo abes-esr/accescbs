@@ -53,9 +53,6 @@ jobs:
     - name: 'Generate the new version (patch few files + git tag)'
       env:
         NEW_TAG: ${{ github.event.inputs.releaseVersion }}
-      uses: actions/setup-java@v3
-      with:
-        java-version: 17
       run: |
         # préparation de la release qui va :
         # - modifier le numéro de version dans les pom.xml du projet
@@ -87,7 +84,7 @@ jobs:
     - name: Set up Maven Central Repository
       uses: actions/setup-java@v3
       with:
-        java-version: '17'
+        java-version: '11'
         distribution: 'temurin'
         server-id: ossrh
         server-username: MAVEN_USERNAME
