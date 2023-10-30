@@ -208,6 +208,18 @@ public class Commandes {
     }
 
     /**
+     * Affichage des notices liées à une notice sous forme de liste
+     *
+     * @return liste des notices liées
+     * @throws CBSException erreur CBS
+     */
+    public String rel(String lotEncours) throws CBSException {
+        String query = new StringBuilder().append(Constants.VTI1).append(Constants.STR_1D).append(Constants.VSE).append(lotEncours)
+                .append(Constants.STR_1D).append(Constants.VPRUNM).append(Constants.STR_1D).append(Constants.VT1).append(Constants.STR_1D)
+                .append(Constants.VTAFR).append(Constants.STR_1D).append(Constants.VCUTF8).append(Constants.STR_1D).append("CUSrel").toString();
+        return connector.tcpReq(query);
+    }
+    /**
      * Suppression d'une notice
      *
      * @param nonotice   Numéro de notice dans la liste
