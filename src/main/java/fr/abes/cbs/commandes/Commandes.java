@@ -121,7 +121,7 @@ public class Commandes {
     public String view(final String noLigne, final String lotEncours, final String fOrigine) throws CBSException {
         String query = new StringBuilder().append(Constants.VTAFR).append(Constants.STR_1D)
                 .append(Constants.VCUTF8).append(Constants.STR_1D).append(Constants.CUSTOO).append(lotEncours)
-                .append("    ").append(noLigne).append(" ").append(fOrigine).toString();
+                .append(" ").append(noLigne).append(" ").append(fOrigine).toString();
         return connector.tcpReq(query);
     }
 
