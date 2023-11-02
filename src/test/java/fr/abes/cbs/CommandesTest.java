@@ -93,7 +93,7 @@ class CommandesTest {
     @Test
     void search() throws CBSException {
         //Résultats dans un fichier à part car les .properties ne supportent pas l'UTF-8
-        assertThat(cmd.search("che mti testtcn")).contains("LPP230721486");
+        assertThat(cmd.search("che mti testtcn")).contains("LPP23309668X");
         assertThat(cmd.getNbNotices()).isEqualTo(2);
 
         assertThat(cmd.getListePpn().toString()).isEqualToIgnoringWhitespace(prop.getProperty("search.listPPnResult"));
@@ -107,7 +107,7 @@ class CommandesTest {
     @DisplayName("Noticées liées : REL")
     @Test
     void rel() throws CBSException {
-        cmd.search("che mti testtcn");
+        cmd.search("che ppn 230721486");
         assertThat(cmd.rel()).isEqualTo(2);
     }
 
