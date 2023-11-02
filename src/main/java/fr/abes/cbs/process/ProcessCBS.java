@@ -763,6 +763,7 @@ public class ProcessCBS {
 	public Integer rel() throws CBSException {
 		String result = clientCBS.rel(String.valueOf(lotEncours));
 		try {
+			this.lotEncours = Integer.parseInt(Utilitaire.recupEntre(result, Constants.STR_1D + "VSIS", Constants.STR_1D));
 			return Integer.parseInt(Utilitaire.recupEntre(result, "VSZ", Constants.STR_1D));
 		} catch (Exception e) {
 			return 0;

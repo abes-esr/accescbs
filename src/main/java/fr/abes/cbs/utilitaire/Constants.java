@@ -14,6 +14,7 @@ public class Constants {
     public static final String CUS = "CUS";
     public static final String VT1 = "V!T1";
     public static final String VTI1 = "VTI1";
+    public static final String VTI = "VTI";
     public static final String VTXTE = "VTXTE";
     public static final String VTXTBIB = "VTXTBIB";
     public static final String VTX0T = "VTX0T";
@@ -36,7 +37,7 @@ public class Constants {
     public static final String CMPPN = "CPC\\MUT \\PPN ";
     public static final String CIPPN = "CPC\\INV \\PPN ";
     public static final String CPCWIS = "CPC\\WIS \\USE ";
-    public static final String CUSTOO = "CUS\\too S";
+    public static final String CUSTOO = "CUS\\TOO S";
     public static final String CUSCREL = "CUScre l";
     public static final String CUSMUT = "CUS\\MUT S";
     public static final String UNMTOO = " UNM;\\TOO S";

@@ -119,7 +119,7 @@ public class Commandes {
      * @return la notice
      */
     public String view(final String noLigne, final String lotEncours, final String fOrigine) throws CBSException {
-        String query = new StringBuilder().append(Constants.VTAFR).append(Constants.STR_1D)
+        String query = new StringBuilder().append(Constants.VT1).append(Constants.STR_1D).append(Constants.VTI).append(noLigne).append(Constants.STR_1D).append(Constants.VTAFR).append(Constants.STR_1D)
                 .append(Constants.VCUTF8).append(Constants.STR_1D).append(Constants.CUSTOO).append(lotEncours)
                 .append(" ").append(noLigne).append(" ").append(fOrigine).toString();
         return connector.tcpReq(query);
@@ -669,7 +669,7 @@ public class Commandes {
      * @throws CBSException Erreur CBS
      */
     public String mod(final String noRecord, final String lotEncours) throws CBSException {
-        String query = new StringBuilder().append(Constants.VTI1).append(Constants.STR_1D)
+        String query = new StringBuilder().append(Constants.VTI).append(noRecord).append(Constants.STR_1D)
                 .append(Constants.VSE).append(lotEncours).append(Constants.STR_1D).append(Constants.VPRUNM)
                 .append(Constants.STR_1D).append(Constants.VT1).append(Constants.STR_1D).append(Constants.VTAFR)
                 .append(Constants.STR_1D).append(Constants.VCUTF8).append(Constants.STR_1D).append(Constants.CUSMUT)
