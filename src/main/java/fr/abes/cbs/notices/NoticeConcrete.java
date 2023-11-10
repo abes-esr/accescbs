@@ -79,6 +79,12 @@ public class NoticeConcrete extends Notice implements INotice {
         this.exemplaires = exemplaires;
     }
 
+    public NoticeConcrete(Biblio biblio) {
+        this.noticeBiblio = biblio;
+        this.noticeLocale = null;
+        this.exemplaires = new ArrayList<>();
+    }
+
     public static List<Exemplaire> listeExemplaireUnimarc(String listeExemplaire) throws Exception {
 
         List<Exemplaire> exemplaires = new ArrayList<>();
