@@ -135,6 +135,10 @@ public class Cbs {
      * @throws CBSException Erreur CBS
      */
 	private void checkForErrors(String resu) throws CBSException {
+        if (resu.isEmpty()) {
+            setCmdOk(false);
+            throw new CBSException("V/VERROR", "Erreur inconnue");
+        }
 		//erreur à l'authentification
 		if (resu.contains("V/VREJECT")) {
 			setCmdOk(false);
