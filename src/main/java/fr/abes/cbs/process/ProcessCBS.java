@@ -3,16 +3,19 @@ package fr.abes.cbs.process;
 import fr.abes.cbs.commandes.Commandes;
 import fr.abes.cbs.exception.CBSException;
 import fr.abes.cbs.exception.ZoneException;
-import fr.abes.cbs.notices.*;
+import fr.abes.cbs.models.LogicalBdd;
+import fr.abes.cbs.notices.Biblio;
+import fr.abes.cbs.notices.DonneeLocale;
+import fr.abes.cbs.notices.Exemplaire;
+import fr.abes.cbs.notices.NoticeConcrete;
 import fr.abes.cbs.utilitaire.Constants;
 import fr.abes.cbs.utilitaire.Utilitaire;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ProcessCBS {
 	@Getter
@@ -188,6 +191,41 @@ public class ProcessCBS {
 			}
 		}
 		this.setLotEncours(0);
+	}
+
+	/** authentifie un utilisateur au CBS sur une base logique donnée
+	 *
+	 * @param serveur IP du serveur CBS
+	 * @param port Port du serveur CBS
+	 * @param login Utilisateur
+	 * @param passwd Mot de passe
+	 * @param bdd numéro de base logique où se connecter
+	 * @throws CBSException Erreur CBS
+	 */
+	public void authenticateWithLogicalDb(String serveur, String port, String login, String passwd, String bdd) throws CBSException {
+		if (!clientCBS.isConnected()) {
+			clientCBS.connect(serveur, Integer.parseInt(port));
+		}
+		if (!clientCBS.isLogged()) {
+			String resu = clientCBS.log(login, passwd);
+			if (resu.contains(Constants.STR_1B + "LSY")) {
+				resu = clientCBS.che("\\SYS SU");
+				String bddAsString = resu.substring(resu.indexOf("VKZ"), resu.lastIndexOf("V/VOK"));
+				List<LogicalBdd> listBdd = new ArrayList<>();
+				//alimentation de la liste des bases logiques retournées par le CBS
+				for (String vkz : bddAsString.split("VKZ")) {
+					if (!vkz.isEmpty()) {
+						LogicalBdd logicalBdd = new LogicalBdd(vkz);
+						listBdd.add(logicalBdd);
+					}
+				}
+				//recherche de la base passée en paramètre dans la liste retournée par le cbs
+				Optional<LogicalBdd> resultBdd = listBdd.stream().filter(logicalBdd -> logicalBdd.getBddNumber().equals(bdd)).findFirst();
+				if (resultBdd.isPresent()) {
+					clientCBS.che("\\BES " + resultBdd.get().getLineNumber());
+				}
+			}
+		}
 	}
 
 	/**
