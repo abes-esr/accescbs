@@ -199,7 +199,7 @@ public class ProcessCBS {
 	 * @param port Port du serveur CBS
 	 * @param login Utilisateur
 	 * @param passwd Mot de passe
-	 * @param bdd numéro de base logique où se connecter
+	 * @param bdd numéro de base logique où se connecter (ex : 1.1 ou 1.201)
 	 * @throws CBSException Erreur CBS
 	 */
 	public void authenticateWithLogicalDb(String serveur, String port, String login, String passwd, String bdd) throws CBSException {
