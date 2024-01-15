@@ -86,4 +86,9 @@ public class NoticeConcreteTest {
         noticeConcrete.getExemplaires().remove(0);
         assertThat(noticeConcrete.getNumEx()).isNull();
     }
+
+    @Test
+    void listeExemplaireUnimarcTest() {
+
+    }
 }

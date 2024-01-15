@@ -71,6 +71,38 @@ class CommandesTest {
         com.disconnect();
     }
 
+    @DisplayName("Authentification avec choix de base")
+    @Test
+    void connectLogicalBdd() throws CBSException {
+        ProcessCBS com = new ProcessCBS();
+        try {
+            com.authenticateWithLogicalDb(prop.getProperty("connect.ip"), prop.getProperty("connect.port"), prop.getProperty("connect.login"), "BadPassword", "1.900");
+        } catch (CBSException e) {
+            assertThat(com.getClientCBS().isLogged()).isFalse();
+            assertThat(com.getClientCBS().isConnected()).isTrue();
+        }
+        com.disconnect();
+
+        try {
+            com.authenticateWithLogicalDb(prop.getProperty("connect.ip"), prop.getProperty("connect.port"), "BadLogin", prop.getProperty("connect.password"), "1.900");
+        } catch (CBSException e) {
+            assertThat(com.getClientCBS().isLogged()).isFalse();
+            assertThat(com.getClientCBS().isConnected()).isTrue();
+        }
+
+        try {
+            com.authenticateWithLogicalDb(prop.getProperty("MAUVAISEIP"), prop.getProperty("MAUVAISPORT"), "BadLogin", prop.getProperty("connect.password"), "1.900");
+        } catch (CBSException e) {
+            assertThat(com.getClientCBS().isLogged()).isFalse();
+            assertThat(com.getClientCBS().isConnected()).isTrue();
+        }
+        com.disconnect();
+
+        com.authenticateWithLogicalDb(prop.getProperty("connect.ip"), prop.getProperty("connect.port"), prop.getProperty("connect.login"), prop.getProperty("connect.password"), "1.900");
+        com.disconnect();
+    }
+
+
     @DisplayName("Deconnexion")
     @Test
     void disconnect() throws CBSException {
@@ -327,7 +359,7 @@ class CommandesTest {
         cmd.newLoc("L035 $a123456789");
         cmd.back();
         NoticeConcrete notice = cmd.editerNoticeConcrete("1");
-        Assertions.assertEquals(4, notice.getExemplaires().size());
+        Assertions.assertEquals(5, notice.getExemplaires().size());
 
         String biblioExpected = "100 0#$a2018\r" +
                 "101 0#$aeng\r" +
