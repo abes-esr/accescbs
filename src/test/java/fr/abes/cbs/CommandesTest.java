@@ -26,14 +26,24 @@ class CommandesTest {
 
     private ProcessCBS cmd;
     private Properties prop;
-
+    private Integer poll;
+    
+    private String ip;
+    private String port;
+    private String login;
+    private String password;
     @BeforeEach
     void initAll() throws CBSException, IOException {
         prop = new Properties();
         prop.load(Objects.requireNonNull(CommandesTest.class.getResource("/CommandesTest.properties")).openStream());
-
-        cmd = new ProcessCBS();
-        cmd.authenticate(prop.getProperty("connect.ip"), prop.getProperty("connect.port"), prop.getProperty("connect.login"), prop.getProperty("connect.password"));
+        this.poll = Integer.parseInt(prop.getProperty("connect.poll"));
+        this.ip = prop.getProperty("connect.ip");
+        this.port = prop.getProperty("connect.port");
+        this.login = prop.getProperty("connect.login");
+        this.password = prop.getProperty("connect.password");
+                
+        cmd = new ProcessCBS(poll);
+        cmd.authenticate(ip, port, login, password);
     }
 
     @DisplayName("Connexion ok")
@@ -46,9 +56,9 @@ class CommandesTest {
     @DisplayName("Connexion avec mauvais login/password/IP")
     @Test
     void connectBadLogin() throws CBSException {
-        ProcessCBS com = new ProcessCBS();
+        ProcessCBS com = new ProcessCBS(poll);
         try {
-            com.authenticate(prop.getProperty("connect.ip"), prop.getProperty("connect.port"), prop.getProperty("connect.login"), "BadPassword");
+            com.authenticate(ip, port, login, "BadPassword");
         } catch (CBSException e) {
             assertThat(com.getClientCBS().isLogged()).isFalse();
             assertThat(com.getClientCBS().isConnected()).isTrue();
@@ -56,7 +66,7 @@ class CommandesTest {
         com.disconnect();
 
         try {
-            com.authenticate(prop.getProperty("connect.ip"), prop.getProperty("connect.port"), "BadLogin", prop.getProperty("connect.password"));
+            com.authenticate(ip, port, "BadLogin", prop.getProperty("connect.password"));
         } catch (CBSException e) {
             assertThat(com.getClientCBS().isLogged()).isFalse();
             assertThat(com.getClientCBS().isConnected()).isTrue();
@@ -74,9 +84,9 @@ class CommandesTest {
     @DisplayName("Authentification avec choix de base")
     @Test
     void connectLogicalBdd() throws CBSException {
-        ProcessCBS com = new ProcessCBS();
+        ProcessCBS com = new ProcessCBS(poll);
         try {
-            com.authenticateWithLogicalDb(prop.getProperty("connect.ip"), prop.getProperty("connect.port"), prop.getProperty("connect.login"), "BadPassword", "1.900");
+            com.authenticateWithLogicalDb(ip, port, login, "BadPassword", "1.900");
         } catch (CBSException e) {
             assertThat(com.getClientCBS().isLogged()).isFalse();
             assertThat(com.getClientCBS().isConnected()).isTrue();
@@ -84,21 +94,21 @@ class CommandesTest {
         com.disconnect();
 
         try {
-            com.authenticateWithLogicalDb(prop.getProperty("connect.ip"), prop.getProperty("connect.port"), "BadLogin", prop.getProperty("connect.password"), "1.900");
+            com.authenticateWithLogicalDb(ip, port, "BadLogin", password, "1.900");
         } catch (CBSException e) {
             assertThat(com.getClientCBS().isLogged()).isFalse();
             assertThat(com.getClientCBS().isConnected()).isTrue();
         }
 
         try {
-            com.authenticateWithLogicalDb(prop.getProperty("MAUVAISEIP"), prop.getProperty("MAUVAISPORT"), "BadLogin", prop.getProperty("connect.password"), "1.900");
+            com.authenticateWithLogicalDb(prop.getProperty("MAUVAISEIP"), prop.getProperty("MAUVAISPORT"), "BadLogin", password, "1.900");
         } catch (CBSException e) {
             assertThat(com.getClientCBS().isLogged()).isFalse();
             assertThat(com.getClientCBS().isConnected()).isTrue();
         }
         com.disconnect();
 
-        com.authenticateWithLogicalDb(prop.getProperty("connect.ip"), prop.getProperty("connect.port"), prop.getProperty("connect.login"), prop.getProperty("connect.password"), "1.900");
+        com.authenticateWithLogicalDb(ip, port, login, password, "1.900");
         com.disconnect();
     }
 
@@ -106,8 +116,8 @@ class CommandesTest {
     @DisplayName("Deconnexion")
     @Test
     void disconnect() throws CBSException {
-        ProcessCBS com = new ProcessCBS();
-        com.authenticate(prop.getProperty("connect.ip"), prop.getProperty("connect.port"), prop.getProperty("connect.login"), prop.getProperty("connect.password"));
+        ProcessCBS com = new ProcessCBS(poll);
+        com.authenticate(ip, port, login, prop.getProperty("connect.password"));
         assertThat(com.getClientCBS().isLogged()).isTrue();
         assertThat(com.getClientCBS().isConnected()).isTrue();
         com.disconnect();

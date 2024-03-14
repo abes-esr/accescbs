@@ -67,8 +67,8 @@ public class ProcessCBS {
 	@Setter
 	private String rcr;
 
-	public ProcessCBS() {
-		clientCBS = new Commandes();
+	public ProcessCBS(Integer poll) {
+		clientCBS = new Commandes(poll);
 		listePpn = new StringBuilder();
 		nbNotices = 0;
 		lotEncours = 0;

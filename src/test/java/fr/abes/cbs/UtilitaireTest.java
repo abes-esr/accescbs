@@ -30,7 +30,7 @@ class UtilitaireTest {
             e.printStackTrace();
         }
 
-        cmd = new ProcessCBS();
+        cmd = new ProcessCBS(Integer.parseInt(prop.getProperty("connect.poll")));
         cmd.authenticate(prop.getProperty("connect.ip"), prop.getProperty("connect.port"), prop.getProperty("connect.login"), prop.getProperty("connect.password"));
 
         noticeResource = new Scanner(UtilitaireTest.class.getResourceAsStream("/noticePica.txt"), "UTF-8").useDelimiter("\\A").next();
