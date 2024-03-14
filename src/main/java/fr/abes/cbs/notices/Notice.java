@@ -397,15 +397,7 @@ public abstract class Notice implements INotice {
 
     @Override
     public void deleteZoneWithValue(String zone, String sousZone, String valeur) {
-
-        Iterator<Zone> it = this.listeZones.values().iterator();
-        while (it.hasNext()) {
-            Zone zoneToDelete = it.next();
-            if (zoneToDelete.getLabel().equals(zone) && zoneToDelete.findSubLabel(sousZone).contains(valeur)) {
-                it.remove();
-            }
-        }
-
+        this.listeZones.values().removeIf(zoneToDelete -> zoneToDelete.getLabel().equals(zone) && zoneToDelete.findSubLabel(sousZone) != null && zoneToDelete.findSubLabel(sousZone).contains(valeur));
     }
 
     /**
