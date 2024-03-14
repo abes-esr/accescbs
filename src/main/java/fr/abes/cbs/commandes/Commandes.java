@@ -19,8 +19,8 @@ public class Commandes {
     @Getter
     private String rcr = "";
 
-    public Commandes() {
-        connector = new Cbs();
+    public Commandes(Integer poll) {
+        connector = new Cbs(poll);
     }
 
     /**

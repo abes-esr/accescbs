@@ -18,7 +18,11 @@ public class Cbs {
     @Getter @Setter private boolean cmdOk;
     @Getter @Setter private String errorMessage;
     private Socket s;
+    private Integer poll;
 
+    public Cbs(Integer poll) {
+        this.poll = poll;
+    }
     /**
      * socket disconnection
      */
@@ -111,7 +115,7 @@ public class Cbs {
                         break;
                     }
                     nbtours++;
-                    Thread.sleep(10);
+                    Thread.sleep(poll);
                     nb = in.available();
                 }
             }
