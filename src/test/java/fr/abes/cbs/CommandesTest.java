@@ -157,7 +157,8 @@ class CommandesTest {
     @Test
     void relNoResult() throws CBSException {
         cmd.search("che mti trioptjldksjlk"); //aucune réponse trouvé
-        assertThat(cmd.rel()).isEqualTo(0);
+        CBSException exception = Assertions.assertThrows(CBSException.class, () -> cmd.rel());
+        Assertions.assertEquals("Impossible de lancer la commande rel : pas de lot en cours", exception.getMessage());
     }
 
     @DisplayName("ILN Rattachement")
