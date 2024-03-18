@@ -5,6 +5,7 @@ import fr.abes.cbs.utilitaire.Constants;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.Level;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -68,7 +69,7 @@ public class Cbs {
                 return "connect ko";
             }
         } catch (Exception e) {
-        	throw new CBSException("Error connecting to " + tip + " " + port, e.getMessage());
+        	throw new CBSException(Level.ERROR, "Error connecting to " + tip + " " + port + " : " + e.getMessage());
         }
     }
 
@@ -82,7 +83,7 @@ public class Cbs {
                 s.close();
             }
         } catch (Exception e) {
-            throw new CBSException("Error disconnecting socket", e.getMessage());
+            throw new CBSException(Level.ERROR, "Error disconnecting socket : " + e.getMessage());
         }
     }
     /**
@@ -141,17 +142,17 @@ public class Cbs {
 	private void checkForErrors(String resu) throws CBSException {
         if (resu.isEmpty()) {
             setCmdOk(false);
-            throw new CBSException("V/VERROR", "Erreur inconnue");
+            throw new CBSException(Level.ERROR, "Erreur inconnue");
         }
 		//erreur à l'authentification
 		if (resu.contains("V/VREJECT")) {
 			setCmdOk(false);
-			throw new CBSException("V/VREJECT", resu.substring(2, resu.indexOf(Constants.STR_1D)));
+			throw new CBSException(Level.ERROR, resu.substring(2, resu.indexOf(Constants.STR_1D)));
 		}
 		//erreur cas général
 		if (resu.contains("V/VERROR")) {
 			setCmdOk(false);
-            throw new CBSException("V/VERROR", resu.substring(resu.indexOf("M02") + 3, resu.indexOf(Constants.STR_1D, resu.indexOf("M02") + 3)));
+            throw new CBSException(Level.ERROR, resu.substring(resu.indexOf("M02") + 3, resu.indexOf(Constants.STR_1D, resu.indexOf("M02") + 3)));
 		}
 		setCmdOk(true);
 	}
