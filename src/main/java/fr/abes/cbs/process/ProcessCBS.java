@@ -130,7 +130,7 @@ public class ProcessCBS {
             }
             return resu;
         } catch (Exception ex) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException("V/VFATAL", "Erreur dans la requête envoyé au CBS");
         }
     }
 
@@ -284,7 +284,7 @@ public class ProcessCBS {
             }
             return Utilitaire.xmlFormat(chaine);
         } catch (Exception ex) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException("V/VFATAL", "Erreur dans la requête envoyé au CBS");
         }
     }
 
@@ -304,7 +304,7 @@ public class ProcessCBS {
             initTablesResult(lstrecords);
             return resu;
         } catch (Exception ex) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException("V/VFATAL", "Erreur dans la requête envoyé au CBS");
         }
     }
 
@@ -337,7 +337,7 @@ public class ProcessCBS {
             ppnEncours = Utilitaire.recupEntre(resu, "avec PPN ", Constants.STR_1D).trim();
             return resu;
         } catch (Exception ex) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException("V/VFATAL", "Erreur dans la requête envoyé au CBS");
         }
 
     }
@@ -362,7 +362,7 @@ public class ProcessCBS {
             onEdit = false;
             return resu;
         } catch (Exception ex) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException("V/VFATAL", "Erreur dans la requête envoyé au CBS");
         }
 
     }
@@ -383,7 +383,7 @@ public class ProcessCBS {
             ppnEncours = Utilitaire.recupEntre(resu, Constants.MSG_APPN, Constants.STR_1D).trim();
             return resu;
         } catch (Exception ex) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException("V/VFATAL", "Erreur dans la requête envoyé au CBS");
         }
     }
 
@@ -466,7 +466,7 @@ public class ProcessCBS {
             }
             return clientCBS.valMod(notice, lgnotice, String.valueOf(lotEncours), ppnEncours, norecord, noticedeb, "");
         } catch (Exception ex) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException("V/VFATAL", "Erreur dans la requête envoyé au CBS");
         }
     }
 
@@ -510,7 +510,7 @@ public class ProcessCBS {
             }
             return clientCBS.valMod(noticeStr, lgnotice, String.valueOf(lotEncours), ppnEncours, norecord, noticedeb, "");
         } catch (Exception ex) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException("V/VFATAL", "Erreur dans la requête envoyé au CBS");
         }
     }
 
@@ -528,7 +528,7 @@ public class ProcessCBS {
             String resu = clientCBS.affBib(rcr);
             return Utilitaire.recupEntre(resu, Constants.STR_1E + "VAG" + Constants.STR_1B + "P", Constants.STR_1E + "VAV");
         } catch (Exception ex) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException("V/VFATAL", "Erreur dans la requête envoyé au CBS");
         }
     }
 
@@ -550,7 +550,7 @@ public class ProcessCBS {
             }
             return exemp;
         } catch (Exception ex) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException("V/VFATAL", "Erreur dans la requête envoyé au CBS");
         }
     }
 
@@ -605,7 +605,7 @@ public class ProcessCBS {
             onNew = false;
             return resu;
         } catch (Exception ex) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException("V/VFATAL", "Erreur dans la requête envoyé au CBS");
         }
     }
 
@@ -672,7 +672,7 @@ public class ProcessCBS {
         } catch (ZoneException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException("V/VFATAL", "Erreur dans la requête envoyé au CBS");
         }
     }
 
@@ -788,7 +788,7 @@ public class ProcessCBS {
             int lgexemp = Integer.parseInt(noticedeb.substring(2, 6)) - 1;
             return clientCBS.valModE(exemplaire, numEx, String.valueOf(lotEncours), noticedeb, ppnEncours, lgexemp);
         } catch (Exception e) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException("V/VFATAL", "Erreur dans la requête envoyé au CBS");
         }
     }
 
@@ -841,7 +841,7 @@ public class ProcessCBS {
             String result = this.affUsa();
             this.setRcr(result.substring(result.indexOf("VU3") + 3, result.indexOf(" " + Constants.STR_1E)));
         } catch (Exception e) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException("V/VFATAL", "Erreur dans la requête envoyé au CBS");
         }
     }
 
@@ -885,7 +885,7 @@ public class ProcessCBS {
             this.lotEncours = Integer.parseInt(Utilitaire.recupEntre(result, Constants.STR_1D + "VSIS", Constants.STR_1D));
             return Integer.parseInt(Utilitaire.recupEntre(result, "VSZ", Constants.STR_1D));
         } catch (Exception e) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException("V/VFATAL", "Erreur dans la requête envoyé au CBS");
         }
     }
 
@@ -933,7 +933,7 @@ public class ProcessCBS {
             String noticedeb = Utilitaire.recupEntre(resu, Constants.VTXT, Constants.STR_1F);
             return clientCBS.valModLoc(noticedeb, ppnEncours, String.valueOf(lotEncours), vloc);
         } catch (Exception e) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException("V/VFATAL", "Erreur dans la requête envoyé au CBS");
         }
     }
 
