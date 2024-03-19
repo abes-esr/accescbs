@@ -118,6 +118,7 @@ public class Constants {
     public static final String ZONE_DEBUT_EXEMPLAIRE_XML_REGEX = "930";
     public static final String VTXTLOK = "VTXTLOK";
 
+    public static final String ERREUR_SYSTEME = "Erreur de communication avec le serveur du CBS";
     /***
      * Constructeur privé permet de rendre la classe non instantiable
      */

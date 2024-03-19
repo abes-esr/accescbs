@@ -4,13 +4,13 @@ import fr.abes.cbs.exception.CBSException;
 import fr.abes.cbs.utilitaire.Constants;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.Level;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 /** Représente une session au CBS
  */
@@ -19,7 +19,7 @@ public class Cbs {
     @Getter @Setter private boolean cmdOk;
     @Getter @Setter private String errorMessage;
     private Socket s;
-    private Integer poll;
+    private final Integer poll;
 
     public Cbs(Integer poll) {
         this.poll = poll;
@@ -99,7 +99,7 @@ public class Cbs {
             String chaine1 = String.valueOf((char) 29);
             String chaine2 = String.valueOf((char) 03);
             String myString = query + chaine1 + chaine2;
-            byte[] bytes = myString.getBytes("UTF-8");
+            byte[] bytes = myString.getBytes(StandardCharsets.UTF_8);
             out.write(bytes, 0, bytes.length);
             int nb;
             int nbtours = 0;
@@ -108,7 +108,7 @@ public class Cbs {
             while (nb > 0) {
                 byte[] red = new byte[nb];
                 in.read(red, 0, nb);
-                String res = new String(red, "UTF-8");
+                String res = new String(red, StandardCharsets.UTF_8);
                 resu.append(res);
                 nb = in.available();
                 while (nbtours < 20 && nb == 0) {
@@ -130,7 +130,7 @@ public class Cbs {
             return res;
         } catch (IOException | InterruptedException e) {
             cmdOk = false;
-            return new StringBuilder("Req ko " + e.toString()).toString();
+            return "Req ko " + e;
         }
     }
 
