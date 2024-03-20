@@ -107,21 +107,36 @@ public class Cbs {
             out.write(bytes, 0, bytes.length);
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            int nb = in.read();
-            byte[] buffer = new byte[nb];
+            int length = in.read();
+
+            byte[] buffer = new byte[length];
             for(int s; (s=in.read(buffer)) != -1; )
             {
-                baos.write(buffer, 0, s);
-                String res = new String(buffer, StandardCharsets.UTF_8);
-                if (res.contains(Constants.STR_03))
+                int totalBytesRead = 0;
+                boolean end = false;
+                StringBuilder dataString = new StringBuilder(length);
+                while(!end) {
+                    int currentBytesRead = in.read(buffer);
+                    totalBytesRead = currentBytesRead + totalBytesRead;
+                    if(totalBytesRead <= length) {
+                        dataString.append(new String(buffer, 0, currentBytesRead, StandardCharsets.UTF_8));
+                    } else {
+                        dataString.append(new String(buffer, 0, length - totalBytesRead + currentBytesRead, StandardCharsets.UTF_8));
+                    }
+                    if(dataString.length()>=length) {
+                        end = true;
+                    }
+                }
+                baos.write(dataString.toString().getBytes(StandardCharsets.UTF_8), 0, s);
+                if (dataString.toString().contains(Constants.STR_03)) {
                     break;
-                nb = in.read();
-                buffer = new byte[nb];
+                }
+                length = in.read();
+                buffer = new byte[length];
             }
             baos.flush();
             String res = baos.toString(StandardCharsets.UTF_8);
             baos.close();
-            log.debug(res);
             if(res.contains(Constants.VERROR)){
             	errorMessage = res;
             } else {
