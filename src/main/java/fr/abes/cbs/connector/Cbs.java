@@ -4,17 +4,21 @@ import fr.abes.cbs.exception.CBSException;
 import fr.abes.cbs.utilitaire.Constants;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.Level;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Base64;
 
 /** Représente une session au CBS
  */
-
+@Slf4j
 public class Cbs {
     @Getter @Setter private boolean cmdOk;
     @Getter @Setter private String errorMessage;
@@ -101,26 +105,20 @@ public class Cbs {
             String myString = query + chaine1 + chaine2;
             byte[] bytes = myString.getBytes(StandardCharsets.UTF_8);
             out.write(bytes, 0, bytes.length);
-            int nb;
-            int nbtours = 0;
-            StringBuilder resu = new StringBuilder();
-            nb = in.read();
-            while (nb > 0) {
-                byte[] red = new byte[nb];
-                in.read(red, 0, nb);
-                String res = new String(red, StandardCharsets.UTF_8);
-                resu.append(res);
-                nb = in.available();
-                while (nbtours < 20 && nb == 0) {
-                    if(resu.toString().contains("\u0003")){
-                        break;
-                    }
-                    nbtours++;
-                    Thread.sleep(poll);
-                    nb = in.available();
-                }
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            for(int s; (s=in.read(buffer)) != -1; )
+            {
+                baos.write(buffer, 0, s);
+                String res = new String(buffer, StandardCharsets.UTF_8);
+                if (res.contains(Constants.STR_03))
+                    break;
             }
-            String res = resu.toString();
+            baos.flush();
+            baos.close();
+            String res = baos.toString(StandardCharsets.UTF_8);
+            log.debug(res);
             if(res.contains(Constants.VERROR)){
             	errorMessage = res;
             } else {
@@ -128,7 +126,7 @@ public class Cbs {
             }
             cmdOk = true;
             return res;
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException  e) {
             cmdOk = false;
             return "Req ko " + e;
         }
