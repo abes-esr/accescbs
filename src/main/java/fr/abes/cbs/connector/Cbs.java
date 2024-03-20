@@ -116,8 +116,8 @@ public class Cbs {
                     break;
             }
             baos.flush();
-            baos.close();
             String res = baos.toString(StandardCharsets.UTF_8);
+            baos.close();
             log.debug(res);
             if(res.contains(Constants.VERROR)){
             	errorMessage = res;
