@@ -107,13 +107,16 @@ public class Cbs {
             out.write(bytes, 0, bytes.length);
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
+            int nb = in.read();
+            byte[] buffer = new byte[nb];
             for(int s; (s=in.read(buffer)) != -1; )
             {
                 baos.write(buffer, 0, s);
                 String res = new String(buffer, StandardCharsets.UTF_8);
                 if (res.contains(Constants.STR_03))
                     break;
+                nb = in.read();
+                buffer = new byte[nb];
             }
             baos.flush();
             String res = baos.toString(StandardCharsets.UTF_8);
