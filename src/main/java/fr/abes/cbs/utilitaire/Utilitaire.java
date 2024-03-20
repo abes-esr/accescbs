@@ -1,6 +1,7 @@
 package fr.abes.cbs.utilitaire;
 
 import fr.abes.cbs.exception.CBSException;
+import org.apache.logging.log4j.Level;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
@@ -126,7 +127,7 @@ public class Utilitaire {
             byte[] utf8 = str.getBytes(StandardCharsets.UTF_8);
             return new String(utf8, "ISO8859_1");
         } catch (UnsupportedEncodingException ex) {
-            throw new CBSException("Impossible d'encoder la chaine en ISO", ex.getMessage());
+            throw new CBSException(Level.WARN, "Impossible d'encoder la chaine en ISO : " + ex.getMessage());
         }
     }
 

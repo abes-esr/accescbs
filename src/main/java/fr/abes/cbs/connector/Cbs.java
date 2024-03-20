@@ -4,12 +4,13 @@ import fr.abes.cbs.exception.CBSException;
 import fr.abes.cbs.utilitaire.Constants;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.Level;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 /** Représente une session au CBS
  */
@@ -18,7 +19,7 @@ public class Cbs {
     @Getter @Setter private boolean cmdOk;
     @Getter @Setter private String errorMessage;
     private Socket s;
-    private Integer poll;
+    private final Integer poll;
 
     public Cbs(Integer poll) {
         this.poll = poll;
@@ -68,7 +69,7 @@ public class Cbs {
                 return "connect ko";
             }
         } catch (Exception e) {
-        	throw new CBSException("Error connecting to " + tip + " " + port, e.getMessage());
+        	throw new CBSException(Level.ERROR, "Error connecting to " + tip + " " + port + " : " + e.getMessage());
         }
     }
 
@@ -82,7 +83,7 @@ public class Cbs {
                 s.close();
             }
         } catch (Exception e) {
-            throw new CBSException("Error disconnecting socket", e.getMessage());
+            throw new CBSException(Level.ERROR, "Error disconnecting socket : " + e.getMessage());
         }
     }
     /**
@@ -98,7 +99,7 @@ public class Cbs {
             String chaine1 = String.valueOf((char) 29);
             String chaine2 = String.valueOf((char) 03);
             String myString = query + chaine1 + chaine2;
-            byte[] bytes = myString.getBytes("UTF-8");
+            byte[] bytes = myString.getBytes(StandardCharsets.UTF_8);
             out.write(bytes, 0, bytes.length);
             int nb;
             int nbtours = 0;
@@ -107,7 +108,7 @@ public class Cbs {
             while (nb > 0) {
                 byte[] red = new byte[nb];
                 in.read(red, 0, nb);
-                String res = new String(red, "UTF-8");
+                String res = new String(red, StandardCharsets.UTF_8);
                 resu.append(res);
                 nb = in.available();
                 while (nbtours < 20 && nb == 0) {
@@ -129,7 +130,7 @@ public class Cbs {
             return res;
         } catch (IOException | InterruptedException e) {
             cmdOk = false;
-            return new StringBuilder("Req ko " + e.toString()).toString();
+            return "Req ko " + e;
         }
     }
 
@@ -141,17 +142,17 @@ public class Cbs {
 	private void checkForErrors(String resu) throws CBSException {
         if (resu.isEmpty()) {
             setCmdOk(false);
-            throw new CBSException("V/VERROR", "Erreur inconnue");
+            throw new CBSException(Level.ERROR, "Erreur inconnue");
         }
 		//erreur à l'authentification
 		if (resu.contains("V/VREJECT")) {
 			setCmdOk(false);
-			throw new CBSException("V/VREJECT", resu.substring(2, resu.indexOf(Constants.STR_1D)));
+			throw new CBSException(Level.ERROR, resu.substring(2, resu.indexOf(Constants.STR_1D)));
 		}
 		//erreur cas général
 		if (resu.contains("V/VERROR")) {
 			setCmdOk(false);
-            throw new CBSException("V/VERROR", resu.substring(resu.indexOf("M02") + 3, resu.indexOf(Constants.STR_1D, resu.indexOf("M02") + 3)));
+            throw new CBSException(Level.ERROR, resu.substring(resu.indexOf("M02") + 3, resu.indexOf(Constants.STR_1D, resu.indexOf("M02") + 3)));
 		}
 		setCmdOk(true);
 	}

@@ -13,6 +13,7 @@ import fr.abes.cbs.utilitaire.Utilitaire;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.Level;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,9 +106,10 @@ public class ProcessCBS {
      * @throws CBSException Erreur CBS
      */
     public String search(String query) throws CBSException {
+        String resu = "";
         onEdit = false;
         try {
-            String resu = clientCBS.che(query);
+            resu = clientCBS.che(query);
             // on réinitialise la liste de ppn après chaque recherche
             listePpn = new StringBuilder();
 
@@ -130,7 +132,7 @@ public class ProcessCBS {
             }
             return resu;
         } catch (Exception ex) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException(Level.FATAL, Constants.ERREUR_SYSTEME);
         }
     }
 
@@ -260,7 +262,7 @@ public class ProcessCBS {
      */
     public String view(final String noLigne, final boolean xml, String formatOrigine) throws CBSException {
         if (this.lotEncours == 0) {
-            throw new CBSException("V/VERROR", "Impossible de lancer la commande view : pas de lot en cours");
+            throw new CBSException(Level.ERROR, "Impossible de lancer la commande view : pas de lot en cours");
         }
         try {
             String fOrigine = formatOrigine;
@@ -284,7 +286,7 @@ public class ProcessCBS {
             }
             return Utilitaire.xmlFormat(chaine);
         } catch (Exception ex) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException(Level.FATAL, Constants.ERREUR_SYSTEME);
         }
     }
 
@@ -304,7 +306,7 @@ public class ProcessCBS {
             initTablesResult(lstrecords);
             return resu;
         } catch (Exception ex) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException(Level.FATAL, Constants.ERREUR_SYSTEME);
         }
     }
 
@@ -337,7 +339,7 @@ public class ProcessCBS {
             ppnEncours = Utilitaire.recupEntre(resu, "avec PPN ", Constants.STR_1D).trim();
             return resu;
         } catch (Exception ex) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException(Level.FATAL, Constants.ERREUR_SYSTEME);
         }
 
     }
@@ -362,7 +364,7 @@ public class ProcessCBS {
             onEdit = false;
             return resu;
         } catch (Exception ex) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException(Level.FATAL, Constants.ERREUR_SYSTEME);
         }
 
     }
@@ -383,7 +385,7 @@ public class ProcessCBS {
             ppnEncours = Utilitaire.recupEntre(resu, Constants.MSG_APPN, Constants.STR_1D).trim();
             return resu;
         } catch (Exception ex) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException(Level.FATAL, Constants.ERREUR_SYSTEME);
         }
     }
 
@@ -466,7 +468,7 @@ public class ProcessCBS {
             }
             return clientCBS.valMod(notice, lgnotice, String.valueOf(lotEncours), ppnEncours, norecord, noticedeb, "");
         } catch (Exception ex) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException(Level.FATAL, Constants.ERREUR_SYSTEME);
         }
     }
 
@@ -510,7 +512,7 @@ public class ProcessCBS {
             }
             return clientCBS.valMod(noticeStr, lgnotice, String.valueOf(lotEncours), ppnEncours, norecord, noticedeb, "");
         } catch (Exception ex) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException(Level.FATAL, Constants.ERREUR_SYSTEME);
         }
     }
 
@@ -528,7 +530,7 @@ public class ProcessCBS {
             String resu = clientCBS.affBib(rcr);
             return Utilitaire.recupEntre(resu, Constants.STR_1E + "VAG" + Constants.STR_1B + "P", Constants.STR_1E + "VAV");
         } catch (Exception ex) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException(Level.FATAL, Constants.ERREUR_SYSTEME);
         }
     }
 
@@ -550,7 +552,7 @@ public class ProcessCBS {
             }
             return exemp;
         } catch (Exception ex) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException(Level.FATAL, Constants.ERREUR_SYSTEME);
         }
     }
 
@@ -605,7 +607,7 @@ public class ProcessCBS {
             onNew = false;
             return resu;
         } catch (Exception ex) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException(Level.FATAL, Constants.ERREUR_SYSTEME);
         }
     }
 
@@ -618,13 +620,14 @@ public class ProcessCBS {
      * @throws CBSException Erreur CBS
      */
     public NoticeConcrete editerNoticeConcrete(final String noRecord) throws CBSException, ZoneException {
+        String resu = "";
         // num de l'exemplaire en cours
         nbExPPnEncours = 0;
         // num du prochain exemplaire
         nvNumEx = "";
         int posLastEx;
         try {
-            String resu = clientCBS.mod(noRecord, String.valueOf(lotEncours));
+            resu = clientCBS.mod(noRecord, String.valueOf(lotEncours));
             //on récupère la notice bibliographique
             String biblio = Utilitaire.recupEntre(resu, Constants.VTXTBIB, Constants.STR_1E);
             Biblio noticeBiblio = new Biblio(biblio.substring(biblio.indexOf(Constants.STR_1F) + 1));
@@ -672,7 +675,7 @@ public class ProcessCBS {
         } catch (ZoneException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException(Level.FATAL, "Erreur dans la requête envoyée au CBS");
         }
     }
 
@@ -788,7 +791,7 @@ public class ProcessCBS {
             int lgexemp = Integer.parseInt(noticedeb.substring(2, 6)) - 1;
             return clientCBS.valModE(exemplaire, numEx, String.valueOf(lotEncours), noticedeb, ppnEncours, lgexemp);
         } catch (Exception e) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException(Level.FATAL, Constants.ERREUR_SYSTEME);
         }
     }
 
@@ -841,7 +844,7 @@ public class ProcessCBS {
             String result = this.affUsa();
             this.setRcr(result.substring(result.indexOf("VU3") + 3, result.indexOf(" " + Constants.STR_1E)));
         } catch (Exception e) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException(Level.FATAL, Constants.ERREUR_SYSTEME);
         }
     }
 
@@ -879,13 +882,13 @@ public class ProcessCBS {
      */
     public Integer rel() throws CBSException {
         if (this.lotEncours == 0)
-            throw new CBSException("V/VERROR", "Impossible de lancer la commande rel : pas de lot en cours");
+            throw new CBSException(Level.ERROR, "Impossible de lancer la commande rel : pas de lot en cours");
         try {
             String result = clientCBS.rel(String.valueOf(lotEncours));
             this.lotEncours = Integer.parseInt(Utilitaire.recupEntre(result, Constants.STR_1D + "VSIS", Constants.STR_1D));
             return Integer.parseInt(Utilitaire.recupEntre(result, "VSZ", Constants.STR_1D));
         } catch (Exception e) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException(Level.FATAL, Constants.ERREUR_SYSTEME);
         }
     }
 
@@ -933,7 +936,7 @@ public class ProcessCBS {
             String noticedeb = Utilitaire.recupEntre(resu, Constants.VTXT, Constants.STR_1F);
             return clientCBS.valModLoc(noticedeb, ppnEncours, String.valueOf(lotEncours), vloc);
         } catch (Exception e) {
-            throw new CBSException("V/VERROR", "Erreur dans la requête envoyé au CBS");
+            throw new CBSException(Level.FATAL, Constants.ERREUR_SYSTEME);
         }
     }
 
