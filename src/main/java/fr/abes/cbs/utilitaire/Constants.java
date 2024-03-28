@@ -54,24 +54,25 @@ public class Constants {
     public static final String BSA = "\\$a";
     public static final String ERR_NOTICE_NSELECTED = "pas de notice selectionnée ou pas de no d exemplaire";
     public static final String MSG_APPN = "avec PPN ";
-
-    public static final String STR_1D = new String(new char[] { (char) 29 });
-    public static final String STR_1E = new String(new char[] { (char) 30 });
-    public static final String STR_0D = new String(new char[] { (char) 13 });
-    public static final String STR_1B = new String(new char[] { (char) 27 });
-    public static final String STR_1F = new String(new char[] { (char) 31 });
-    public static final String STR_E9 = new String(new char[] { (char) 101 });
-    public static final String STR_769 = new String(new char[] { (char) 769 });
+    public static final String STR_03 = String.valueOf((char) 03);
+    public static final String STR_29 = String.valueOf((char) 29);
+    public static final String STR_1D = String.valueOf((char) 29);
+    public static final String STR_1E = String.valueOf((char) 30);
+    public static final String STR_0D = String.valueOf((char) 13);
+    public static final String STR_1B = String.valueOf((char) 27);
+    public static final String STR_1F = String.valueOf((char) 31);
+    public static final String STR_E9 = String.valueOf((char) 101);
+    public static final String STR_769 = String.valueOf((char) 769);
     public static final char SEP_CHAMP = (char) Integer.parseInt("0D", 16);
-    public static final String STR_DOLLAR = new String(new char[] { (char) 36 });
-    public static final String STR_SPACE = new String(new char[] { (char) 32 });
+    public static final String STR_DOLLAR = String.valueOf((char) 36);
+    public static final String STR_SPACE = String.valueOf((char) 32);
     public static final String FINLIGNE = new String(
             new char[] { (char) 13, (char) 10, (char) 13, (char) 10, (char) 13, (char) 10, (char) 31, (char) 30 });
     public static final String SEPS = new String(new char[] { (char) 27, 'L', 'P', 'P' });
     public static final String SEPS1 = new String(new char[] { (char) 27, 'L', 'N', 'R' });
     public static final String LMA = new String(new char[] { (char) 27, 'L', 'M', 'A' });
-    public static final String CR_152_S = new String(new char[] { (char) 152 });
-    public static final String CR_156_S = new String(new char[] { (char) 156 });
+    public static final String CR_152_S = String.valueOf((char) 152);
+    public static final String CR_156_S = String.valueOf((char) 156);
 
     public static final String STR_ZOE = "?\\zoe+";
 
