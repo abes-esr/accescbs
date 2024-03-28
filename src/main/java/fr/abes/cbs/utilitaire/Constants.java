@@ -55,6 +55,7 @@ public class Constants {
     public static final String ERR_NOTICE_NSELECTED = "pas de notice selectionnée ou pas de no d exemplaire";
     public static final String MSG_APPN = "avec PPN ";
     public static final String STR_03 = String.valueOf((char) 03);
+    public static final String STR_29 = String.valueOf((char) 29);
     public static final String STR_1D = String.valueOf((char) 29);
     public static final String STR_1E = String.valueOf((char) 30);
     public static final String STR_0D = String.valueOf((char) 13);
