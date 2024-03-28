@@ -4,17 +4,17 @@ import fr.abes.cbs.exception.CBSException;
 import fr.abes.cbs.utilitaire.Constants;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.Level;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Base64;
 
 /** Représente une session au CBS
  */
-
 public class Cbs {
     @Getter @Setter private boolean cmdOk;
     @Getter @Setter private String errorMessage;
@@ -86,52 +86,47 @@ public class Cbs {
             throw new CBSException(Level.ERROR, "Error disconnecting socket : " + e.getMessage());
         }
     }
-    /**
-     * la méthode envoie une requête au CBS
-     * @param query la requête a envoyer
-     * @return le résultat de l'exécution de la requête
-     *
-     */
-    private String req(final String query) {
+
+     private String req(String query) {
         try {
-            DataInputStream in = new DataInputStream(s.getInputStream());
             DataOutputStream out = new DataOutputStream(s.getOutputStream());
-            String chaine1 = String.valueOf((char) 29);
-            String chaine2 = String.valueOf((char) 03);
-            String myString = query + chaine1 + chaine2;
-            byte[] bytes = myString.getBytes(StandardCharsets.UTF_8);
+            query += Constants.STR_29 + Constants.STR_03;
+            byte[] bytes = query.getBytes(StandardCharsets.UTF_8);
             out.write(bytes, 0, bytes.length);
-            int nb;
-            int nbtours = 0;
-            StringBuilder resu = new StringBuilder();
-            nb = in.read();
-            while (nb > 0) {
-                byte[] red = new byte[nb];
-                in.read(red, 0, nb);
-                String res = new String(red, StandardCharsets.UTF_8);
-                resu.append(res);
-                nb = in.available();
-                while (nbtours < 20 && nb == 0) {
-                    if(resu.toString().contains("\u0003")){
-                        break;
-                    }
-                    nbtours++;
-                    Thread.sleep(poll);
-                    nb = in.available();
-                }
-            }
-            String res = resu.toString();
+
+            String res = receiveMessageFromServer();
+
             if(res.contains(Constants.VERROR)){
-            	errorMessage = res;
+                errorMessage = res;
             } else {
-            	errorMessage = "";
+                errorMessage = "";
             }
             cmdOk = true;
             return res;
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException  e) {
             cmdOk = false;
             return "Req ko " + e;
         }
+    }
+
+    private String receiveMessageFromServer() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        InputStream inputStream = s.getInputStream();
+        InputStreamReader isr = new InputStreamReader(inputStream);
+        BufferedReader br = new BufferedReader(isr);
+
+        char[] buffer = new char[8192];
+        int charsRead;
+        br.read();
+        int cpt = 0;
+        while ((charsRead = br.read(buffer)) != -1) {
+            cpt++;
+            sb.append(buffer, 0, charsRead);
+            if (!br.ready()) {
+                break;
+            }
+        }
+        return sb.toString();
     }
 
     /**
