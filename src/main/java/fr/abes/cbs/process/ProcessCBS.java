@@ -2,7 +2,6 @@ package fr.abes.cbs.process;
 
 import fr.abes.cbs.commandes.Commandes;
 import fr.abes.cbs.exception.CBSException;
-import fr.abes.cbs.exception.CommException;
 import fr.abes.cbs.exception.ZoneException;
 import fr.abes.cbs.models.LogicalBdd;
 import fr.abes.cbs.notices.Biblio;
@@ -16,14 +15,15 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.Level;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 public class ProcessCBS {
     @Getter
-    private Commandes clientCBS;
-    private String timeStpEncours = "000200:00:00.000";
+    private final Commandes clientCBS;
     @Getter
     @Setter
     private int lotEncours;
@@ -45,14 +45,11 @@ public class ProcessCBS {
     @Getter
     @Setter
     public boolean hasExpl;
-    @Getter
-    @Setter
-    private String actEncours;
     private int pos = 1;
     @Getter
     @Setter
     private int nbNotices;
-    // la longueur de la notice récupérée suite à une recherche
+
     // liste des ppn retournés par la recherche
     @Getter
     @Setter
@@ -61,38 +58,26 @@ public class ProcessCBS {
     private String nvNumEx;
     @Getter
     private int nbExPPnEncours;
+    // la longueur de la notice récupérée suite à une recherche
     private int lgNoticeSearch;
     @Getter
-    private List<List<String>> resultatsTable;
+    private final List<List<String>> resultatsTable;
     @Getter
-    private List<String[]> resultatsList;
+    private final List<String[]> resultatsList;
     @Getter
     @Setter
     private String rcr;
-
-    public ProcessCBS(Integer poll) {
-        clientCBS = new Commandes(poll);
-        listePpn = new StringBuilder();
-        nbNotices = 0;
-        lotEncours = 0;
-        resultatsTable = new ArrayList<>();
-        resultatsList = new ArrayList<>();
-    }
 
     /**
      * Constructeur par défaut avec un délai entre 2 requête de 10ms
      */
     public ProcessCBS() {
-        clientCBS = new Commandes(10);
+        clientCBS = new Commandes();
         listePpn = new StringBuilder();
         nbNotices = 0;
         lotEncours = 0;
         resultatsTable = new ArrayList<>();
         resultatsList = new ArrayList<>();
-    }
-
-    public boolean isCmdOk() {
-        return clientCBS.isCmdOk();
     }
 
     public void disconnect() throws CBSException {
@@ -104,36 +89,33 @@ public class ProcessCBS {
      *
      * @param query requête CHE
      * @return résultat de la recherche
-     * @throws CBSException Erreur CBS
+     * @throws IOException Erreur de communication avec le CBS
      */
-    public String search(String query) throws CommException {
+    public String search(String query) throws IOException {
         String resu = "";
-        onEdit = false;
+        this.onEdit = false;
+        // on réinitialise la liste de ppn après chaque recherche
+        this.listePpn = new StringBuilder();
         try {
             resu = clientCBS.che(query);
-            // on réinitialise la liste de ppn après chaque recherche
-            listePpn = new StringBuilder();
-
-            nbNotices = Utilitaire.getNbNoticesFromChe(resu);
-            switch (nbNotices) {
-                case 1:
-                    nbNotices = 1;
-                    lotEncours = Integer.parseInt(Utilitaire.recupEntre(resu, Constants.STR_1D + "VSIS", Constants.STR_1D));
-                    ppnEncours = Utilitaire.recupEntre(resu, "LPP", Constants.STR_1B);
-                    lgNoticeSearch = resu.length();
-                    break;
+            this.nbNotices = Utilitaire.getNbNoticesFromChe(resu);
+            switch (this.nbNotices) {
                 case 0:
-                    nbNotices = 0;
+                    break;
+                case 1:
+                    this.lotEncours = Integer.parseInt(Utilitaire.recupEntre(resu, Constants.STR_1D + "VSIS", Constants.STR_1D));
+                    this.ppnEncours = Utilitaire.recupEntre(resu, "LPP", Constants.STR_1B);
                     break;
                 default:
-                    lotEncours = Integer.parseInt(Utilitaire.recupEntre(resu, "VSIS", Constants.STR_1D + "KTA"));
+                    this.lotEncours = Integer.parseInt(Utilitaire.recupEntre(resu, "VSIS", Constants.STR_1D));
                     String[] lstrecords = resu.split(Constants.STR_1B + "H" + Constants.STR_1B + "LPP");
                     initTablesResult(lstrecords);
-                    lgNoticeSearch = resu.length();
             }
+            this.lgNoticeSearch = resu.length();
             return resu;
         } catch (Exception ex) {
-            throw new CommException(Constants.ERREUR_SYSTEME);
+            log.error("Erreur recherche " + query + " / result : " + resu.replace("\r", "").replace("\n", "") + " erreur : " + ex.getMessage());
+            throw new IOException(ex);
         }
     }
 
@@ -152,7 +134,7 @@ public class ProcessCBS {
         for (int i = 1; i < lstrecords.length; i++) {
             String ligne = lstrecords[i];
             String ppn = ligne.substring(0, 9);
-            listePpn.append(ppn + ";");
+            listePpn.append(ppn).append(";");
             String lg = Utilitaire.recupEntre(ligne, Constants.SEPS1, Constants.STR_1B);
             String type = Utilitaire.recupEntre(ligne, Constants.LMA, Constants.STR_1B);
             String auteur = Utilitaire.recupEntre(ligne, Constants.STR_1B + "LV0", Constants.STR_1B);
@@ -160,7 +142,7 @@ public class ProcessCBS {
             String inconnu2 = Utilitaire.recupEntre(ligne, Constants.STR_1B + "LV2", Constants.STR_1B);
             String inconnu3 = Utilitaire.recupEntre(ligne, Constants.STR_1B + "LV3", Constants.STR_1B);
             String inconnu4 = Utilitaire.recupEntre(ligne, Constants.STR_1B + "LV4", Constants.STR_1B);
-            if (ppn.length() > 8 && !lg.isEmpty()) {
+            if (!lg.isEmpty()) {
                 String[] lignet2 = new String[8];
                 ArrayList<String> lignet = new ArrayList<>();
                 lignet.add(lg.trim());
@@ -193,10 +175,10 @@ public class ProcessCBS {
      * @param port    Port du serveur CBS
      * @param login   Utilisateur
      * @param passwd  Mot de passe
-     * @throws CBSException Erreur CBS
-     * @throws CommException erreur de communication avec le CBS
+     * @throws CBSException  Erreur CBS
+     * @throws IOException erreur de communication avec le CBS
      */
-    public void authenticate(String serveur, String port, String login, String passwd) throws CBSException, CommException {
+    public void authenticate(String serveur, String port, String login, String passwd) throws CBSException, IOException {
         if (!clientCBS.isConnected()) {
             clientCBS.connect(serveur, Integer.parseInt(port));
         }
@@ -225,8 +207,9 @@ public class ProcessCBS {
      * @param passwd  Mot de passe
      * @param bdd     numéro de base logique où se connecter (ex : 1.1 ou 1.201)
      * @throws CBSException Erreur CBS
+     * @throws IOException erreur de communication avec le CBS
      */
-    public void authenticateWithLogicalDb(String serveur, String port, String login, String passwd, String bdd) throws CBSException {
+    public void authenticateWithLogicalDb(String serveur, String port, String login, String passwd, String bdd) throws CBSException, IOException {
         if (!clientCBS.isConnected()) {
             clientCBS.connect(serveur, Integer.parseInt(port));
         }
@@ -261,8 +244,9 @@ public class ProcessCBS {
      * @param formatOrigine format d'origine de la notice
      * @return la notice noLigne en string
      * @throws CBSException Erreur CBS
+     * @throws IOException erreur de communication CBS
      */
-    public String view(final String noLigne, final boolean xml, String formatOrigine) throws CBSException, CommException {
+    public String view(final String noLigne, final boolean xml, String formatOrigine) throws CBSException, IOException {
         if (this.lotEncours == 0) {
             throw new CBSException(Level.ERROR, "Impossible de lancer la commande view : pas de lot en cours");
         }
@@ -288,7 +272,7 @@ public class ProcessCBS {
             }
             return Utilitaire.xmlFormat(chaine);
         } catch (Exception ex) {
-            throw new CommException(Constants.ERREUR_SYSTEME);
+            throw new IOException(ex);
         }
     }
 
@@ -297,8 +281,9 @@ public class ProcessCBS {
      *
      * @return Retourne les 16 prochains résultats
      * @throws CBSException Erreur CBS
+     * @throws IOException erreur de communication avec le CBS
      */
-    public String next() throws CBSException, CommException {
+    public String next() throws CBSException, IOException {
         try {
             onEdit = false;
             pos = pos + 16;
@@ -308,23 +293,8 @@ public class ProcessCBS {
             initTablesResult(lstrecords);
             return resu;
         } catch (Exception ex) {
-            throw new CommException(Constants.ERREUR_SYSTEME);
+            throw new IOException(ex);
         }
-    }
-
-    /**
-     * Met une notice en edit sur le CBS et la retourne en XML le numero de
-     * record est la position dans la liste courte
-     *
-     * @param noRecord Numéro de la notice souhaitée
-     * @return notice en XML en édition
-     * @throws CBSException Erreur CBS
-     * @throws CommException erreur de communication avec le CBS
-     * @deprecated
-     */
-    @Deprecated
-    public String editerEnXml(final String noRecord) throws CBSException, CommException {
-        return Utilitaire.xmlFormatEdit(this.editerJCBS(noRecord));
     }
 
     /**
@@ -332,10 +302,10 @@ public class ProcessCBS {
      *
      * @param notice Notice pica
      * @return Résultat de la création
-     * @throws CBSException Erreur CBS
-     * @throws CommException erreur de communication avec le CBS
+     * @throws CBSException  Erreur CBS
+     * @throws IOException erreur de communication avec le CBS
      */
-    public String enregistrerNew(final String notice) throws CBSException, CommException {
+    public String enregistrerNew(final String notice) throws CBSException, IOException {
         try {
             String resu = clientCBS.cre(notice, 1);
             onEdit = false;
@@ -345,36 +315,10 @@ public class ProcessCBS {
         } catch (CBSException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new CommException(Constants.ERREUR_SYSTEME);
+            throw new IOException(ex);
         }
 
     }
-
-    /**
-     * Enregistrer une notice en edit
-     * (pica)
-     *
-     * @param notice Notice au format natif
-     * @return Réponse du CBS
-     * @throws CBSException Erreur CBS
-     */
-    public String enregistrer(final String notice) throws CBSException, CommException {
-
-        int lettsp = Integer.parseInt(timeStpEncours.substring(0, 4));
-        lettsp--;
-        String leact = ("P").equals(actEncours) ? Constants.STR_1B + "P" : "";
-        String noticedeb = "BIB" + timeStpEncours;
-        try {
-            String resu = clientCBS.valMod(notice, lettsp, String.valueOf(lotEncours), ppnEncours, "1", noticedeb, leact);
-
-            onEdit = false;
-            return resu;
-        } catch (Exception ex) {
-            throw new CommException(Constants.ERREUR_SYSTEME);
-        }
-
-    }
-
 
     /**
      * Enregistrer une nouvelle notice d'autorites
@@ -382,8 +326,9 @@ public class ProcessCBS {
      * @param notice notice au format natif
      * @return Réponse du CBS
      * @throws CBSException Erreur CBS
+     * @throws IOException erreur de communication avec le CBS
      */
-    public String enregistrerNewAut(final String notice) throws CommException, CBSException {
+    public String enregistrerNewAut(final String notice) throws IOException, CBSException {
         try {
             String resu = clientCBS.cre(notice, 2);
             onEdit = false;
@@ -393,26 +338,10 @@ public class ProcessCBS {
         } catch (CBSException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new CommException(Constants.ERREUR_SYSTEME);
+            throw new IOException(ex);
         }
     }
 
-    /**
-     * envoi commande de translitération
-     *
-     * @param notice Notice au format natif
-     * @return Réponse du CBS
-     */
-    public String transliterer(final String notice) throws CBSException {
-        String leact = "";
-        if (Constants.LP.equals(actEncours)) {
-            leact = (char) 27 + Constants.LP;
-        }
-        String resu = clientCBS.transliterer(notice, leact, timeStpEncours, String.valueOf(lotEncours), ppnEncours);
-        onEdit = false;
-        onNew = true;
-        return resu;
-    }
 
     /**
      * envoi commande de translitération sans ppn
@@ -420,8 +349,9 @@ public class ProcessCBS {
      * @param notice Notice au format natif
      * @return Réponse du CBS
      * @throws CBSException Erreur CBS
+     * @throws IOException erreur de communication avec le CBS
      */
-    public String translitererSansPPN(final String notice) throws CBSException {
+    public String translitererSansPPN(final String notice) throws CBSException, IOException {
         String resu = clientCBS.translitererSansPPN(notice);
         onEdit = false;
         onNew = true;
@@ -434,8 +364,9 @@ public class ProcessCBS {
      * @param nonotice position de la notice dans le liste de resultats
      * @return Réponse du CBS
      * @throws CBSException Erreur CBS
+     * @throws IOException erreur de communication avec le CBS
      */
-    public String supprimer(final String nonotice) throws CBSException {
+    public String supprimer(final String nonotice) throws CBSException, IOException {
         String resu = clientCBS.sup(nonotice, String.valueOf(lotEncours), ppnEncours);
         if (clientCBS.isCmdOk()) {
             onEdit = false;
@@ -450,8 +381,9 @@ public class ProcessCBS {
      * @param params Tableau des paramètres pour le CBS
      * @return Réponse du CBS
      * @throws CBSException Erreur CBS
+     * @throws IOException erreur de communication avec le CBS
      */
-    public String setParams(final String[] params) throws CBSException {
+    public String setParams(final String[] params) throws CBSException, IOException {
         return clientCBS.setParams(params);
     }
 
@@ -461,10 +393,10 @@ public class ProcessCBS {
      * @param norecord Position de la notice dans la liste
      * @param notice   Notice au format natif
      * @return le message renvoyé par le CBS suite à la modification
-     * @throws CBSException erreur de validation
-     * @throws CommException Erreur de communication avec le CBS
+     * @throws CBSException  erreur de validation
+     * @throws IOException erreur de communication avec le CBS
      */
-    public String modifierNotice(String norecord, String notice) throws CommException, CBSException {
+    public String modifierNotice(String norecord, String notice) throws IOException, CBSException {
         try {
             String resu = clientCBS.mod(norecord, String.valueOf(lotEncours));
             String noticedeb = Utilitaire.recupEntre(resu, "VTXT", Constants.STR_1F);
@@ -479,7 +411,7 @@ public class ProcessCBS {
         } catch (CBSException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new CommException(Constants.ERREUR_SYSTEME);
+            throw new IOException(ex);
         }
     }
 
@@ -489,10 +421,10 @@ public class ProcessCBS {
      * @param norecord position de la notice dans le jeu de résultat
      * @param notice   notice au format NoticeConcrete
      * @return le message renvoyé par le CBS suite à la validation
-     * @throws CBSException erreur de validation CBS
-     * @throws CommException erreur de communication avec le CBS
+     * @throws CBSException  erreur de validation CBS
+     * @throws IOException erreur de communication avec le CBS
      */
-    public String modifierNoticeConcrete(String norecord, NoticeConcrete notice) throws CommException, CBSException {
+    public String modifierNoticeConcrete(String norecord, NoticeConcrete notice) throws IOException, CBSException {
         try {
             String resu = clientCBS.mod(norecord, String.valueOf(lotEncours));
             String noticeStr = notice.getNoticeBiblio().toString();
@@ -523,10 +455,10 @@ public class ProcessCBS {
                 }
             }
             return clientCBS.valMod(noticeStr, lgnotice, String.valueOf(lotEncours), ppnEncours, norecord, noticedeb, "");
-        }catch (CBSException ex) {
+        } catch (CBSException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new CommException(Constants.ERREUR_SYSTEME);
+            throw new IOException(ex);
         }
     }
 
@@ -537,14 +469,14 @@ public class ProcessCBS {
      *
      * @param rcr le rcr concerné
      * @return l'ILN de rattachement
-     * @throws CommException Erreur de communication avec le CBS
+     * @throws IOException Erreur de communication avec le CBS
      */
-    public String ilnRattachement(final String rcr) throws CommException {
+    public String ilnRattachement(final String rcr) throws IOException {
         try {
             String resu = clientCBS.affBib(rcr);
             return Utilitaire.recupEntre(resu, Constants.STR_1E + "VAG" + Constants.STR_1B + "P", Constants.STR_1E + "VAV");
         } catch (Exception ex) {
-            throw new CommException(Constants.ERREUR_SYSTEME);
+            throw new IOException(ex);
         }
     }
 
@@ -553,10 +485,10 @@ public class ProcessCBS {
      *
      * @param numEx : numéro de l'exemplaire à modifier
      * @return : exemplaire sélectionné
-     * @throws CBSException Erreur CBS
-     * @throws CommException erreur de communication avec le CBS
+     * @throws CBSException  Erreur CBS
+     * @throws IOException erreur de communication avec le CBS
      */
-    public String editerExemplaire(String numEx) throws CBSException, CommException {
+    public String editerExemplaire(String numEx) throws CBSException, IOException {
         try {
             String resu = clientCBS.modE(numEx, String.valueOf(lotEncours));
             String exemp;
@@ -569,7 +501,7 @@ public class ProcessCBS {
         } catch (CBSException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new CommException(Constants.ERREUR_SYSTEME);
+            throw new IOException(Constants.ERREUR_SYSTEME);
         }
     }
 
@@ -579,10 +511,10 @@ public class ProcessCBS {
      *
      * @param noRecord notice au format natif, en mode édition
      * @return Notice éditée
-     * @throws CBSException Erreur CBS
-     * @throws CommException erreur de communication avec le CBS
+     * @throws CBSException  Erreur CBS
+     * @throws IOException erreur de communication avec le CBS
      */
-    public String editer(final String noRecord) throws CBSException, CommException {
+    public String editer(final String noRecord) throws CBSException, IOException {
         // num de l'exemplaire en cours
         nbExPPnEncours = 0;
         // num du prochain exemplaire
@@ -627,7 +559,7 @@ public class ProcessCBS {
         } catch (CBSException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new CommException(Constants.ERREUR_SYSTEME);
+            throw new IOException(ex);
         }
     }
 
@@ -637,11 +569,11 @@ public class ProcessCBS {
      *
      * @param noRecord notice au format natif, en mode édition
      * @return Notice éditée
-     * @throws CBSException Erreur CBS
+     * @throws CBSException  Erreur CBS
      * @throws ZoneException erreur de construction de la notice
-     * @throws CommException erreur de communication avec le CBS
+     * @throws IOException erreur de communication avec le CBS
      */
-    public NoticeConcrete editerNoticeConcrete(final String noRecord) throws CBSException, ZoneException, CommException {
+    public NoticeConcrete editerNoticeConcrete(final String noRecord) throws CBSException, ZoneException, IOException {
         String resu = "";
         // num de l'exemplaire en cours
         nbExPPnEncours = 0;
@@ -697,70 +629,9 @@ public class ProcessCBS {
         } catch (ZoneException | CBSException ex) {
             throw ex;
         } catch (Exception ex) {
-            throw new CommException(Constants.ERREUR_SYSTEME);
+            log.error("Erreur passage en édition" + ex.getMessage());
+            throw new IOException(ex);
         }
-    }
-
-    /**
-     * Passage en édition comme utilisé dans JCBS (comptabilité IDRef
-     *
-     * @return Notice au format édition
-     * @throws CBSException erreur de validation
-     * @throws CommException erreur de communication avec le CBS
-     */
-    public String editerJCBS(String noRecord) throws CBSException, CommException {
-        String resu = this.editer(noRecord);
-        String notice;
-        actEncours = "";
-        if (resu.contains(Constants.STR_1B + "P001")) {
-            ppnEncours = Utilitaire.recupEntre(resu, Constants.STR_1B + "P001", Constants.STR_1B);
-            ppnEncours = ppnEncours.substring(0, ppnEncours.length() - 1).trim().replaceAll("\\$a", "");
-
-            notice = Utilitaire.recupEntre(resu, Constants.STR_1F + Constants.STR_1B + "P", Constants.STR_0D + Constants.STR_0D + Constants.STR_1E);
-            //on suprime le P et le dernier caractere parasite
-            actEncours = "P";
-        } else if (resu.contains(Constants.STR_1B + "P003")) {
-            ppnEncours = Utilitaire.recupEntre(resu, Constants.STR_1B + "P003", Constants.STR_1B);
-            ppnEncours = ppnEncours.substring(0, ppnEncours.length() - 1).trim().replaceAll("\\$a", "");
-            //entre 1F1B et 0D0E donne la notice avec le P001
-            notice = Utilitaire.recupEntre(resu, Constants.STR_1F + Constants.STR_1B + "P", Constants.STR_0D + Constants.STR_0D + Constants.STR_1E);
-            if (("").equals(notice)) {
-                notice = Utilitaire.recupEntre(resu, Constants.STR_1F + Constants.STR_1B + "P", Constants.STR_0D + Constants.STR_1E);
-            }
-            if (("").equals(notice)) {
-                //cas ou la notice termine par une zone protégée
-                notice = Utilitaire.recupEntre(resu, Constants.STR_1F + Constants.STR_1B + "P", Constants.STR_0D + Constants.STR_1B + "D" + Constants.STR_1E);
-            }
-            //on suprime le P et le dernier caractere parasite
-            actEncours = "P";
-        } else {
-            ppnEncours = Utilitaire.recupEntre(resu, Constants.STR_1F + "003", Constants.STR_0D);
-            ppnEncours = ppnEncours.trim().replaceAll("\\$a", "");
-            notice = Utilitaire.recupEntre(resu, Constants.STR_1F, Constants.STR_0D + Constants.STR_0D + Constants.STR_1E);
-            actEncours = "";
-        }
-        timeStpEncours = Utilitaire.recupEntre(resu, "VTXTBIB", Constants.STR_1F);
-
-        //pour recupere les exemplaires a faire....
-        String exemp = Utilitaire.recupEntre(resu, "VTXTE", Constants.STR_1E + "VMC");
-        StringBuilder eXp = new StringBuilder();
-        if (("").equals(exemp)) {
-            exemp = "VTXTE" + exemp;
-            String[] lstblocsExp = exemp.split(Constants.STR_1E);
-            for (String blocExp : lstblocsExp) // foreach (String blocExp in lstblocsExp)
-            {
-                String[] sbloc = blocExp.split(Constants.STR_1F);
-                if (sbloc.length == 2) {
-                    String trv = sbloc[0].replaceAll("VTXT", "");
-                    eXp.append(trv.substring(0, 3) + " " + trv.substring(3) + Constants.STR_0D);
-                    eXp.append(sbloc[1]);
-                }
-            }
-        }
-        if (("").equals(eXp.toString())) {
-            notice += eXp;
-        }
-        return notice;
     }
 
     /**
@@ -769,8 +640,9 @@ public class ProcessCBS {
      * @param numEx : numéro de l'exemplaire (sans le e, sur 2 digits) à passer en paramètre de la commande cre exx
      * @return le message renvoyé par le CBS suite à la création de l'exemplaire
      * @throws CBSException erreur CBS
+     * @throws IOException erreur de communication avec le CBS
      */
-    public String creerExemplaire(String numEx) throws CBSException {
+    public String creerExemplaire(String numEx) throws CBSException, IOException {
         return clientCBS.creE(numEx, String.valueOf(lotEncours));
     }
 
@@ -779,8 +651,9 @@ public class ProcessCBS {
      *
      * @return message renvoyé par le cbs suite au lancement de la commande cre l
      * @throws CBSException erreur CBS
+     * @throws IOException erreur de communication avec le CBS
      */
-    public String creerDonneeLocale() throws CBSException {
+    public String creerDonneeLocale() throws CBSException, IOException {
         return clientCBS.creL(String.valueOf(lotEncours));
     }
 
@@ -795,8 +668,9 @@ public class ProcessCBS {
      * @param exemplaire le nouveau num. d'exemplaire en concaténant "e" et NvNumEx
      * @return le message renvoyé par le CBS suite à la création de l'exemplaire
      * @throws CBSException Erreur CBS
+     * @throws IOException erreur de communication avec le CBS
      */
-    public String newExemplaire(String exemplaire) throws CBSException {
+    public String newExemplaire(String exemplaire) throws CBSException, IOException {
         return clientCBS.valCreE(exemplaire, String.valueOf(lotEncours), ppnEncours);
     }
 
@@ -806,10 +680,10 @@ public class ProcessCBS {
      * @param exemplaire : l'exemplaire à modifier
      * @param numEx      Numéro d'exemplaire
      * @return le message renvoyé par le CBS suite à la modification
-     * @throws CBSException Erreur CBS
-     * @throws CommException erreur de communication avec le CBS
+     * @throws CBSException  Erreur CBS
+     * @throws IOException erreur de communication avec le CBS
      */
-    public String modifierExemp(String exemplaire, String numEx) throws CBSException, CommException {
+    public String modifierExemp(String exemplaire, String numEx) throws CBSException, IOException {
         try {
             String resu = clientCBS.modE(numEx, String.valueOf(lotEncours));
             String noticedeb = Utilitaire.recupEntre(resu, Constants.VTXTE, Constants.STR_1F);
@@ -818,12 +692,17 @@ public class ProcessCBS {
         } catch (CBSException ex) {
             throw ex;
         } catch (Exception e) {
-            throw new CommException(Constants.ERREUR_SYSTEME);
+            throw new IOException(e);
         }
     }
 
-    public String back() throws CBSException {
-        return clientCBS.back(String.valueOf(lotEncours));
+    public void back() throws CBSException, IOException {
+        try {
+            clientCBS.back(String.valueOf(lotEncours));
+        } catch (Exception ex) {
+            log.error("Erreur retour arrière : " + ex.getMessage());
+            throw ex;
+        }
     }
 
     /**
@@ -836,8 +715,9 @@ public class ProcessCBS {
      * @return le message renvoyé par le CBS suite à la création de
      * l'utilisateur
      * @throws CBSException Erreur CBS
+     * @throws IOException erreur de communication avec le CBS
      */
-    public String newUsa(final String[] user) throws CBSException {
+    public String newUsa(final String[] user) throws CBSException, IOException {
         return clientCBS.creUsa(user);
     }
 
@@ -847,8 +727,9 @@ public class ProcessCBS {
      * @param user Nom de l'utilisateur à supprimer
      * @return Réponse du CBS
      * @throws CBSException Erreur CBS
+     * @throws IOException erreur de communication avec le CBS
      */
-    public String supUsa(final String user) throws CBSException {
+    public String supUsa(final String user) throws CBSException, IOException {
         return clientCBS.valSupUsa(user);
     }
 
@@ -857,21 +738,20 @@ public class ProcessCBS {
      *
      * @return les informations de l'utilisateur connecté
      */
-    public String affUsa() throws CBSException {
+    public String affUsa() throws CBSException, IOException {
         return clientCBS.affUsa();
     }
 
     /**
      * Met à jour le RCR actuel avec celui de l'utilisateur connecté
-     * @throws CommException erreur de communication avec le CBS
      *
      */
-    private void majRcr() throws CommException {
+    private void majRcr() throws IOException {
         try {
             String result = this.affUsa();
             this.setRcr(result.substring(result.indexOf("VU3") + 3, result.indexOf(" " + Constants.STR_1E)));
         } catch (Exception e) {
-            throw new CommException(Constants.ERREUR_SYSTEME);
+            throw new IOException(e);
         }
     }
 
@@ -884,7 +764,7 @@ public class ProcessCBS {
      * @return la notice au format unimarc
      * @throws CBSException Erreur CBS
      */
-    public String affUnma() throws CBSException {
+    public String affUnma() throws CBSException, IOException {
         return clientCBS.affFormat("unma", String.valueOf(lotEncours));
     }
 
@@ -898,7 +778,7 @@ public class ProcessCBS {
      * @return la notice au format unimarc
      * @throws CBSException Erreur CBS
      */
-    public String affFormat(String format) throws CBSException {
+    public String affFormat(String format) throws CBSException, IOException {
         return clientCBS.affFormat(format, String.valueOf(lotEncours));
     }
 
@@ -906,10 +786,9 @@ public class ProcessCBS {
      * Récupère la liste des notices liées
      *
      * @return le nombre de notices liées
-     * @throws CBSException erreur CBS
-     * @throws CommException erreur de communication avec le CBS
+     * @throws CBSException  erreur CBS
      */
-    public Integer rel() throws CBSException, CommException {
+    public Integer rel() throws CBSException, IOException {
         if (this.lotEncours == 0)
             throw new CBSException(Level.ERROR, "Impossible de lancer la commande rel : pas de lot en cours");
         try {
@@ -919,7 +798,7 @@ public class ProcessCBS {
         } catch (CBSException ex) {
             throw ex;
         } catch (Exception e) {
-            throw new CommException(Constants.ERREUR_SYSTEME);
+            throw new IOException(e);
         }
     }
 
@@ -933,7 +812,7 @@ public class ProcessCBS {
      * @return le résultat de la suppression
      * @throws CBSException Erreur CBS
      */
-    public String supExemplaire(String exemplaire) throws CBSException {
+    public String supExemplaire(String exemplaire) throws CBSException, IOException {
         return clientCBS.supE(exemplaire, String.valueOf(lotEncours), ppnEncours);
     }
 
@@ -946,7 +825,7 @@ public class ProcessCBS {
      * @return le résultat de la suppression
      * @throws CBSException Erreur CBS
      */
-    public String supBiblio() throws CBSException {
+    public String supBiblio() throws CBSException, IOException {
         return clientCBS.sup(String.valueOf(lotEncours), ppnEncours);
     }
 
@@ -959,10 +838,9 @@ public class ProcessCBS {
      *
      * @param vloc !!!!!!!!!!!!
      * @return le message renvoyé par le CBS suite à la modification
-     * @throws CBSException Erreur CBS
-     * @throws CommException erreur de communication avec le CBS
+     * @throws CBSException  Erreur CBS
      */
-    public String modLoc(final String vloc) throws CBSException, CommException {
+    public String modLoc(final String vloc) throws CBSException, IOException {
         try {
             String resu = clientCBS.modLoc(String.valueOf(lotEncours));
             String noticedeb = Utilitaire.recupEntre(resu, Constants.VTXT, Constants.STR_1F);
@@ -970,7 +848,7 @@ public class ProcessCBS {
         } catch (CBSException e) {
             throw e;
         } catch (Exception e) {
-            throw new CommException(Constants.ERREUR_SYSTEME);
+            throw new IOException(e);
         }
     }
 
@@ -986,7 +864,7 @@ public class ProcessCBS {
      * locale
      * @throws CBSException Erreur CBS
      */
-    public String newLoc(final String vloc) throws CBSException {
+    public String newLoc(final String vloc) throws CBSException, IOException {
         return clientCBS.valCreLoc(ppnEncours, String.valueOf(lotEncours), vloc);
     }
 
@@ -1000,7 +878,7 @@ public class ProcessCBS {
      * @return message renvoyé par le CBS suite à la suppression
      * @throws CBSException erreur CBS
      */
-    public String supLoc() throws CBSException {
+    public String supLoc() throws CBSException, IOException {
         clientCBS.supL(String.valueOf(lotEncours));
         return clientCBS.valSupL(String.valueOf(lotEncours), ppnEncours);
     }

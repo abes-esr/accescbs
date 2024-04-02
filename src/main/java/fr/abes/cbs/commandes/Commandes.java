@@ -5,7 +5,8 @@ import fr.abes.cbs.exception.CBSException;
 import fr.abes.cbs.utilitaire.Constants;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+
+import java.io.IOException;
 
 public class Commandes {
     @Getter
@@ -19,8 +20,10 @@ public class Commandes {
     @Getter
     private String rcr = "";
 
-    public Commandes(Integer poll) {
-        connector = new Cbs(poll);
+    public Commandes() {
+        this.isConnected = false;
+        this.isLogged = false;
+        this.connector = new Cbs();
     }
 
     /**
@@ -32,14 +35,6 @@ public class Commandes {
         return connector.isCmdOk();
     }
 
-    /**
-     * met à jour la valeur de cmdOk dans connector
-     *
-     * @param cmdOk booléen correspondant au retour de la commande précèdente (OK ou NOK)
-     */
-    public void setCmdOk(boolean cmdOk) {
-        connector.setCmdOk(cmdOk);
-    }
 
     /**
      * Log un utilisateur au CBS
@@ -48,7 +43,7 @@ public class Commandes {
      * @param pwd    le mot de passe
      * @return le message renvoyé par le serveur suite à l'authentification
      */
-    public String log(final String login, final String pwd) throws CBSException {
+    public String log(final String login, final String pwd) throws CBSException, IOException {
 
         String query = new StringBuilder(Constants.VTAFR).append(Constants.STR_1D).append(Constants.VCUTF8).append(Constants.STR_1D).append("CPCSCR 00").toString();
         String resu = connector.tcpReq(query);
@@ -61,7 +56,7 @@ public class Commandes {
             isLogged = false;
             return resu;
         }
-        if ("M03".equals(resu.substring(0, 3)) || "02".equals(resu.substring(0, 2))) {
+        if ("M02".equals(resu.substring(0, 3))) {
             isLogged = false;
             return resu;
         }
@@ -74,12 +69,10 @@ public class Commandes {
      *
      * @param tip   adresse ip du serveur CBS
      * @param port1 port de connexion
-     * @return Le message renvoyé par le serveur
+     * @return true si la tentative de connexion est réussi, false autrement
      */
-    public String connect(String tip, int port1) throws CBSException {
-        String errorMsg = connector.connect(tip, port1);
-        isConnected = errorMsg.isEmpty();
-        return errorMsg;
+    public void connect(String tip, int port1) throws CBSException {
+        this.isConnected = connector.connect(tip, port1);
     }
 
     /**
@@ -92,24 +85,6 @@ public class Commandes {
     }
 
     /**
-     * Retourne le message d'erreur de la dernière commande CBS
-     *
-     * @return Message d'erreur
-     */
-    public String getErrorMessage() {
-        return connector.getErrorMessage();
-    }
-
-    /**
-     * met à jour la valeur de errorMessage dans connector
-     *
-     * @param errorMessage Message d'erreur
-     */
-    public void setErrorMessage(String errorMessage) {
-        connector.setErrorMessage(errorMessage);
-    }
-
-    /**
      * Visualiser une notice parametres: no de record dans le liste
      * courte,retour en xml ou natif,format de recup:UNMA, UNX..
      *
@@ -118,7 +93,7 @@ public class Commandes {
      * @param fOrigine   format d'origine de la notice
      * @return la notice
      */
-    public String view(final String noLigne, final String lotEncours, final String fOrigine) throws CBSException {
+    public String view(final String noLigne, final String lotEncours, final String fOrigine) throws CBSException, IOException {
         String query = new StringBuilder().append(Constants.VT1).append(Constants.STR_1D).append(Constants.VTI).append(noLigne).append(Constants.STR_1D).append(Constants.VTAFR).append(Constants.STR_1D)
                 .append(Constants.VCUTF8).append(Constants.STR_1D).append(Constants.CUSTOO).append(lotEncours)
                 .append(" ").append(noLigne).append(" ").append(fOrigine).toString();
@@ -132,7 +107,7 @@ public class Commandes {
      * @param pos        Position dans la liste
      * @return
      */
-    public String next(final String lotEncours, final int pos) throws CBSException {
+    public String next(final String lotEncours, final int pos) throws CBSException, IOException {
         String query = new StringBuilder().append("CUS\\too s").append(lotEncours).append(" ").append(pos)
                 .append(" K").toString();
         return connector.tcpReq(query);
@@ -146,7 +121,7 @@ public class Commandes {
      * @throws CBSException Erreur CBS
      */
     public String valMod(final String notice, final int lgnotice, String lotEncours, String ppnEncours,
-                         String noRecordEnEdit, String noticedeb, String leact) throws CBSException {
+                         String noRecordEnEdit, String noticedeb, String leact) throws CBSException, IOException {
 
         String query = new StringBuilder().append(Constants.VSE).append(lotEncours).append(Constants.STR_1D)
                 .append(Constants.VTI1).append(Constants.STR_1D).append(Constants.VT1).append(Constants.STR_1D)
@@ -170,7 +145,7 @@ public class Commandes {
      * @return Notice translitérée
      * @throws CBSException Erreur CBS
      */
-    public String transliterer(final String notice, String leact, String timeStpEnCours, String lotEnCours, String ppnEncours) throws CBSException {
+    public String transliterer(final String notice, String leact, String timeStpEnCours, String lotEnCours, String ppnEncours) throws CBSException, IOException {
 
         int lettsp = Integer.parseInt(timeStpEnCours.substring(0, 4));
         lettsp--;
@@ -190,11 +165,11 @@ public class Commandes {
      * @return Notice translitérée
      * @throws CBSException Erreur CBS
      */
-    public String translitererSansPPN(final String notice) throws CBSException {
+    public String translitererSansPPN(final String notice) throws CBSException, IOException {
         String query = new StringBuilder().append(Constants.VTAFR).append(Constants.STR_1D)
                 .append(Constants.VCUTF8).append(Constants.STR_1D).append("CUScre e").toString();
         String resu = connector.tcpReq(query);
-        if (connector.isCmdOk() && connector.getErrorMessage().isEmpty() && resu.contains("VOK")) {
+        if (connector.isCmdOk() && resu.contains("VOK")) {
             query = new StringBuilder().append(Constants.VSE3).append(Constants.STR_1D).append(Constants.VTI1)
                     .append(Constants.STR_1D).append(Constants.VT1).append(Constants.STR_1D).append(Constants.VTAFR)
                     .append(Constants.STR_1D).append(Constants.VCUTF8).append(Constants.STR_1D)
@@ -213,7 +188,7 @@ public class Commandes {
      * @return liste des notices liées
      * @throws CBSException erreur CBS
      */
-    public String rel(String lotEncours) throws CBSException {
+    public String rel(String lotEncours) throws CBSException, IOException {
         String query = new StringBuilder().append(Constants.VTI1).append(Constants.STR_1D).append(Constants.VSE).append(lotEncours)
                 .append(Constants.STR_1D).append(Constants.VPRUNM).append(Constants.STR_1D).append(Constants.VT1).append(Constants.STR_1D)
                 .append(Constants.VTAFR).append(Constants.STR_1D).append(Constants.VCUTF8).append(Constants.STR_1D).append("CUSrel").toString();
@@ -228,7 +203,7 @@ public class Commandes {
      * @return Retour du CBS
      * @throws CBSException Erreur CBS
      */
-    public String sup(final String nonotice, String lotEncours, String ppnEncours) throws CBSException {
+    public String sup(final String nonotice, String lotEncours, String ppnEncours) throws CBSException, IOException {
         String query = new StringBuilder().append(Constants.VTAFR).append(Constants.STR_1D)
                 .append(Constants.VCUTF8).append(Constants.STR_1D).append(Constants.CKPPN).append(ppnEncours)
                 .append(";\\TOO S").append(lotEncours).append(" ").append(nonotice).append(" ").append(Constants.UNMA).toString();
@@ -242,7 +217,7 @@ public class Commandes {
      * @return retour du CBS
      * @throws CBSException Erreur CBS
      */
-    public String supL(String lotEncours) throws CBSException {
+    public String supL(String lotEncours) throws CBSException, IOException {
         String query = new StringBuilder().append(Constants.VTI1).append(Constants.STR_1D).append(Constants.VSE).append(lotEncours)
                 .append(Constants.STR_1D).append(Constants.VPRUNM).append(Constants.STR_1D).append(Constants.VT1).append(Constants.STR_1D)
                 .append(Constants.VTAFR).append(Constants.STR_1D).append(Constants.VCUTF8).append(Constants.STR_1D).append("CUSsup l").toString();
@@ -255,7 +230,7 @@ public class Commandes {
      * @return retour du CBS
      * @throws CBSException
      */
-    public String valSupL(String lotEncours, String ppnEncours) throws CBSException {
+    public String valSupL(String lotEncours, String ppnEncours) throws CBSException, IOException {
         String query = new StringBuilder().append(Constants.VSE).append(lotEncours).append(Constants.STR_1D).append(Constants.VTI1).append(Constants.STR_1D)
                 .append(Constants.VT1).append(Constants.STR_1D).append(Constants.VTAFR).append(Constants.STR_1D).append(Constants.VCUTF8).append(Constants.STR_1D)
                 .append("CPC\\KIL \\PPN ").append(ppnEncours).append(" L;\\TOO S").append(lotEncours).append(" 1 ").append(Constants.UNM).append(Constants.STR_1D).toString();
@@ -270,7 +245,7 @@ public class Commandes {
      * @return Retour du CBS
      * @throws CBSException Erreur CBS
      */
-    public String setParams(final String[] params) throws CBSException {
+    public String setParams(final String[] params) throws CBSException, IOException {
         String triResultats = params[0];
         String triVol = params[1];
         String cleBal = params[2];
@@ -332,7 +307,7 @@ public class Commandes {
      * @param rcr le rcr concerné
      * @return l'ILN de rattachement
      */
-    public String affBib(final String rcr) throws CBSException {
+    public String affBib(final String rcr) throws CBSException, IOException {
         String query = new StringBuilder().append(Constants.VT1).append(Constants.STR_1D).append(Constants.VTAFR)
                 .append(Constants.STR_1D).append(Constants.VCUTF8).append(Constants.STR_1D).append("CUSaff bib ")
                 .append(rcr).append(Constants.STR_1D).toString();
@@ -346,7 +321,7 @@ public class Commandes {
      * @return retour du CBS
      * @throws CBSException Erreur CBS
      */
-    public String che(String req) throws CBSException {
+    public String che(String req) throws CBSException, IOException {
         String query = new StringBuilder().append(Constants.CUTF8).append(Constants.STR_1D).append(Constants.VSE1)
                 .append(Constants.STR_1D).append(Constants.VPRK).append(Constants.STR_1D).append(Constants.VT1)
                 .append(Constants.STR_1D).append(Constants.VTI1).append(Constants.STR_1D).append(" ")
@@ -363,7 +338,7 @@ public class Commandes {
      * @return retour du cbs
      * @throws CBSException Erreur CBS
      */
-    public String creE(String numEx, String lotEncours) throws CBSException {
+    public String creE(String numEx, String lotEncours) throws CBSException, IOException {
         String query = new StringBuilder().append(Constants.VTI1).append(Constants.STR_1D).append(Constants.VSE)
                 .append(lotEncours).append(Constants.STR_1D).append(Constants.VPRUNM).append(Constants.STR_1D)
                 .append(Constants.VT1).append(Constants.STR_1D).append(Constants.VTAFR).append(Constants.STR_1D)
@@ -378,7 +353,7 @@ public class Commandes {
      * @Return retour du cbs
      * @Throws CBSException erreur CBS
      */
-    public String creL(String lotEncours) throws CBSException {
+    public String creL(String lotEncours) throws CBSException, IOException {
         String query = new StringBuilder().append(Constants.VTI1).append(Constants.STR_1D).append(Constants.VSE)
                 .append(lotEncours).append(Constants.STR_1D).append(Constants.VPRUNM).append(Constants.STR_1D)
                 .append(Constants.VT1).append(Constants.STR_1D).append(Constants.VTAFR).append(Constants.STR_1D)
@@ -393,7 +368,7 @@ public class Commandes {
      * @return : exemplaire sélectionné
      * @throws CBSException Erreur CBS
      */
-    public String modE(String numEx, String lotEncours) throws CBSException {
+    public String modE(String numEx, String lotEncours) throws CBSException, IOException {
         String query = new StringBuilder().append(Constants.VTI1).append(Constants.STR_1D).append(Constants.VSE)
                 .append(lotEncours).append(Constants.STR_1D).append(Constants.VPRUNM).append(Constants.STR_1D)
                 .append(Constants.VT1).append(Constants.STR_1D).append(Constants.VTAFR).append(Constants.STR_1D)
@@ -412,7 +387,7 @@ public class Commandes {
      * @return le message renvoyé par le CBS suite à la création
      * @throws CBSException Erreur CBS
      */
-    public String cre(String notice, int flag) throws CBSException {
+    public String cre(String notice, int flag) throws CBSException, IOException {
         String query = new StringBuilder().append("CPC\\INV \\").append(flag).append(" UNM").append(Constants.STR_1D).append(Constants.BBWVTX0T).append("BIB000200:00:00.000").append(Constants.STR_1F)
                 .append("D1").append(Constants.STR_1F).append("I").append(notice).append(Constants.FINLIGNE).toString();
         return connector.tcpReq(query);
@@ -429,7 +404,7 @@ public class Commandes {
      * @return le message renvoyé par le CBS suite à la création de l'exemplaire
      * @throws CBSException Erreur CBS
      */
-    public String valCreE(String exemplaire, String lotEncours, String ppnEncours) throws CBSException {
+    public String valCreE(String exemplaire, String lotEncours, String ppnEncours) throws CBSException, IOException {
         String query = new StringBuilder("VSE").append(lotEncours).append(Constants.STR_1D).append("VTI1").append(Constants.STR_1D)
                 .append(Constants.VT1).append(Constants.STR_1D).append(Constants.VTAFR).append(Constants.STR_1D).append(Constants.VCUTF8).append(Constants.STR_1D)
                 .append(Constants.CIPPN).append(ppnEncours).append(" E").append(exemplaire.substring(1, 3)).append(Constants.UNMTOO)
@@ -452,7 +427,7 @@ public class Commandes {
      * @throws CBSException Erreur CBS
      */
     public String valModE(String exemplaire, String numEx, String lotEncours, String noticedeb, String ppnEncours,
-                          int lgexemp) throws CBSException {
+                          int lgexemp) throws CBSException, IOException {
         String query = new StringBuilder().append(Constants.VSE).append(lotEncours).append(Constants.STR_1D)
                 .append(Constants.VTI1).append(Constants.STR_1D).append(Constants.VT1).append(Constants.STR_1D)
                 .append(Constants.VTAFR).append(Constants.STR_1D).append(Constants.VCUTF8).append(Constants.STR_1D)
@@ -470,7 +445,7 @@ public class Commandes {
      *
      * @return
      */
-    public String back(String lotEncours) throws CBSException {
+    public String back(String lotEncours) throws CBSException, IOException {
         String query = new StringBuilder().append(Constants.VSE).append(lotEncours).append(Constants.STR_1D)
                 .append(Constants.VTI1).append(Constants.STR_1D).append(Constants.VT1).append(Constants.STR_1D)
                 .append(Constants.VTAFR).append(Constants.STR_1D).append(Constants.VCUTF8).append(Constants.STR_1D)
@@ -486,7 +461,7 @@ public class Commandes {
      * @return Retour CBS
      * @throws CBSException Erreur CBS
      */
-    public String creUsa(final String[] user) throws CBSException {
+    public String creUsa(final String[] user) throws CBSException, IOException {
         String login = user[1];
         String group = user[0];
         String shortname = user[2];
@@ -524,7 +499,7 @@ public class Commandes {
      * @return Retour du CBS
      * @throws CBSException Erreur CBS
      */
-    public String valSupUsa(String user) throws CBSException {
+    public String valSupUsa(String user) throws CBSException, IOException {
         String query = new StringBuilder().append(Constants.VT1).append(Constants.STR_1D).append(Constants.VTAFR).append(Constants.STR_1D).append(Constants.VCUTF8).append(Constants.STR_1D).append(Constants.CPCWIS).append(user).toString();
         return connector.tcpReq(query);
     }
@@ -535,7 +510,7 @@ public class Commandes {
      * @return Infos user
      * @throws CBSException Erreur CBS
      */
-    public String affUsa() throws CBSException {
+    public String affUsa() throws CBSException, IOException {
         String query = new StringBuilder().append(Constants.VT1).append(Constants.STR_1D).append(Constants.VTAFR)
                 .append(Constants.STR_1D).append(Constants.VCUTF8).append(Constants.STR_1D).append(Constants.CUS).append("aff usa").append(Constants.STR_1D).toString();
         return connector.tcpReq(query);
@@ -551,7 +526,7 @@ public class Commandes {
      * @return la notice au format unimarc
      * @throws CBSException Erreur CBS
      */
-    public String affFormat(String format, String lotEncours) throws CBSException {
+    public String affFormat(String format, String lotEncours) throws CBSException, IOException {
         String query = new StringBuilder().append(Constants.VSE).append(lotEncours).append(Constants.STR_1D)
                 .append(Constants.VTI1).append(Constants.STR_1D).append(Constants.VPRI).append(Constants.STR_1D)
                 .append(Constants.VT1).append(Constants.STR_1D).append(Constants.VTAFR).append(Constants.STR_1D)
@@ -572,7 +547,7 @@ public class Commandes {
      * @return le résultat de la suppression
      * @throws CBSException Erreur CBS
      */
-    public String supE(String exemplaire, String lotEncours, String ppnEncours) throws CBSException {
+    public String supE(String exemplaire, String lotEncours, String ppnEncours) throws CBSException, IOException {
         String query = new StringBuilder().append(Constants.VSE).append(lotEncours).append(Constants.STR_1D)
                 .append(Constants.VTI1).append(Constants.STR_1D).append(Constants.VT1).append(Constants.STR_1D)
                 .append(Constants.VTAFR).append(Constants.STR_1D).append(Constants.VCUTF8).append(Constants.STR_1D)
@@ -590,7 +565,7 @@ public class Commandes {
      * @return le résultat de la suppression
      * @throws CBSException Erreur CBS
      */
-    public String sup(String lotEncours, String ppnEncours) throws CBSException {
+    public String sup(String lotEncours, String ppnEncours) throws CBSException, IOException {
         String query = new StringBuilder().append(Constants.VSE).append(lotEncours).append(Constants.STR_1D)
                 .append(Constants.VTI1).append(Constants.STR_1D).append(Constants.VT1).append(Constants.STR_1D)
                 .append(Constants.VTAFR).append(Constants.STR_1D).append(Constants.VCUTF8).append(Constants.STR_1D)
@@ -605,7 +580,7 @@ public class Commandes {
      * @return le message renvoyé par le CBS suite à la modification
      * @throws CBSException Erreur CBS
      */
-    public String modLoc(final String lotEncours) throws CBSException {
+    public String modLoc(final String lotEncours) throws CBSException, IOException {
         String query = new StringBuilder().append(Constants.VSE).append(lotEncours).append(Constants.STR_1D)
                 .append(Constants.VTI1).append(Constants.STR_1D).append(Constants.VT1).append(Constants.STR_1D)
                 .append(Constants.VPRUNMA).append(Constants.STR_1D).append(Constants.VTAFR).append(Constants.STR_1D)
@@ -627,7 +602,7 @@ public class Commandes {
      * @return le message renvoyé par le CBS suite à la modification
      * @throws CBSException Erreur CBS
      */
-    public String valModLoc(final String notice, final String ppnEncours, final String lotEncours, final String vloc) throws CBSException {
+    public String valModLoc(final String notice, final String ppnEncours, final String lotEncours, final String vloc) throws CBSException, IOException {
         String query = new StringBuilder().append(Constants.VSE).append(lotEncours).append(Constants.STR_1D)
                 .append(Constants.VTI1).append(Constants.STR_1D).append(Constants.VT1).append(Constants.STR_1D)
                 .append(Constants.VTAFR).append(Constants.STR_1D).append(Constants.VCUTF8).append(Constants.STR_1D)
@@ -649,7 +624,7 @@ public class Commandes {
      * @return retour du CBS
      * @throws CBSException Erreur CBS
      */
-    public String valCreLoc(final String ppnEncours, final String lotEncours, final String vloc) throws CBSException {
+    public String valCreLoc(final String ppnEncours, final String lotEncours, final String vloc) throws CBSException, IOException {
         String query = new StringBuilder().append(Constants.VSE).append(lotEncours).append(Constants.STR_1D)
                 .append(Constants.VTI1).append(Constants.STR_1D).append(Constants.VT1).append(Constants.STR_1D)
                 .append(Constants.VTAFR).append(Constants.STR_1D).append(Constants.VCUTF8).append(Constants.STR_1D)
@@ -668,7 +643,7 @@ public class Commandes {
      * @return retour du CBS
      * @throws CBSException Erreur CBS
      */
-    public String mod(final String noRecord, final String lotEncours) throws CBSException {
+    public String mod(final String noRecord, final String lotEncours) throws CBSException, IOException {
         String query = new StringBuilder().append(Constants.VTI).append(noRecord).append(Constants.STR_1D)
                 .append(Constants.VSE).append(lotEncours).append(Constants.STR_1D).append(Constants.VPRUNM)
                 .append(Constants.STR_1D).append(Constants.VT1).append(Constants.STR_1D).append(Constants.VTAFR)

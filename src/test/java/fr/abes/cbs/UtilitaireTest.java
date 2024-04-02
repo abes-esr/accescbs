@@ -1,7 +1,6 @@
 package fr.abes.cbs;
 
 import fr.abes.cbs.exception.CBSException;
-import fr.abes.cbs.exception.CommException;
 import fr.abes.cbs.process.ProcessCBS;
 import fr.abes.cbs.utilitaire.Constants;
 import fr.abes.cbs.utilitaire.Utilitaire;
@@ -23,7 +22,7 @@ class UtilitaireTest {
     private static String noticeResourceAvecExemplaireAbes;
 
     @BeforeAll
-    static void initAll() throws CBSException, CommException {
+    static void initAll() throws CBSException, IOException {
         Properties prop = new Properties();
         try {
             prop.load(UtilitaireTest.class.getResource("/CommandesTest.properties").openStream());
@@ -31,7 +30,7 @@ class UtilitaireTest {
             e.printStackTrace();
         }
 
-        cmd = new ProcessCBS(Integer.parseInt(prop.getProperty("connect.poll")));
+        cmd = new ProcessCBS();
         cmd.authenticate(prop.getProperty("connect.ip"), prop.getProperty("connect.port"), prop.getProperty("connect.login"), prop.getProperty("connect.password"));
 
         noticeResource = new Scanner(UtilitaireTest.class.getResourceAsStream("/noticePica.txt"), "UTF-8").useDelimiter("\\A").next();
@@ -49,7 +48,7 @@ class UtilitaireTest {
 
     @DisplayName("Nb de notices from CHE")
     @Test
-    void getNbNoticesFromChe() throws CBSException, CommException {
+    void getNbNoticesFromChe() throws IOException {
         assertThat(Utilitaire.getNbNoticesFromChe(cmd.search("che mti fdfsdfsfzerzrzrzrzfsdf"))).isEqualTo(0);
         assertThat(Utilitaire.getNbNoticesFromChe(cmd.search("che ppn 230721486"))).isEqualTo(1);
         assertThat(Utilitaire.getNbNoticesFromChe(cmd.search("che mti testtcn"))).isEqualTo(2);
@@ -57,21 +56,21 @@ class UtilitaireTest {
 
     @DisplayName("Conversion Pica -> XML")
     @Test
-    void xmlFormat() throws CBSException, CommException {
+    void xmlFormat() throws CBSException, IOException {
         //On vérifie la présence d'un champ afin de vérifier que le XML n'est pas vide et donc que la notice a bien été convertie
         assertThat(Utilitaire.xmlFormat(noticeTestEnEdition())).contains("<controlfield  tag=\"008\" >$aAax</controlfield>");
     }
 
     @DisplayName("Conversion Pica -> XML pour les notices en édition")
     @Test
-    void xmlFormatEdit() throws CBSException, CommException {
+    void xmlFormatEdit() throws CBSException, IOException {
         //On vérifie la présence d'un champ afin de vérifier que le XML n'est pas vide et donc que la notice a bien été convertie
         assertThat(Utilitaire.xmlFormatEdit(noticeTestEnEdition())).contains("<subfield code=\"a\">Aax</subfield></datafield>");
     }
 
     @DisplayName("Conversion liste résultats -> XML")
     @Test
-    void getRecordSetAsXml() throws CBSException, CommException {
+    void getRecordSetAsXml() throws IOException {
         cmd.search("che mti ours");
         //On vérifie que l'on a bien une liste XML non vide en retour
         assertThat(Utilitaire.getRecordSetAsXml(cmd.getResultatsTable())).contains("<RecordsList><Record><Col0>1</Col0>");
@@ -79,7 +78,7 @@ class UtilitaireTest {
 
     @DisplayName("Conversion liste résultats -> XML du 1er résultat uniquement")
     @Test
-    void getRecordSetAsXmlFromFor() throws CBSException, CommException {
+    void getRecordSetAsXmlFromFor() throws IOException {
         cmd.search("che mti ours");
         //On vérifie que l'on a bien une liste XML non vide  d'un seul élement en retour
         String xml = Utilitaire.getRecordSetAsXmlFromFor(0,1, cmd.getResultatsTable());
@@ -90,7 +89,7 @@ class UtilitaireTest {
 
     @DisplayName("Récupération d'un tag")
     @Test
-    void getTag() throws CBSException {
+    void getTag() {
         String notice = new Scanner(CommandesTest.class.getResourceAsStream("/noticePica.txt"), "UTF-8").useDelimiter("\\A").next();
         //On vérifie que getTag nous retourne bien la bonne valeur
         assertThat(Utilitaire.getTag(notice, "008", "")).isEqualTo("$aAax");
@@ -121,7 +120,7 @@ class UtilitaireTest {
 
     @DisplayName("Conversion XML -> Marc")
     @Test
-    void xml2MarcEdit() throws CBSException, CommException {
+    void xml2MarcEdit() throws CBSException, IOException {
         cmd.search("che ppn 230721486");
         String xml = Utilitaire.xmlFormat(cmd.editer("1"));
         assertThat(Utilitaire.xml2MarcEdit(xml)).contains("008 $aAax").contains("101 0$afre");
@@ -129,7 +128,7 @@ class UtilitaireTest {
 
     @DisplayName("Conversion XML -> Marc")
     @Test
-    void xml2Marc() throws CBSException, IOException {
+    void xml2Marc() {
         //String content = Files.readString(Paths.get("/noticeXML.xml"), StandardCharsets.US_ASCII);
 
         Scanner scanner = new Scanner(UtilitaireTest.class.getResourceAsStream("/noticeXML.xml"), "UTF-8").useDelimiter("\\r");
@@ -175,7 +174,7 @@ class UtilitaireTest {
 
     @DisplayName("Ajout d'une zone biblio")
     @Test
-    void ajoutZoneBiblio() throws CBSException, CommException {
+    void ajoutZoneBiblio() throws CBSException, IOException {
         //On récupère notre notice de test, puis on y ajoute la zone 102
         String noticeAvecAjout = Utilitaire.ajoutZoneBiblio(noticeTestEnEdition(), "102", "$a", "valeurTest");
         //On vérifie que la zone 102 est bien présente
@@ -184,7 +183,7 @@ class UtilitaireTest {
 
     @DisplayName("Modif d'une zone biblio")
     @Test
-    void modifZoneBiblio() throws CBSException, CommException {
+    void modifZoneBiblio() throws CBSException, IOException {
         //On récupère notre notice de test, puis on y modifie la zone 101
         String noticeModifiee = Utilitaire.modifZoneBiblio(noticeTestEnEdition(), "101", "$a", "fr");
         //On vérifie la valeur de la zone 101
@@ -193,7 +192,7 @@ class UtilitaireTest {
 
     @DisplayName("Suppr d'une zone biblio")
     @Test
-    void suppZoneBiblio() throws CBSException, CommException {
+    void suppZoneBiblio() throws CBSException, IOException {
         //On supprime la zone 101
         String noticeModifiee = Utilitaire.suppZoneBiblio(noticeTestEnEdition(), "101", "$a");
         //On vérifie son absence
@@ -221,7 +220,7 @@ class UtilitaireTest {
 
     @DisplayName("Suppr d'une zone biblio avec pattern")
     @Test
-    void suppZoneBiblioWithPattern() throws CBSException, CommException {
+    void suppZoneBiblioWithPattern() throws CBSException, IOException {
         //On supprime la zone 101 qui contient "eng"
         String noticeModifiee = Utilitaire.suppZoneBiblioWithPattern(noticeTestEnEdition(), "101", "$a", "fre");
         //On vérifie son absence
@@ -230,7 +229,7 @@ class UtilitaireTest {
 
     @DisplayName("Supp d'une zone biblio avec pattern quand zone répétée")
     @Test
-    void suppZoneBiblioWithPatternZoneRepet() throws CBSException, CommException {
+    void suppZoneBiblioWithPatternZoneRepet() throws CBSException, IOException {
         cmd.search("che ppn 219041989");
         String notice = cmd.editer("1");
         String noticeModifiee = Utilitaire.suppZoneBiblioWithPattern(notice, "607", "$x", "Early works");
@@ -255,12 +254,12 @@ class UtilitaireTest {
 
     @DisplayName("Récupération de la réponse d'une commande")
     @Test
-    void messageCommande() throws CommException {
+    void messageCommande() throws IOException {
         //La recherche "mti ours" nous répond bien "recherche mti ours"
         assertThat(Utilitaire.messageCommande(cmd.search("che mti ours"))).contains("VCOrecherche mti ours");
     }
 
-    private String noticeTestEnEdition() throws CBSException, CommException {
+    private String noticeTestEnEdition() throws CBSException, IOException {
         cmd.search("che ppn 230721486");
         return cmd.editer("1");
     }

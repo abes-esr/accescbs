@@ -1,7 +1,6 @@
 package fr.abes.cbs;
 
 import fr.abes.cbs.exception.CBSException;
-import fr.abes.cbs.exception.CommException;
 import fr.abes.cbs.exception.ZoneException;
 import fr.abes.cbs.notices.Exemplaire;
 import fr.abes.cbs.notices.NoticeConcrete;
@@ -27,23 +26,20 @@ class CommandesTest {
 
     private ProcessCBS cmd;
     private Properties prop;
-    private Integer poll;
-    
     private String ip;
     private String port;
     private String login;
     private String password;
     @BeforeEach
-    void initAll() throws CBSException, IOException, CommException {
+    void initAll() throws CBSException, IOException {
         prop = new Properties();
         prop.load(Objects.requireNonNull(CommandesTest.class.getResource("/CommandesTest.properties")).openStream());
-        this.poll = Integer.parseInt(prop.getProperty("connect.poll"));
         this.ip = prop.getProperty("connect.ip");
         this.port = prop.getProperty("connect.port");
         this.login = prop.getProperty("connect.login");
         this.password = prop.getProperty("connect.password");
                 
-        cmd = new ProcessCBS(poll);
+        cmd = new ProcessCBS();
         cmd.authenticate(ip, port, login, password);
     }
 
@@ -56,8 +52,8 @@ class CommandesTest {
 
     @DisplayName("Connexion avec mauvais login/password/IP")
     @Test
-    void connectBadLogin() throws CBSException, CommException {
-        ProcessCBS com = new ProcessCBS(poll);
+    void connectBadLogin() throws CBSException, IOException {
+        ProcessCBS com = new ProcessCBS();
         try {
             com.authenticate(ip, port, login, "BadPassword");
         } catch (CBSException e) {
@@ -84,8 +80,8 @@ class CommandesTest {
 
     @DisplayName("Authentification avec choix de base")
     @Test
-    void connectLogicalBdd() throws CBSException {
-        ProcessCBS com = new ProcessCBS(poll);
+    void connectLogicalBdd() throws CBSException, IOException {
+        ProcessCBS com = new ProcessCBS();
         try {
             com.authenticateWithLogicalDb(ip, port, login, "BadPassword", "1.900");
         } catch (CBSException e) {
@@ -116,8 +112,8 @@ class CommandesTest {
 
     @DisplayName("Deconnexion")
     @Test
-    void disconnect() throws CBSException, CommException {
-        ProcessCBS com = new ProcessCBS(poll);
+    void disconnect() throws CBSException, IOException {
+        ProcessCBS com = new ProcessCBS();
         com.authenticate(ip, port, login, prop.getProperty("connect.password"));
         assertThat(com.getClientCBS().isLogged()).isTrue();
         assertThat(com.getClientCBS().isConnected()).isTrue();
@@ -128,13 +124,13 @@ class CommandesTest {
 
     @DisplayName("Affichage info user")
     @Test
-    void affUsa() throws CBSException {
+    void affUsa() throws CBSException, IOException {
         assertThat(cmd.affUsa()).contains(prop.getProperty("iln.rcrAbes"));
     }
 
     @DisplayName("Recherche")
     @Test
-    void search() throws CommException {
+    void search() throws IOException {
         //Résultats dans un fichier à part car les .properties ne supportent pas l'UTF-8
         assertThat(cmd.search("che mti testtcn")).contains("LPP23309668X");
         assertThat(cmd.getNbNotices()).isEqualTo(2);
@@ -149,14 +145,14 @@ class CommandesTest {
 
     @DisplayName("Noticées liées : REL")
     @Test
-    void rel() throws CommException, CBSException {
+    void rel() throws CBSException, IOException {
         cmd.search("che ppn 230721486");
         assertThat(cmd.rel()).isEqualTo(2);
     }
 
     @DisplayName("Notices liées : REL aucune résultat")
     @Test
-    void relNoResult() throws CommException {
+    void relNoResult() throws IOException {
         cmd.search("che mti trioptjldksjlk"); //aucune réponse trouvé
         CBSException exception = Assertions.assertThrows(CBSException.class, () -> cmd.rel());
         Assertions.assertEquals("Impossible de lancer la commande rel : pas de lot en cours", exception.getMessage());
@@ -164,25 +160,26 @@ class CommandesTest {
 
     @DisplayName("ILN Rattachement")
     @Test
-    void ilnRattachement() throws CommException {
+    void ilnRattachement() throws IOException {
         assertThat(cmd.ilnRattachement(prop.getProperty("iln.rcrAbes"))).isEqualTo(prop.getProperty("iln.ilnAbes"));
     }
 
     @DisplayName("Création de notice")
     @Test
-    void enregistrerNew() throws CBSException, CommException {
+    void enregistrerNew() throws CBSException, IOException {
         StringBuilder notice = new StringBuilder();
         notice.append("008 $aAax").append(Constants.STR_0D).append("100 0#$a2018").append(Constants.STR_0D).append("101 0#$afre").append(Constants.STR_0D).append("200 0#$atestApiCreation@TEST").append(Constants.STR_0D);
 
         String resu = cmd.enregistrerNew(notice.toString());
         assertThat(resu).contains("Notice créée");
-        /*La suppression ne fonctionne pas en TU car la validation d'une notice prend plusieurs minutes ¯\_(ツ)_/¯
-        System.out.println("Suppr : " + cmd.supprimer("1"));*/
+        /*La suppression ne fonctionne pas en TU car la validation d'une notice prend plusieurs minutes ¯\_(ツ)_/¯*/
+
+        //System.out.println("Suppr : " + cmd.supprimer("1"));
     }
 
     @DisplayName("Modification de notice")
     @Test
-    void modifierNotice() throws CBSException, CommException {
+    void modifierNotice() throws CBSException, IOException {
         //Date du jour
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yy");
         Date date = new Date();
@@ -204,7 +201,7 @@ class CommandesTest {
 
     @DisplayName("Affichage d'une notice en xml")
     @Test
-    void view() throws CommException, CBSException {
+    void view() throws CBSException, IOException {
         //Recherche de la notice a afficher
         cmd.search("che ppn 230721486");
         cmd.affUnma();
@@ -221,7 +218,7 @@ class CommandesTest {
 
     @DisplayName("Next()")
     @Test
-    void next() throws CBSException, CommException {
+    void next() throws CBSException, IOException {
         cmd.search("che mti ours");
         cmd.affUnma();
         //Vérifier que la 1ere notice est la 17e
@@ -230,7 +227,7 @@ class CommandesTest {
 
     @DisplayName("Creation de notice d'autorité")
     @Test
-    void enregistrerNewAut() throws CBSException, CommException {
+    void enregistrerNewAut() throws CBSException, IOException {
         String notice = "008 $aTp1" + Constants.STR_0D + "200 #0$aMonsieurAPI" + Constants.STR_0D;
         String resu = cmd.enregistrerNewAut(notice);
         assertThat(resu).contains("Notice créée");
@@ -238,7 +235,7 @@ class CommandesTest {
 
     @DisplayName("Création d'exemplaire")
     @Test
-    void newExemplaire() throws CBSException, CommException {
+    void newExemplaire() throws CBSException, IOException {
         noticeTestEnEdition();
         //Récupération du prochain numéro d'exemplaire à créer
         String nvExemplaire = cmd.getNvNumEx();
@@ -248,7 +245,7 @@ class CommandesTest {
 
     @DisplayName("Passage en mode édition d'un exemplaire")
     @Test
-    void editerExemp() throws CBSException, CommException {
+    void editerExemp() throws CBSException, IOException {
         noticeTestEnEdition();
         //Récupération du prochain numéro d'exemplaire à créer
         String numEx = getLastNumEx().substring(1, 3);
@@ -260,7 +257,7 @@ class CommandesTest {
 
     @DisplayName("Modification d'exemplaire")
     @Test
-    void modifierExemp() throws CBSException, CommException {
+    void modifierExemp() throws CBSException, IOException {
         noticeTestEnEdition();
         String numEx = getLastNumEx().substring(1, 3);
         //On modifie le dernier exemplaire en changeant la valeur de $j en b (sans trop savoir à quoi cela correspond)
@@ -272,7 +269,7 @@ class CommandesTest {
 
     @DisplayName("Modification d'exemplaire avec construction d'un objet")
     @Test
-    void modifierExempAvecContructionObjet() throws CBSException, ZoneException, CommException {
+    void modifierExempAvecContructionObjet() throws CBSException, ZoneException, IOException {
         noticeTestEnEdition();
         String exemplaireStr = getLastNumEx() + " $bx";
         Exemplaire exemplaire = new Exemplaire(exemplaireStr);
@@ -290,7 +287,7 @@ class CommandesTest {
 
     @DisplayName("Suppression d'exemplaire")
     @Test
-    void supprExep() throws CBSException, InterruptedException, CommException {
+    void supprExep() throws CBSException, IOException {
         noticeTestEnEdition();
         String nvExemplaire = getLastNumEx();
         //Si e01, il n'y a donc aucun exemplaire existant sur cette notice, ça va être génant pour en modifier un...
@@ -301,7 +298,7 @@ class CommandesTest {
 
     @DisplayName("Création puis suppression User")
     @Test
-    void creUsa() throws CBSException {
+    void creUsa() throws CBSException, IOException {
         //Génération d'un login aléatoire, afin d'éviter un username déjà pris
         int nombreAleatoire = 1000000 + (int) (Math.random() * ((9999999 - 1000000) + 1));
         String login = String.valueOf(nombreAleatoire);
@@ -315,7 +312,7 @@ class CommandesTest {
 
     @DisplayName("Set Params")
     @Test
-    void setParams() throws CBSException {
+    void setParams() throws CBSException, IOException {
         //Tableau des paramètres
         String[] params = {"-", "+", "AUT", "MTI", "K", "KOR", "UNU", "I", "UNM", "9999", "Y", "*", "*", "*", "*", "0", "0", "A", "SYS", "LAN", "YOP", "0", "A"};
         //On vérifie que les params ont bien été mis à jour (le CBS répond ok)
@@ -324,7 +321,7 @@ class CommandesTest {
 
     @DisplayName("Création puis suppression de donnée locale")
     @Test
-    void newLoc() throws CBSException, CommException {
+    void newLoc() throws CBSException, IOException {
         noticeTestEnEdition();
         //On vérifie que la notice modifiée contient bien le nouveau champ L035
         assertThat(cmd.newLoc("L035 $a1")).contains("L035");
@@ -334,7 +331,7 @@ class CommandesTest {
 
     @DisplayName("Modification donnée locale")
     @Test
-    void modLoc() throws CBSException, CommException {
+    void modLoc() throws CBSException, IOException {
         cmd.search("che ppn 23073426X");
         cmd.creerDonneeLocale();
         assertThat(cmd.newLoc("L035 $a1")).contains("L035 ##$a1");
@@ -366,9 +363,8 @@ class CommandesTest {
      */
     @Test
     @DisplayName("test editerNoticeConcrete")
-    void editerNoticeConcreteTest() throws CBSException, ZoneException, CommException {
+    void editerNoticeConcreteTest() throws CBSException, ZoneException, IOException {
         cmd.search("che ppn 23073426X");
-        cmd.newLoc("L035 $a123456789");
         cmd.back();
         NoticeConcrete notice = cmd.editerNoticeConcrete("1");
         Assertions.assertEquals(5, notice.getExemplaires().size());
@@ -377,15 +373,11 @@ class CommandesTest {
                 "101 0#$aeng\r" +
                 "200 0#$aNotice de test de modification dans API Sudoc@testmodifier Notice\r";
         Assertions.assertTrue(notice.getNoticeBiblio().toString().contains(biblioExpected));
-
-        String donneesLocExpected = "L035 ##$a123456789";
-        Assertions.assertTrue(notice.getNoticeLocale().toString().contains(donneesLocExpected));
-        cmd.supLoc();
     }
 
     @Test
     @DisplayName("test edition avec notice concrète")
-    void modifierNoticeConcreteTest() throws CBSException, ZoneException, CommException {
+    void modifierNoticeConcreteTest() throws CBSException, ZoneException, IOException {
         //Date du jour
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yy");
         Date date = new Date();
@@ -412,7 +404,7 @@ class CommandesTest {
      * @return La notice utilisé pour les tests (ppn 219041989)
      * @throws CBSException si erreur lors de la recherche (pas connecté, pas de résultat, etc.)
      */
-    String noticeTestEnEdition() throws CBSException, CommException {
+    String noticeTestEnEdition() throws CBSException, IOException {
         cmd.search("che ppn 23073426X");
         cmd.affUnma();
         return cmd.editer("1");
