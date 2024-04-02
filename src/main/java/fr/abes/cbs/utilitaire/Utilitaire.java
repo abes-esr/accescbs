@@ -101,18 +101,9 @@ public class Utilitaire {
      * @return nombre de notices retourné par commande CHE
      */
     public static Integer getNbNoticesFromChe(String resu) {
-        // un seul résultat
-        String nbResults = Utilitaire.recupEntre(resu, Constants.STR_1D + "VSZ", Constants.STR_1D);
-        if (resu.indexOf("LPP") != 0
-                && "1".equals(nbResults)) {
-            return 1;
-        }
-        // plusieurs résultats
-        if (resu.contains(Constants.STR_1D + "VSZ")) {
-            return Integer.parseInt(nbResults);
-        }
-        // pas de résultats
-        return 0;
+        if (resu.contains("M02"))
+            return 0;
+        return Integer.parseInt(Utilitaire.recupEntre(resu, Constants.STR_1D + "VSZ", Constants.STR_1D));
     }
 
     /**

@@ -10,20 +10,20 @@ import org.apache.logging.log4j.Level;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Base64;
 
-/** Représente une session au CBS
+/**
+ * Représente une session au CBS
  */
+@Slf4j
 public class Cbs {
-    @Getter @Setter private boolean cmdOk;
-    @Getter @Setter private String errorMessage;
+    @Getter
+    @Setter
+    private boolean cmdOk;
     private Socket s;
-    private final Integer poll;
 
-    public Cbs(Integer poll) {
-        this.poll = poll;
+    public Cbs() {
     }
+
     /**
      * socket disconnection
      */
@@ -33,49 +33,33 @@ public class Cbs {
 
     /**
      * socket method connection
-     * @param tip is socket address
+     *
+     * @param tip  is socket address
      * @param port is socket port
-     * @return the error message
+     * @return true si la tentateive de connexion a réussi, false autrement
      */
-    public String connect(final String tip, final int port) throws CBSException {
-        errorMessage = connectTcp(tip, port);
-        return errorMessage;
+    public boolean connect(final String tip, final int port) throws CBSException {
+        try {
+            s = new Socket(tip, port);
+            return s.isConnected();
+        } catch (Exception e) {
+            throw new CBSException(Level.ERROR, "Error connecting to " + tip + " " + port + " : " + e.getMessage());
+        }
     }
 
     /**
      * @param query to send to the socket
      * @return the result of query execution
      */
-    public String tcpReq(final String query) throws CBSException {
+    public String tcpReq(final String query) throws CBSException, IOException {
         String resu = req(query);
         checkForErrors(resu);
         return resu;
     }
 
-    /**
-     * Pour ouvrir une connexion tcp/ip avec le CBS.
-     *
-     * @param tip L'adresse ip du serveur (CBS) avec lequel on veut ouvrir une connexion.
-     * @param port le n° de port.
-     * @return le résultat de la connexion tcp/ip
-     *
-     */
-    private String connectTcp(final String tip, final int port) throws CBSException {
-        try {
-            s = new Socket(tip, port);
-            if (s.isConnected()) {
-                return "";
-            } else {
-                return "connect ko";
-            }
-        } catch (Exception e) {
-        	throw new CBSException(Level.ERROR, "Error connecting to " + tip + " " + port + " : " + e.getMessage());
-        }
-    }
 
     /**
      * la méthode ferme une connexion tcp/ip avec le CBS
-     *
      */
     private void disconnect() throws CBSException {
         try {
@@ -87,25 +71,17 @@ public class Cbs {
         }
     }
 
-     private String req(String query) {
+    private String req(String query) throws IOException {
         try {
             DataOutputStream out = new DataOutputStream(s.getOutputStream());
             query += Constants.STR_29 + Constants.STR_03;
             byte[] bytes = query.getBytes(StandardCharsets.UTF_8);
             out.write(bytes, 0, bytes.length);
-
-            String res = receiveMessageFromServer();
-
-            if(res.contains(Constants.VERROR)){
-                errorMessage = res;
-            } else {
-                errorMessage = "";
-            }
-            cmdOk = true;
-            return res;
-        } catch (IOException  e) {
+            return receiveMessageFromServer();
+        } catch (Exception e) {
+            log.error("Erreur socket");
             cmdOk = false;
-            return "Req ko " + e;
+            throw new IOException(e);
         }
     }
 
@@ -114,41 +90,43 @@ public class Cbs {
         InputStream inputStream = s.getInputStream();
         InputStreamReader isr = new InputStreamReader(inputStream);
         BufferedReader br = new BufferedReader(isr);
-
-        char[] buffer = new char[8192];
-        int charsRead;
-        br.read();
-        int cpt = 0;
-        while ((charsRead = br.read(buffer)) != -1) {
-            cpt++;
-            sb.append(buffer, 0, charsRead);
-            if (!br.ready()) {
-                break;
+        try {
+            char[] buffer = new char[8192];
+            int charsRead;
+            while ((charsRead = br.read(buffer)) != -1) {
+                sb.append(buffer, 0, charsRead);
+                if (sb.lastIndexOf(Constants.STR_03) == (sb.length() - 1)) {
+                    break;
+                }
             }
+        } catch (Exception ex) {
+            log.error("Erreur réponse : " + ex.getMessage());
+            throw ex;
         }
         return sb.toString();
     }
 
     /**
      * Vérifie la présence d'erreurs dans un retour CBS, et lève une exception si il y en a
+     *
      * @param resu Retour du CBS
      * @throws CBSException Erreur CBS
      */
-	private void checkForErrors(String resu) throws CBSException {
+    private void checkForErrors(String resu) throws CBSException {
         if (resu.isEmpty()) {
             setCmdOk(false);
             throw new CBSException(Level.ERROR, "Erreur inconnue");
         }
-		//erreur à l'authentification
-		if (resu.contains("V/VREJECT")) {
-			setCmdOk(false);
-			throw new CBSException(Level.ERROR, resu.substring(2, resu.indexOf(Constants.STR_1D)));
-		}
-		//erreur cas général
-		if (resu.contains("V/VERROR")) {
-			setCmdOk(false);
+        //erreur à l'authentification
+        if (resu.contains("V/VREJECT")) {
+            setCmdOk(false);
+            throw new CBSException(Level.ERROR, resu.substring(2, resu.indexOf(Constants.STR_1D)));
+        }
+        //erreur cas général
+        if (resu.contains("V/VERROR")) {
+            setCmdOk(false);
             throw new CBSException(Level.ERROR, resu.substring(resu.indexOf("M02") + 3, resu.indexOf(Constants.STR_1D, resu.indexOf("M02") + 3)));
-		}
-		setCmdOk(true);
-	}
+        }
+        setCmdOk(true);
+    }
 }
