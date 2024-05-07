@@ -191,9 +191,10 @@ public class Commandes {
     public String rel(String lotEncours) throws CBSException, IOException {
         String query = new StringBuilder().append(Constants.VTI1).append(Constants.STR_1D).append(Constants.VSE).append(lotEncours)
                 .append(Constants.STR_1D).append(Constants.VPRUNM).append(Constants.STR_1D).append(Constants.VT1).append(Constants.STR_1D)
-                .append(Constants.VTAFR).append(Constants.STR_1D).append(Constants.VCUTF8).append(Constants.STR_1D).append("CUSrel").toString();
+                .append(Constants.VTAFR).append(Constants.STR_1D).append(Constants.VCUTF8).append(Constants.STR_1D).append("CUSrel ; aff k").toString();
         return connector.tcpReq(query);
     }
+
     /**
      * Suppression d'une notice
      *

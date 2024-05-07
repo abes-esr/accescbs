@@ -643,6 +643,7 @@ public class BiblioTest {
                         "604 ##$3269292918$x604x$2rameau\r" +
                         "605 ##$3269292683$m605m$x605x$2rameau\r" +
                         "605 ##$a@605a$h605h$h605h-2$i605i-2$k605k$m605m$x605x$2rameau\r" +
+                        "606 ##$1FRBNF029949904$aPersonnel de la petite enfance$1FRBNF027792110$xPratique$2rameau\r" +
                         "607 ##$3277194156$z607z$2rameau\r" +
                         "607 ##$3277194156$3269292721$x607x$y607y$z607z$2rameau\r" +
                         "607 ##$a607a$x607x$z607z$2rameau\r" +
@@ -679,6 +680,7 @@ public class BiblioTest {
                 "604 ##$3269292918$x604x$2rameau\r" +
                 "605 ##$3269292683$m605m$x605x$2rameau\r" +
                 "605 ##$a@605a$h605h$h605h-2$i605i-2$k605k$m605m$x605x$2rameau\r" +
+                "606 ##$1FRBNF029949904$aPersonnel de la petite enfance$1FRBNF027792110$xPratique$2rameau\r" +
                 "607 ##$3277194156$z607z$2rameau\r" +
                 "607 ##$3277194156$3269292721$x607x$y607y$z607z$2rameau\r" +
                 "607 ##$a607a$x607x$z607z$2rameau\r" +
