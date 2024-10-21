@@ -74,7 +74,7 @@ public class ZonesSpecifications {
                     new ZoneSpecification("128", "abcd"),
                     new ZoneSpecification("130", "abcd"),
                     new ZoneSpecification("135", "abcdefghijk"),
-                    new ZoneSpecification("140", "abcdefghijk"),
+                    new ZoneSpecification("140", "abcdefghijkl"),
                     new ZoneSpecification("181", "Pc"),
                     new ZoneSpecification("182", "Pc"),
                     new ZoneSpecification("183", "Pa"),
