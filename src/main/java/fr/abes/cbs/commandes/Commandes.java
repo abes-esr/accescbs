@@ -56,7 +56,7 @@ public class Commandes {
             isLogged = false;
             return resu;
         }
-        if ("M02".equals(resu.substring(0, 3))) {
+        if (resu.startsWith("M02")) {
             isLogged = false;
             return resu;
         }
