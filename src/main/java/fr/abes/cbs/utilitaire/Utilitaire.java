@@ -101,7 +101,7 @@ public class Utilitaire {
      * @return nombre de notices retourné par commande CHE
      */
     public static Integer getNbNoticesFromChe(String resu) {
-        if (resu.startsWith("M02"))
+        if (resu.startsWith("M02") || resu.startsWith("M03"))
             return 0;
         return Integer.parseInt(Utilitaire.recupEntre(resu, Constants.STR_1D + "VSZ", Constants.STR_1D));
     }
