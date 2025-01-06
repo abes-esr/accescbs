@@ -749,7 +749,8 @@ public class ProcessCBS {
     private void majRcr() throws IOException {
         try {
             String result = this.affUsa();
-            this.setRcr(result.substring(result.indexOf("VU3") + 3, result.indexOf(" " + Constants.STR_1E)));
+            String endTrame = result.substring(result.indexOf("VU3") + 3);
+            this.setRcr(endTrame.substring(0, endTrame.indexOf(Constants.STR_1E)));
         } catch (Exception e) {
             throw new IOException(e);
         }
