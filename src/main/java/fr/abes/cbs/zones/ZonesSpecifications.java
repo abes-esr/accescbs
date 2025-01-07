@@ -156,7 +156,7 @@ public class ZonesSpecifications {
                     new ZoneSpecification("447", "67a[tohilbfghi]ecndpsuxy0v9"),
                     new ZoneSpecification("448", "67a[tohilbfghi]ecndpsuxy0v9"),
                     new ZoneSpecification("451", "67a[tohilbfghi]ecndpsuxy0v9"),
-                    new ZoneSpecification("452", "5670a[tohilbfghi]ecndpsuxy0v9"),
+                    new ZoneSpecification("452", "5670a[tohilbfghi]ecndpsuxyv9"),
                     new ZoneSpecification("453", "67a[tohilbfghi]ecndpsuxy0v9"),
                     new ZoneSpecification("454", "67a[tohilbfghi]ecndpsuxy0v9"),
                     new ZoneSpecification("455", "67a[tohilbfghi]ecndpsuxy0v9"),
