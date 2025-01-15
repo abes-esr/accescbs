@@ -22,6 +22,7 @@ import java.util.Optional;
 
 @Slf4j
 public class ProcessCBS {
+    private String timeStpEncours = "000200:00:00.000";
     @Getter
     private final Commandes clientCBS;
     @Getter
@@ -45,6 +46,9 @@ public class ProcessCBS {
     @Getter
     @Setter
     public boolean hasExpl;
+    @Getter
+    @Setter
+    private String actEncours;
     private int pos = 1;
     @Getter
     @Setter
@@ -321,6 +325,31 @@ public class ProcessCBS {
     }
 
     /**
+     * Enregistrer une notice en edit
+     * (pica)
+     *
+     * @param notice Notice au format natif
+     * @return Réponse du CBS
+     * @throws CBSException Erreur CBS
+     */
+    public String enregistrer(final String notice) throws CBSException, IOException {
+
+        int lettsp = Integer.parseInt(timeStpEncours.substring(0, 4));
+        lettsp--;
+        String leact = ("P").equals(actEncours) ? Constants.STR_1B + "P" : "";
+        String noticedeb = "BIB" + timeStpEncours;
+        try {
+            String resu = clientCBS.valMod(notice, lettsp, String.valueOf(lotEncours), ppnEncours, "1", noticedeb, leact);
+
+            onEdit = false;
+            return resu;
+        } catch (Exception ex) {
+            throw new IOException(ex);
+        }
+
+    }
+
+    /**
      * Enregistrer une nouvelle notice d'autorites
      *
      * @param notice notice au format natif
@@ -342,6 +371,22 @@ public class ProcessCBS {
         }
     }
 
+    /**
+     * envoi commande de translitération
+     *
+     * @param notice Notice au format natif
+     * @return Réponse du CBS
+     */
+    public String transliterer(final String notice) throws CBSException, IOException {
+        String leact = "";
+        if (Constants.LP.equals(actEncours)) {
+            leact = (char) 27 + Constants.LP;
+        }
+        String resu = clientCBS.transliterer(notice, leact, timeStpEncours, String.valueOf(lotEncours), ppnEncours);
+        onEdit = false;
+        onNew = true;
+        return resu;
+    }
 
     /**
      * envoi commande de translitération sans ppn
@@ -633,6 +678,69 @@ public class ProcessCBS {
             throw new IOException(ex);
         }
     }
+
+    /**
+     * Passage en édition comme utilisé dans JCBS (comptabilité IDRef
+     *
+     * @return Notice au format édition
+     * @throws CBSException erreur de validation
+     * @throws IOException erreur de communication avec le CBS
+     */
+    public String editerJCBS(String noRecord) throws CBSException, IOException {
+        String resu = this.editer(noRecord);
+        String notice;
+        actEncours = "";
+        if (resu.contains(Constants.STR_1B + "P001")) {
+            ppnEncours = Utilitaire.recupEntre(resu, Constants.STR_1B + "P001", Constants.STR_1B);
+            ppnEncours = ppnEncours.substring(0, ppnEncours.length() - 1).trim().replaceAll("\\$a", "");
+
+            notice = Utilitaire.recupEntre(resu, Constants.STR_1F + Constants.STR_1B + "P", Constants.STR_0D + Constants.STR_0D + Constants.STR_1E);
+            //on suprime le P et le dernier caractere parasite
+            actEncours = "P";
+        } else if (resu.contains(Constants.STR_1B + "P003")) {
+            ppnEncours = Utilitaire.recupEntre(resu, Constants.STR_1B + "P003", Constants.STR_1B);
+            ppnEncours = ppnEncours.substring(0, ppnEncours.length() - 1).trim().replaceAll("\\$a", "");
+            //entre 1F1B et 0D0E donne la notice avec le P001
+            notice = Utilitaire.recupEntre(resu, Constants.STR_1F + Constants.STR_1B + "P", Constants.STR_0D + Constants.STR_0D + Constants.STR_1E);
+            if (("").equals(notice)) {
+                notice = Utilitaire.recupEntre(resu, Constants.STR_1F + Constants.STR_1B + "P", Constants.STR_0D + Constants.STR_1E);
+            }
+            if (("").equals(notice)) {
+                //cas ou la notice termine par une zone protégée
+                notice = Utilitaire.recupEntre(resu, Constants.STR_1F + Constants.STR_1B + "P", Constants.STR_0D + Constants.STR_1B + "D" + Constants.STR_1E);
+            }
+            //on suprime le P et le dernier caractere parasite
+            actEncours = "P";
+        } else {
+            ppnEncours = Utilitaire.recupEntre(resu, Constants.STR_1F + "003", Constants.STR_0D);
+            ppnEncours = ppnEncours.trim().replaceAll("\\$a", "");
+            notice = Utilitaire.recupEntre(resu, Constants.STR_1F, Constants.STR_0D + Constants.STR_0D + Constants.STR_1E);
+            actEncours = "";
+        }
+        timeStpEncours = Utilitaire.recupEntre(resu, "VTXTBIB", Constants.STR_1F);
+
+        //pour recupere les exemplaires a faire....
+        String exemp = Utilitaire.recupEntre(resu, "VTXTE", Constants.STR_1E + "VMC");
+        StringBuilder eXp = new StringBuilder();
+        if (("").equals(exemp)) {
+            exemp = "VTXTE" + exemp;
+            String[] lstblocsExp = exemp.split(Constants.STR_1E);
+            for (String blocExp : lstblocsExp) // foreach (String blocExp in lstblocsExp)
+            {
+                String[] sbloc = blocExp.split(Constants.STR_1F);
+                if (sbloc.length == 2) {
+                    String trv = sbloc[0].replaceAll("VTXT", "");
+                    eXp.append(trv.substring(0, 3) + " " + trv.substring(3) + Constants.STR_0D);
+                    eXp.append(sbloc[1]);
+                }
+            }
+        }
+        if (("").equals(eXp.toString())) {
+            notice += eXp;
+        }
+        return notice;
+    }
+
 
     /**
      * Lance la commande pour créer un exemplaire
