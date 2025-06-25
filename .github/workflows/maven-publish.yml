@@ -46,7 +46,7 @@ jobs:
           # - pousser le tout sur le dépôt github
           git config --global user.email "github-action@noreply"
           git config --global user.name "Github Action"
-          mvn release:prepare \
+          mvn release:prepare -PtoOSSRH \
             --batch-mode \
             -DreleaseVersion=$NEW_TAG \
             -Darguments=-DskipTests \
@@ -58,6 +58,14 @@ jobs:
             git switch develop
             git merge $CURRENT_GIT_BRANCH
             git push
+      - name: Check GPG key presence
+        run: |
+          echo "${{ secrets.MAVEN_GPG_PRIVATE_KEY }}" | gpg --batch --import
+          echo "Clés GPG secrètes disponibles :"
+          gpg --list-secret-keys --keyid-format LONG
+          echo "Clés GPG publiques disponibles :"
+          gpg --list-keys --keyid-format LONG
+
       - name: Create the github release
         uses: softprops/action-gh-release@v1
         with:
