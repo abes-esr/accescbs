@@ -25,7 +25,7 @@ jobs:
           echo $CURRENT_GIT_BRANCH
 
           [[ "$CURRENT_GIT_BRANCH" == "main" || "$CURRENT_GIT_BRANCH" ==
-          "master" ]] && exit 0 || exit 1
+          "updateMavenCentralPublishing" ]] && exit 0 || exit 1
       - name: Verify version is semver formatted (X.X.X)
         env:
           NEW_TAG: '${{ github.event.inputs.releaseVersion }}'
