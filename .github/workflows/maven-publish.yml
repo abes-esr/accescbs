@@ -76,7 +76,11 @@ jobs:
       - name: Deploy to Maven Central
         run: |
           export GPG_TTY=$(tty)
-          mvn release:perform -B -Darguments="-Dgpg.passphrase=${{ secrets.MAVEN_GPG_PASSPHRASE }} -DskipTests"
+          mvn release:perform -B \
+            -Dgpg.passphrase=${{ secrets.MAVEN_GPG_PASSPHRASE }} \
+            -Dgpg.executable=gpg \
+            -Dgpg.useagent=true \
+            -Darguments="-DskipTests"
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
