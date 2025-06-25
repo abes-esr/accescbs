@@ -88,6 +88,7 @@ jobs:
 
       - name: 🧪 Deploy to OSSRH via Maven Central
         env:
+          MAVEN_OPTS: "--add-opens=java.base/java.util=ALL-UNNAMED"
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
