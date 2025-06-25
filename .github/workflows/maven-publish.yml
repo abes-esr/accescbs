@@ -1,90 +1,92 @@
 name: Maven Publish
-'on':
+
+on:
   workflow_dispatch:
     inputs:
       releaseVersion:
-        description: Version de la release (semver)
+        description: 'Version de la release (semver)'
         required: true
-        default: x.x.x
+        default: 'x.x.x'
+
 jobs:
   maven-publish:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
+
     steps:
-      - name: Checkout source code
+      - name: 📥 Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: '0'
-          token: '${{ secrets.TOKEN_GITHUB_FOR_GITHUB_ACTION }}'
-      - name: Verify release is created only on "main" or "master" git branch
-        run: >
-          CURRENT_GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          fetch-depth: 0
+          token: ${{ secrets.TOKEN_GITHUB_FOR_GITHUB_ACTION }}
 
-          echo $CURRENT_GIT_BRANCH
+      - name: 🕵️‍♂️ Check current branch
+        run: |
+          BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          echo "Current branch: $BRANCH"
+          [[ "$BRANCH" == "main" || "$BRANCH" == "updateMavenCentralPublishing" ]] && exit 0 || exit 1
 
-          [[ "$CURRENT_GIT_BRANCH" == "main" || "$CURRENT_GIT_BRANCH" ==
-          "updateMavenCentralPublishing" ]] && exit 0 || exit 1
-      - name: Verify version is semver formatted (X.X.X)
-        env:
-          NEW_TAG: '${{ github.event.inputs.releaseVersion }}'
+      - name: 🔢 Validate semver version
+        run: echo "${{ github.event.inputs.releaseVersion }}" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$'
+
+      - name: ❌ Check if tag already exists
         run: |
-          echo $NEW_TAG | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$'
-      - name: Verify version is not already used as a git tag
-        env:
-          NEW_TAG: '${{ github.event.inputs.releaseVersion }}'
-        run: |
-          [[ "$(git tag --list | grep $NEW_TAG)" == "" ]] && exit 0 || exit 1
-      - name: Generate the new version (patch few files + git tag)
-        env:
-          NEW_TAG: '${{ github.event.inputs.releaseVersion }}'
-        run: |
-          # préparation de la release qui va :
-          # - modifier le numéro de version dans les pom.xml du projet
-          # - créer un tag git du numéro de version en question
-          # - pousser le tout sur le dépôt github
-          git config --global user.email "github-action@noreply"
-          git config --global user.name "Github Action"
-          mvn release:prepare -PtoOSSRH \
-            --batch-mode \
-            -DreleaseVersion=$NEW_TAG \
-            -Darguments=-DskipTests \
-            -DtagNameFormat="@{project.version}"
-            # merge la préparation de la nouvelle version sur develop
-            # (version X.X.X-SNAPSHOT)
-            # CURRENT_GIT_BRANCH vaut main ou master, c'est la où est créé la release
-            CURRENT_GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-            git switch develop
-            git merge $CURRENT_GIT_BRANCH
-            git push
-      - name: Check GPG key presence
+          TAG="${{ github.event.inputs.releaseVersion }}"
+          [[ "$(git tag --list "$TAG")" == "" ]] && exit 0 || exit 1
+
+      - name: ⚙️ Set up Java + Maven Central credentials
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          server-id: ossrh
+          server-username: OSSRH_USERNAME
+          server-password: OSSRH_TOKEN
+          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+
+      - name: 🔐 Import and validate GPG key
         run: |
           echo "${{ secrets.MAVEN_GPG_PRIVATE_KEY }}" | gpg --batch --import
-          echo "Clés GPG secrètes disponibles :"
           gpg --list-secret-keys --keyid-format LONG
-          echo "Clés GPG publiques disponibles :"
-          gpg --list-keys --keyid-format LONG
+          echo "Test message" > test.txt
+          KEYID=$(gpg --list-secret-keys --with-colons | grep '^sec' | cut -d: -f5 | head -n1)
+          gpg --batch --yes --pinentry-mode loopback \
+            --passphrase "${{ secrets.MAVEN_GPG_PASSPHRASE }}" \
+            -u "$KEYID" -s test.txt
+          echo "✅ GPG signing test passed."
 
-      - name: Create the github release
+      - name: 🏗️ Prepare release (version & tag)
+        env:
+          NEW_TAG: ${{ github.event.inputs.releaseVersion }}
+        run: |
+          git config --global user.email "github-action@noreply"
+          git config --global user.name "GitHub Action"
+          mvn release:prepare -B \
+            -DreleaseVersion=$NEW_TAG \
+            -DtagNameFormat="@{project.version}" \
+            -Darguments=-DskipTests
+
+      - name: 🧪 Deploy to OSSRH via Maven Central
+        env:
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+        run: |
+          KEYID=$(gpg --list-secret-keys --with-colons | grep '^sec' | cut -d: -f5 | head -n1)
+          mvn -B release:perform -PtoOSSRH \
+            -Dgpg.keyname=$KEYID \
+            -Dgpg.executable=gpg \
+            -Dgpg.useagent=false \
+            -Dgpg.passphrase="${{ secrets.MAVEN_GPG_PASSPHRASE }}" \
+            -Darguments="-DskipTests"
+
+      - name: 🚀 Create GitHub release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: '${{ github.event.inputs.releaseVersion }}'
+          tag_name: ${{ github.event.inputs.releaseVersion }}
           generate_release_notes: true
-          token: '${{ secrets.TOKEN_GITHUB_FOR_GITHUB_ACTION }}'
-      - name: Set up Maven Central Repository
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'
-          distribution: temurin
-          server-id: ossrh
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_PASSWORD
-          gpg-private-key: '${{ secrets.MAVEN_GPG_PRIVATE_KEY }}'
-          gpg-passphrase: MAVEN_GPG_PASSPHRASE
-      - name: Deploy with Maven
-        run: 'mvn -B release:perform -PtoOSSRH -Dgpg.passphrase=$MAVEN_GPG_PASSPHRASE -Dgpg.executable=gpg -Dgpg.useagent=false -Darguments="-DskipTests"'
         env:
-          MAVEN_USERNAME: '${{ secrets.OSSRH_USERNAME }}'
-          MAVEN_PASSWORD: '${{ secrets.OSSRH_TOKEN }}'
-          MAVEN_GPG_PASSPHRASE: '${{ secrets.MAVEN_GPG_PASSPHRASE }}'
+          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB_FOR_GITHUB_ACTION }}
