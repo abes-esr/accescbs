@@ -86,6 +86,11 @@ jobs:
           </settings>
           EOF
 
+      - name: 🔍 Test Auth to OSSRH
+        run: |
+          curl -u "${{ secrets.OSSRH_USERNAME }}:${{ secrets.OSSRH_TOKEN }}" \
+           -I https://s01.oss.sonatype.org/service/local/status
+
       - name: 🧪 Deploy to OSSRH via Maven Central
         env:
           MAVEN_OPTS: "--add-opens=java.base/java.util=ALL-UNNAMED"
