@@ -69,6 +69,23 @@ jobs:
             -DtagNameFormat="@{project.version}" \
             -Darguments=-DskipTests
 
+      - name: Create temporary settings.xml with OSSRH credentials
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml <<EOF
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+          <servers>
+          <server>
+            <id>ossrh</id>
+            <username>${{ secrets.OSSRH_USERNAME }}</username>
+            <password>${{ secrets.OSSRH_TOKEN }}</password>
+          </server>
+          </servers>
+          </settings>
+          EOF
+
       - name: 🧪 Deploy to OSSRH via Maven Central
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
@@ -76,7 +93,7 @@ jobs:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
         run: |
           KEYID=$(gpg --list-secret-keys --with-colons | grep '^sec' | cut -d: -f5 | head -n1)
-          mvn -B release:perform -PtoOSSRH \
+          mvn -B release:perform -s ~/.m2/settings.xml -PtoOSSRH \
             -Dgpg.keyname=$KEYID \
             -Dgpg.executable=gpg \
             -Dgpg.useagent=false \
