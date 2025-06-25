@@ -88,8 +88,19 @@ jobs:
 
       - name: 🔍 Test Auth to OSSRH
         run: |
-          curl -u "${{ secrets.OSSRH_USERNAME }}:${{ secrets.OSSRH_TOKEN }}" \
-           -I https://s01.oss.sonatype.org/service/local/status
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+          -u "${{ secrets.OSSRH_USERNAME }}:${{ secrets.OSSRH_TOKEN }}" \
+          https://s01.oss.sonatype.org/service/local/status)
+
+          echo "HTTP status: $RESPONSE"
+
+          if [ "$RESPONSE" -ne 200 ]; then
+          echo "❌ Auth failed (expected 200)."
+          exit 1
+          else
+            echo "✅ Auth successful."
+          fi
+
 
       - name: 🧪 Deploy to OSSRH via Maven Central
         env:
