@@ -36,17 +36,17 @@ jobs:
           TAG="${{ github.event.inputs.releaseVersion }}"
           [[ "$(git tag --list "$TAG")" == "" ]] && exit 0 || exit 1
 
-      - name: ⚙️ Set up Java + Maven Central credentials
-        uses: actions/setup-java@v4
+      - name: Set up Maven Central Repository
+        uses: actions/setup-java@v3
         with:
+          java-version: '11'
           distribution: temurin
-          java-version: '17'
           server-id: ossrh
-          server-username: ${{ secrets.OSSRH_USERNAME }}
-          server-password: ${{ secrets.OSSRH_TOKEN }}
-          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-          gpg-passphrase: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+          gpg-private-key: '${{ secrets.MAVEN_GPG_PRIVATE_KEY }}'
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+          
       - name: 🔐 Import and validate GPG key
         run: |
           echo "${{ secrets.MAVEN_GPG_PRIVATE_KEY }}" | gpg --batch --import
