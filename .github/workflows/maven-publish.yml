@@ -58,17 +58,6 @@ jobs:
             -u "$KEYID" -s test.txt
           echo "✅ GPG signing test passed."
 
-      - name: 🏗️ Prepare release (version & tag)
-        env:
-          NEW_TAG: ${{ github.event.inputs.releaseVersion }}
-        run: |
-          git config --global user.email "github-action@noreply"
-          git config --global user.name "GitHub Action"
-          mvn release:prepare -B \
-            -DreleaseVersion=$NEW_TAG \
-            -DtagNameFormat="@{project.version}" \
-            -Darguments=-DskipTests
-
       - name: Create temporary settings.xml with OSSRH credentials
         run: |
           mkdir -p ~/.m2
@@ -110,12 +99,8 @@ jobs:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
         run: |
           KEYID=$(gpg --list-secret-keys --with-colons | grep '^sec' | cut -d: -f5 | head -n1)
-          mvn -B release:perform -s ~/.m2/settings.xml -PtoOSSRH \
-            -Dgpg.keyname=$KEYID \
-            -Dgpg.executable=gpg \
-            -Dgpg.useagent=false \
-            -Dgpg.passphrase="${{ secrets.MAVEN_GPG_PASSPHRASE }}" \
-            -Darguments="-DskipTests"
+          mvn clean deploy -DskipTests -Dgpg.keyname=$GPG_KEY_ID
+
 
       - name: 🚀 Create GitHub release
         uses: softprops/action-gh-release@v1
