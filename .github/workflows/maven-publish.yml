@@ -79,7 +79,9 @@ jobs:
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
         run: |
-          mvn clean deploy -DskipTests -Dgpg.keyname=${{ secrets.GPG_KEY_ID }}
+          export GPG_KEY_ID=$(gpg --list-secret-keys --with-colons | grep '^sec' | cut -d: -f5 | head -n1)
+          echo "Using GPG key: $GPG_KEY_ID"
+          mvn clean deploy -DskipTests -Dgpg.keyname=$GPG_KEY_ID
 
 
       - name: 🚀 Create GitHub release
