@@ -217,7 +217,7 @@
                       <version>0.8.0</version>
                       <extensions>true</extensions>
                       <configuration>
-                        <publishingServerId>maven-central</publishingServerId>
+                        <publishingServerId>central</publishingServerId>
                       </configuration>
                     </plugin>
                 </plugins>
