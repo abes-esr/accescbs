@@ -62,7 +62,7 @@
             <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
         <repository>
-            <id>maven-central</id>
+            <id>central</id>
             <name>Maven Central Publishing</name>
             <url>https://central.sonatype.com/api/v1/publish</url>
         </repository>
