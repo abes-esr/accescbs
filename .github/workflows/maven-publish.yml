@@ -94,7 +94,7 @@ jobs:
       
           echo "✅ Clé GPG trouvée : $GPG_KEY_ID"
           
-          mvn deploy -DskipTests \
+          mvn verify -DskipTests \
             -PtoOSSRH \
             -Dgpg.keyname=$GPG_KEY_ID \
             -Dgpg.passphrase="${MAVEN_GPG_PASSPHRASE}" \
