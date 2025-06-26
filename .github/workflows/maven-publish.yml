@@ -49,8 +49,8 @@ jobs:
 
       - name: Import GPG key
         run: |
-          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
-          KEY_ID=$(echo "$GPG_KEY_ID")
+          echo "${{ secrets.MAVEN_GPG_PRIVATE_KEY}}" | gpg --batch --import
+          KEY_ID=$(echo "${{ secrets.GPG_KEY_ID}}")
           echo "Using GPG key ID: $KEY_ID"
           
      
