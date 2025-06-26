@@ -46,17 +46,14 @@ jobs:
           server-password: MAVEN_PASSWORD
           gpg-private-key: '${{ secrets.MAVEN_GPG_PRIVATE_KEY }}'
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
-          
-      - name: 🔐 Import and validate GPG key
+
+      - name: Import GPG key
         run: |
-          echo "${{ secrets.MAVEN_GPG_PRIVATE_KEY }}" | gpg --batch --import
-          gpg --list-secret-keys --keyid-format LONG
-          echo "Test message" > test.txt
-          KEYID=$(gpg --list-secret-keys --with-colons | grep '^sec' | cut -d: -f5 | head -n1)
-          gpg --batch --yes --pinentry-mode loopback \
-            --passphrase "${{ secrets.MAVEN_GPG_PASSPHRASE }}" \
-            -u "$KEYID" -s test.txt
-          echo "✅ GPG signing test passed."
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+          KEY_ID=$(echo "$GPG_KEY_ID")
+          echo "Using GPG key ID: $KEY_ID"
+          
+     
 
       - name: Create temporary settings.xml with OSSRH credentials
         run: |
@@ -74,22 +71,6 @@ jobs:
           </servers>
           </settings>
           EOF
-
-      - name: 🔍 Test Auth to OSSRH
-        run: |
-          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
-          -u "${{ secrets.OSSRH_USERNAME }}:${{ secrets.OSSRH_TOKEN }}" \
-          https://s01.oss.sonatype.org/service/local/status)
-
-          echo "HTTP status: $RESPONSE"
-
-          if [ "$RESPONSE" -ne 200 ]; then
-          echo "❌ Auth failed (expected 200)."
-          # exit 1
-          else
-            echo "✅ Auth successful."
-          fi
-
 
       - name: 🧪 Deploy to OSSRH via Maven Central
         env:
