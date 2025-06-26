@@ -81,7 +81,8 @@ jobs:
         run: |
           export GPG_KEY_ID=$(gpg --list-secret-keys --with-colons | grep '^sec' | cut -d: -f5 | head -n1)
           echo "Using GPG key: $GPG_KEY_ID"
-          mvn clean deploy -DskipTests -Dgpg.keyname=$GPG_KEY_ID
+          mvn clean install -PtoOSSRH -DskipTests -Dgpg.keyname=$GPG_KEY_ID
+          
 
 
       - name: 🚀 Create GitHub release
