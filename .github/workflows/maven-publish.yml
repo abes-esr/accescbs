@@ -84,11 +84,23 @@ jobs:
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
         run: |
-          mvn clean install -PtoOSSRH -DskipTests -Dgpg.keyname=$KEYID
-          -Dgpg.passphrase="${{ secrets.MAVEN_GPG_PASSPHRASE }}" \
-          -Dgpg.executable=gpg \
-          -Dgpg.useagent=false
+          # Extraire le GPG key ID correctement
+          GPG_KEY_ID=$(gpg --list-secret-keys --with-colons | grep '^sec' | cut -d: -f5 | head -n1)
           
+          if [ -z "$GPG_KEY_ID" ]; then
+            echo "❌ Aucune clé GPG trouvée, ou clé non importée correctement."
+            exit 1
+          fi
+      
+          echo "✅ Clé GPG trouvée : $GPG_KEY_ID"
+          
+          mvn clean deploy -DskipTests \
+            -PtoOSSRH \
+            -Dgpg.keyname=$GPG_KEY_ID \
+            -Dgpg.passphrase="${MAVEN_GPG_PASSPHRASE}" \
+            -Dgpg.executable=gpg \
+            -Dgpg.useagent=false
+              
 
 
       - name: 🚀 Create GitHub release
