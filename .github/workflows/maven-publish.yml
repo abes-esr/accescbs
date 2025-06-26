@@ -78,7 +78,7 @@ jobs:
           xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
           <servers>
           <server>
-            <id>maven-central</id>
+            <id>central</id>
             <username>${{ secrets.OSSRH_USERNAME }}</username>
             <password>${{ secrets.OSSRH_TOKEN }}</password>
           </server>
