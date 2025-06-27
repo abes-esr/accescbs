@@ -70,7 +70,7 @@ jobs:
           <servers>
           <server>
             <id>central</id>
-            <username>${MAVEN_USERNAME}</username>
+            <username>central:${MAVEN_USERNAME}</username>
             <password>${MAVEN_PASSWORD}</password>
           </server>
           </servers>
