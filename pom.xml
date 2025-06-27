@@ -202,19 +202,10 @@
                         <groupId>org.sonatype.central</groupId>
                         <artifactId>central-publishing-maven-plugin</artifactId>
                         <version>0.8.0</version>
-                        <executions>
-                            <execution>
-                                <id>publish</id>
-                                <phase>deploy</phase>
-                                <goals>
-                                    <goal>publish</goal>
-                                </goals>
-                            </execution>
-                        </executions>
                         <extensions>true</extensions>
-                          <configuration>
+                        <configuration>
                             <publishingServerId>central</publishingServerId>
-                          </configuration>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
