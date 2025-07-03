@@ -64,12 +64,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB_FOR_GITHUB_ACTION }}
 
       - name: ☕ Set up Maven Central Repository
+        uses: actions/setup-java@v3
         env: 
           SERVER_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           SERVER_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
           GPG_PRIVATE_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-        uses: actions/setup-java@v3
         with:
           java-version: '11'
           distribution: temurin
