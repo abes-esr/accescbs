@@ -18,9 +18,11 @@ jobs:
           token: ${{ secrets.TOKEN_GITHUB_FOR_GITHUB_ACTION }}
 
       - name: 🕵️‍♂️ Check current branch
+        id: current_branch
         run: |
           BRANCH=$(git rev-parse --abbrev-ref HEAD)
-          echo "Current branch: $BRANCH"
+          echo "Current branch is $BRANCH"
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
           [[ "$BRANCH" == "main" || "$BRANCH" == "updateMavenCentralPublishing" ]] && exit 0 || exit 1
 
       - name: 🔍 Extract current version from pom.xml
@@ -30,7 +32,8 @@ jobs:
           release_version="${version%-SNAPSHOT}"
           echo "release_version=$release_version" >> $GITHUB_OUTPUT
           echo "version=$version" >> $GITHUB_OUTPUT
-          echo "📦 Release version: $release_version"
+          echo "📦 Current version: $version"
+          echo "🔖 Release version: $release_version"
 
       - name: 🚧 Set release version in pom.xml (remove -SNAPSHOT)
         run: |
@@ -43,7 +46,14 @@ jobs:
           git config user.email "actions@github.com"
           git add pom.xml
           git commit -m "🔖 Release version ${{ steps.extract_version.outputs.release_version }}"
-          git push origin HEAD:main
+
+      - name: 🔄 Pull latest changes (rebase) before push
+        run: |
+          git pull --rebase origin ${{ steps.current_branch.outputs.branch }}
+
+      - name: ⬆️ Push release version
+        run: |
+          git push origin HEAD:${{ steps.current_branch.outputs.branch }}
 
       - name: 🚀 Create GitHub release
         uses: softprops/action-gh-release@v1
@@ -80,4 +90,69 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
         run: |
-          mkdir -p
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml <<EOF
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+          <servers>
+            <server>
+              <id>central</id>
+              <username>${MAVEN_USERNAME}</username>
+              <password>${MAVEN_PASSWORD}</password>
+            </server>
+          </servers>
+          </settings>
+          EOF
+
+      - name: 🧪 Deploy to OSSRH via Maven Central
+        env:
+          MAVEN_OPTS: "--add-opens=java.base/java.util=ALL-UNNAMED"
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+        run: |
+          GPG_KEY_ID=$(gpg --list-secret-keys --with-colons | grep '^sec' | cut -d: -f5 | head -n1)
+
+          if [ -z "$GPG_KEY_ID" ]; then
+            echo "❌ Aucune clé GPG trouvée, ou clé non importée correctement."
+            exit 1
+          fi
+
+          echo "✅ Clé GPG trouvée : $GPG_KEY_ID"
+
+          mvn deploy -DskipTests \
+            -PtoOSSRH \
+            -Dgpg.keyname=$GPG_KEY_ID \
+            -Dgpg.passphrase="${MAVEN_GPG_PASSPHRASE}" \
+            -Dgpg.executable=gpg \
+            -Dgpg.useagent=false
+
+      - name: 🔢 Calculate next snapshot version
+        id: versioning
+        run: |
+          IFS='.' read -r major minor patch <<< "${{ steps.extract_version.outputs.release_version }}"
+          next_patch=$((patch + 1))
+          next_version="$major.$minor.$next_patch-SNAPSHOT"
+          echo "next_version=$next_version" >> $GITHUB_OUTPUT
+          echo "🔮 Next version: $next_version"
+
+      - name: 🚧 Set next snapshot version in pom.xml
+        run: |
+          mvn versions:set -DnewVersion=${{ steps.versioning.outputs.next_version }}
+          mvn versions:commit
+
+      - name: 💾 Commit next snapshot version
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add pom.xml
+          git commit -m "🔄 Prepare next development iteration: ${{ steps.versioning.outputs.next_version }}"
+
+      - name: 🔄 Pull latest changes (rebase) before push (next snapshot)
+        run: |
+          git pull --rebase origin ${{ steps.current_branch.outputs.branch }}
+
+      - name: ⬆️ Push next snapshot version
+        run: |
+          git push origin HEAD:${{ steps.current_branch.outputs.branch }}
