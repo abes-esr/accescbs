@@ -36,6 +36,14 @@ jobs:
           TAG="${{ github.event.inputs.releaseVersion }}"
           [[ "$(git tag --list "$TAG")" == "" ]] && exit 0 || exit 1
 
+      - name: 🚀 Create GitHub release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.event.inputs.releaseVersion }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB_FOR_GITHUB_ACTION }}
+          
       - name: Set up Maven Central Repository
         uses: actions/setup-java@v3
         with:
@@ -106,10 +114,4 @@ jobs:
               
 
 
-      - name: 🚀 Create GitHub release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ github.event.inputs.releaseVersion }}
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB_FOR_GITHUB_ACTION }}
+    
