@@ -61,6 +61,9 @@ jobs:
      
 
       - name: Create temporary settings.xml with OSSRH credentials
+        env:
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
         run: |
           mkdir -p ~/.m2
           cat > ~/.m2/settings.xml <<EOF
@@ -70,7 +73,7 @@ jobs:
           <servers>
           <server>
             <id>central</id>
-            <username>central:${MAVEN_USERNAME}</username>
+            <username>${MAVEN_USERNAME}</username>
             <password>${MAVEN_PASSWORD}</password>
           </server>
           </servers>
