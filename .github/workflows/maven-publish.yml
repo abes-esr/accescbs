@@ -2,11 +2,6 @@ name: Maven Publish
 
 on:
   workflow_dispatch:
-    inputs:
-      releaseVersion:
-        description: 'Version de la release (semver)'
-        required: true
-        default: 'x.x.x'
 
 jobs:
   maven-publish:
@@ -28,23 +23,37 @@ jobs:
           echo "Current branch: $BRANCH"
           [[ "$BRANCH" == "main" || "$BRANCH" == "updateMavenCentralPublishing" ]] && exit 0 || exit 1
 
-      - name: 🔢 Validate semver version
-        run: echo "${{ github.event.inputs.releaseVersion }}" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$'
-
-      - name: ❌ Check if tag already exists
+      - name: 🔍 Extract current version from pom.xml
+        id: extract_version
         run: |
-          TAG="${{ github.event.inputs.releaseVersion }}"
-          [[ "$(git tag --list "$TAG")" == "" ]] && exit 0 || exit 1
+          version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          release_version="${version%-SNAPSHOT}"
+          echo "release_version=$release_version" >> $GITHUB_OUTPUT
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "📦 Release version: $release_version"
+
+      - name: 🚧 Set release version in pom.xml (remove -SNAPSHOT)
+        run: |
+          mvn versions:set -DnewVersion=${{ steps.extract_version.outputs.release_version }}
+          mvn versions:commit
+
+      - name: 🔖 Commit release version
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add pom.xml
+          git commit -m "🔖 Release version ${{ steps.extract_version.outputs.release_version }}"
+          git push origin HEAD:main
 
       - name: 🚀 Create GitHub release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.event.inputs.releaseVersion }}
+          tag_name: ${{ steps.extract_version.outputs.release_version }}
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB_FOR_GITHUB_ACTION }}
-          
-      - name: Set up Maven Central Repository
+
+      - name: ☕ Set up Maven Central Repository
         uses: actions/setup-java@v3
         with:
           java-version: '11'
@@ -65,53 +74,10 @@ jobs:
             --passphrase "${{ secrets.MAVEN_GPG_PASSPHRASE }}" \
             -u "$KEYID" -s test.txt
           echo "✅ GPG signing test passed."
-          
-     
 
-      - name: Create temporary settings.xml with OSSRH credentials
+      - name: 🛠 Create temporary settings.xml with OSSRH credentials
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
         run: |
-          mkdir -p ~/.m2
-          cat > ~/.m2/settings.xml <<EOF
-          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
-          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
-          <servers>
-          <server>
-            <id>central</id>
-            <username>${MAVEN_USERNAME}</username>
-            <password>${MAVEN_PASSWORD}</password>
-          </server>
-          </servers>
-          </settings>
-          EOF
-
-      - name: 🧪 Deploy to OSSRH via Maven Central
-        env:
-          MAVEN_OPTS: "--add-opens=java.base/java.util=ALL-UNNAMED"
-          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-        run: |
-          # Extraire le GPG key ID correctement
-          GPG_KEY_ID=$(gpg --list-secret-keys --with-colons | grep '^sec' | cut -d: -f5 | head -n1)
-          
-          if [ -z "$GPG_KEY_ID" ]; then
-            echo "❌ Aucune clé GPG trouvée, ou clé non importée correctement."
-            exit 1
-          fi
-      
-          echo "✅ Clé GPG trouvée : $GPG_KEY_ID"
-          
-          mvn deploy -DskipTests \
-            -PtoOSSRH \
-            -Dgpg.keyname=$GPG_KEY_ID \
-            -Dgpg.passphrase="${MAVEN_GPG_PASSPHRASE}" \
-            -Dgpg.executable=gpg \
-            -Dgpg.useagent=false
-              
-
-
-    
+          mkdir -p
