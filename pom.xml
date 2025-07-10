@@ -153,6 +153,11 @@
     <profiles>
         <profile>
             <id>toOSSRH</id>
+            <activation>
+                <property>
+                    <name>gpg.passphrase</name>
+                </property>
+            </activation>
             <build>
                 <plugins>
                     <plugin>
