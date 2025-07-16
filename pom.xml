@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>fr.abes.api-communes</groupId>
     <artifactId>AccesCbs</artifactId>
-    <version>2.5.124</version>
+    <version>2.5.125-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>AccesCbs</name>
     <description>AccesCbs allows programs to interract with Sudoc French bibliographic database.</description>
