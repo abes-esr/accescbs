@@ -1,82 +1,158 @@
 name: Maven Publish
-'on':
+
+on:
   workflow_dispatch:
-    inputs:
-      releaseVersion:
-        description: Version de la release (semver)
-        required: true
-        default: x.x.x
+
 jobs:
   maven-publish:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
+
     steps:
-      - name: Checkout source code
+      - name: 📥 Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: '0'
-          token: '${{ secrets.TOKEN_GITHUB_FOR_GITHUB_ACTION }}'
-      - name: Verify release is created only on "main" or "master" git branch
-        run: >
-          CURRENT_GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          fetch-depth: 0
+          token: ${{ secrets.TOKEN_GITHUB_FOR_GITHUB_ACTION }}
 
-          echo $CURRENT_GIT_BRANCH
+      - name: 🕵️‍♂️ Check current branch
+        id: current_branch
+        run: |
+          BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          echo "Current branch is $BRANCH"
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+          [[ "$BRANCH" == "main" ]] && exit 0 || exit 1
 
-          [[ "$CURRENT_GIT_BRANCH" == "main" || "$CURRENT_GIT_BRANCH" ==
-          "updateMavenCentralPublishing" ]] && exit 0 || exit 1
-      - name: Verify version is semver formatted (X.X.X)
-        env:
-          NEW_TAG: '${{ github.event.inputs.releaseVersion }}'
+      - name: 🔍 Extract current version from pom.xml
+        id: extract_version
         run: |
-          echo $NEW_TAG | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$'
-      - name: Verify version is not already used as a git tag
-        env:
-          NEW_TAG: '${{ github.event.inputs.releaseVersion }}'
+          version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          release_version="${version%-SNAPSHOT}"
+          echo "release_version=$release_version" >> $GITHUB_OUTPUT
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "📦 Current version: $version"
+          echo "🔖 Release version: $release_version"
+
+      - name: 🚧 Set release version in pom.xml (remove -SNAPSHOT)
         run: |
-          [[ "$(git tag --list | grep $NEW_TAG)" == "" ]] && exit 0 || exit 1
-      - name: Generate the new version (patch few files + git tag)
-        env:
-          NEW_TAG: '${{ github.event.inputs.releaseVersion }}'
+          mvn versions:set -DnewVersion=${{ steps.extract_version.outputs.release_version }}
+          mvn versions:commit
+
+      - name: 🔖 Commit release version
         run: |
-          # préparation de la release qui va :
-          # - modifier le numéro de version dans les pom.xml du projet
-          # - créer un tag git du numéro de version en question
-          # - pousser le tout sur le dépôt github
-          git config --global user.email "github-action@noreply"
-          git config --global user.name "Github Action"
-          mvn release:prepare \
-            --batch-mode \
-            -DreleaseVersion=$NEW_TAG \
-            -Darguments=-DskipTests \
-            -DtagNameFormat="@{project.version}"
-            # merge la préparation de la nouvelle version sur develop
-            # (version X.X.X-SNAPSHOT)
-            # CURRENT_GIT_BRANCH vaut main ou master, c'est la où est créé la release
-            CURRENT_GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-            git switch develop
-            git merge $CURRENT_GIT_BRANCH
-            git push
-      - name: Create the github release
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add pom.xml
+          git commit -m "🔖 Release version ${{ steps.extract_version.outputs.release_version }}"
+
+      - name: 🔄 Pull latest changes (rebase) before push
+        run: |
+          git pull --rebase origin ${{ steps.current_branch.outputs.branch }}
+
+      - name: ⬆️ Push release version
+        run: |
+          git push origin HEAD:${{ steps.current_branch.outputs.branch }}
+
+      - name: 🚀 Create GitHub release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: '${{ github.event.inputs.releaseVersion }}'
+          tag_name: ${{ steps.extract_version.outputs.release_version }}
           generate_release_notes: true
-          token: '${{ secrets.TOKEN_GITHUB_FOR_GITHUB_ACTION }}'
-      - name: Set up Maven Central Repository
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB_FOR_GITHUB_ACTION }}
+
+      - name: ☕ Set up Maven Central Repository
         uses: actions/setup-java@v3
         with:
           java-version: '11'
           distribution: temurin
-          server-id: ossrh
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_PASSWORD
-          gpg-private-key: '${{ secrets.MAVEN_GPG_PRIVATE_KEY }}'
-          gpg-passphrase: MAVEN_GPG_PASSPHRASE
-      - name: Deploy with Maven
-        run: 'mvn -B release:perform -PtoOSSRH -Dgpg.passphrase=$MAVEN_GPG_PASSPHRASE -Dgpg.executable=gpg -Dgpg.useagent=false -Darguments="-DskipTests"'
+          server-id: central
+          server-username: ${{ secrets.OSSRH_USERNAME }}
+          server-password: ${{ secrets.OSSRH_TOKEN }}
+          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          gpg-passphrase: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+
+      - name: 🔐 Import and validate GPG key
+        run: |
+          echo "${{ secrets.MAVEN_GPG_PRIVATE_KEY }}" | gpg --batch --import
+          gpg --list-secret-keys --keyid-format LONG
+          echo "Test message" > test.txt
+          KEYID=$(gpg --list-secret-keys --with-colons | grep '^sec' | cut -d: -f5 | head -n1)
+          gpg --batch --yes --pinentry-mode loopback \
+            --passphrase "${{ secrets.MAVEN_GPG_PASSPHRASE }}" \
+            -u "$KEYID" -s test.txt
+          echo "✅ GPG signing test passed."
+
+      - name: 🛠 Create temporary settings.xml with OSSRH credentials
         env:
-          MAVEN_USERNAME: '${{ secrets.OSSRH_USERNAME }}'
-          MAVEN_PASSWORD: '${{ secrets.OSSRH_TOKEN }}'
-          MAVEN_GPG_PASSPHRASE: '${{ secrets.MAVEN_GPG_PASSPHRASE }}'
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml <<EOF
+          <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+          <servers>
+            <server>
+              <id>central</id>
+              <username>${MAVEN_USERNAME}</username>
+              <password>${MAVEN_PASSWORD}</password>
+            </server>
+          </servers>
+          </settings>
+          EOF
+
+      - name: 🧪 Deploy to OSSRH via Maven Central
+        env:
+          MAVEN_OPTS: "--add-opens=java.base/java.util=ALL-UNNAMED"
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+        run: |
+          GPG_KEY_ID=$(gpg --list-secret-keys --with-colons | grep '^sec' | cut -d: -f5 | head -n1)
+
+          if [ -z "$GPG_KEY_ID" ]; then
+            echo "❌ Aucune clé GPG trouvée, ou clé non importée correctement."
+            exit 1
+          fi
+
+          echo "✅ Clé GPG trouvée : $GPG_KEY_ID"
+
+          mvn deploy -DskipTests \
+            -PtoOSSRH \
+            -Dgpg.keyname=$GPG_KEY_ID \
+            -Dgpg.passphrase="${MAVEN_GPG_PASSPHRASE}" \
+            -Dgpg.executable=gpg \
+            -Dgpg.useagent=false
+
+      - name: 🔢 Calculate next snapshot version
+        id: versioning
+        run: |
+          IFS='.' read -r major minor patch <<< "${{ steps.extract_version.outputs.release_version }}"
+          next_patch=$((patch + 1))
+          next_version="$major.$minor.$next_patch-SNAPSHOT"
+          echo "next_version=$next_version" >> $GITHUB_OUTPUT
+          echo "🔮 Next version: $next_version"
+
+      - name: 🚧 Set next snapshot version in pom.xml
+        run: |
+          mvn versions:set -DnewVersion=${{ steps.versioning.outputs.next_version }}
+          mvn versions:commit
+
+      - name: 💾 Commit next snapshot version
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add pom.xml
+          git commit -m "🔄 Prepare next development iteration: ${{ steps.versioning.outputs.next_version }}"
+
+      - name: 🔄 Pull latest changes (rebase) before push (next snapshot)
+        run: |
+          git pull --rebase origin ${{ steps.current_branch.outputs.branch }}
+
+      - name: ⬆️ Push next snapshot version
+        run: |
+          git push origin HEAD:${{ steps.current_branch.outputs.branch }}
