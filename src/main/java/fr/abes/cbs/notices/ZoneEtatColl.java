@@ -4,12 +4,12 @@ import com.google.common.collect.Table;
 import fr.abes.cbs.exception.ZoneException;
 import fr.abes.cbs.notices.sequences.SequenceEtatColl;
 import fr.abes.cbs.utilitaire.Constants;
+import fr.abes.cbs.utilitaire.EnumUtils;
 import fr.abes.cbs.zones.enumSousZones.Zone_955;
 import fr.abes.cbs.zones.enumSousZones.Zone_956;
 import fr.abes.cbs.zones.enumSousZones.Zone_957;
 import fr.abes.cbs.zones.enumSousZones.Zone_959;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.EnumUtils;
 
 import java.util.ArrayList;
 import java.util.List;
