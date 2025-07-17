@@ -2,9 +2,9 @@ package fr.abes.cbs.notices.sequences;
 
 import fr.abes.cbs.notices.SousZone;
 import fr.abes.cbs.utilitaire.Constants;
+import fr.abes.cbs.utilitaire.EnumUtils;
 import fr.abes.cbs.zones.enumSousZones.SEQ_ECOLL_DEBUT;
 import fr.abes.cbs.zones.enumSousZones.SEQ_ECOLL_FIN;
-import org.apache.commons.lang3.EnumUtils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,10 +22,10 @@ public class SequenceParallele extends Sequence {
                 String labelSousZone = matcher.group("szk" + i);
                 String valeurZone = matcher.group("szv" + i);
                 if (EnumUtils.isValidEnum(SEQ_ECOLL_DEBUT.class, labelSousZone)) {
-                    this.listeSousZonesDebut.add(new SousZone<SEQ_ECOLL_DEBUT>(SEQ_ECOLL_DEBUT.valueOf(labelSousZone), valeurZone));
+                    this.listeSousZonesDebut.add(new SousZone<>(SEQ_ECOLL_DEBUT.valueOf(labelSousZone), valeurZone));
                 } else {
                     if (EnumUtils.isValidEnum(SEQ_ECOLL_FIN.class, labelSousZone)) {
-                        this.listeSousZonesFin.add(new SousZone<SEQ_ECOLL_FIN>(SEQ_ECOLL_FIN.valueOf(labelSousZone), valeurZone));
+                        this.listeSousZonesFin.add(new SousZone<>(SEQ_ECOLL_FIN.valueOf(labelSousZone), valeurZone));
                     }
                 }
             }
