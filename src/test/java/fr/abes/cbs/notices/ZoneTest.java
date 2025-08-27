@@ -1,5 +1,7 @@
 package fr.abes.cbs.notices;
 
+import fr.abes.cbs.exception.ZoneException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -71,7 +73,34 @@ public class ZoneTest {
 
 
         assertThat(zone411.toString()).isEqualTo("411 ##$afleur$aarbre$tthon$ttuna$oolive$hHector$iile$ttable$hville$gMontpellier\r");
+    }
 
+    @Test
+    void replaceSousZone() throws ZoneException {
+        Zone zone701 = new Zone("701", TYPE_NOTICE.BIBLIOGRAPHIQUE);
+        zone701.addSubLabel("$3", "123456789");
+        zone701.addSubLabel("$6", "07");
+        zone701.addSubLabel("$7", "fa");
+        zone701.addSubLabel("$4", "4070 (Auteur)");
+        Assertions.assertEquals("701 $5123456789$607$7fa$44070 (Auteur)\r", zone701.replaceSousZone("$3", "$5").toString());
+
+        zone701 = new Zone("701", TYPE_NOTICE.BIBLIOGRAPHIQUE);
+        zone701.addSubLabel("$3", "123456789");
+        zone701.addSubLabel("$6", "07");
+        zone701.addSubLabel("$7", "fa");
+        zone701.addSubLabel("$3", "987654321");
+        zone701.addSubLabel("$6", "08");
+        zone701.addSubLabel("$7", "vb");
+        zone701.addSubLabel("$4", "4070 (Auteur)");
+        Assertions.assertEquals("701 $5123456789$607$7fa$5987654321$608$7vb$44070 (Auteur)\r", zone701.replaceSousZone("$3", "$5").toString());
+
+        Zone zone600 = new Zone("600", TYPE_NOTICE.BIBLIOGRAPHIQUE);
+        zone600.addSubLabel("$3", "086200038");
+        zone600.addSubLabel("$a", "Nietzsche");
+        zone600.addSubLabel("$b", "Friedrich");
+        zone600.addSubLabel("$f", "1844-1900");
+        zone600.addSubLabel("$2", "rameau");
+        Assertions.assertEquals("600 $5086200038$aNietzsche$bFriedrich$f1844-1900$2rameau\r", zone600.replaceSousZone("$3", "$5").toString());
     }
 
 }

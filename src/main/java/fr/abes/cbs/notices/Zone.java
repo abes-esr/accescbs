@@ -265,6 +265,33 @@ public class Zone {
     }
 
     /**
+     * Méthode permettant de supprimer une sous zone dans une zone et d'ajouter une sous zone dans la même séquence de sous zones que celle qui vient d'être supprimée en reprenant sa valeur
+     * @param sousZoneToDelete la sous zone à supprimer
+     * @param sousZoneLabelToAdd le label de la sous zone à ajouter
+     * @return la zone nouvellement créée
+     */
+    public Zone replaceSousZone(String sousZoneToDelete, String sousZoneLabelToAdd) throws ZoneException {
+        Zone zoneToReturn = new Zone(this.getLabel(), this.getTypeNotice(), this.getIndicateurs());
+        this.getSubLabelTable().rowKeySet().forEach(seqSousZones -> {
+            if (this.getSubLabelTable().row(seqSousZones).containsKey(sousZoneToDelete)) {
+                for (String key : this.getSubLabelTable().row(seqSousZones).keySet()) {
+                    if (!key.equals(sousZoneToDelete)) {
+                        zoneToReturn.getSubLabelTable().put(seqSousZones, key, this.getSubLabelTable().get(seqSousZones, key));
+                    } else {
+                        zoneToReturn.getSubLabelTable().put(seqSousZones, sousZoneLabelToAdd, this.getSubLabelTable().get(seqSousZones, key));
+                    }
+                }
+            } else {
+                //si la séquence ne contient pas la sous zone à supprimer, on la colle dans la nouvelle zone
+                for (String key : this.getSubLabelTable().row(seqSousZones).keySet()) {
+                    zoneToReturn.getSubLabelTable().put(seqSousZones, key, this.getSubLabelTable().get(seqSousZones, key));
+                }
+            }
+        });
+        return zoneToReturn;
+    }
+
+    /**
      * Ajoute à zone les sous-zones suivant l'ordre d'ajout
      *
      * @param zone
