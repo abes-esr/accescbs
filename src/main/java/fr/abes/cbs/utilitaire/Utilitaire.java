@@ -1101,7 +1101,7 @@ public class Utilitaire {
     }
 
     public static String deleteExpensionFromValue(String value) {
-        if (value.indexOf(Constants.STR_1B + "I@") != -1) {
+        if (value != null && value.contains(Constants.STR_1B + "I@")) {
             return value.substring(0, value.indexOf(Constants.STR_1B + "I@"));
         }
         return value;

@@ -6,6 +6,7 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Table;
 import fr.abes.cbs.exception.ZoneException;
 import fr.abes.cbs.utilitaire.Constants;
+import fr.abes.cbs.utilitaire.Utilitaire;
 import fr.abes.cbs.zones.ZoneSpecification;
 import fr.abes.cbs.zones.ZonesSpecifications;
 import lombok.Getter;
@@ -276,9 +277,9 @@ public class Zone {
             if (this.getSubLabelTable().row(seqSousZones).containsKey(sousZoneToDelete)) {
                 for (String key : this.getSubLabelTable().row(seqSousZones).keySet()) {
                     if (!key.equals(sousZoneToDelete)) {
-                        zoneToReturn.getSubLabelTable().put(seqSousZones, key, this.getSubLabelTable().get(seqSousZones, key));
+                        zoneToReturn.getSubLabelTable().put(seqSousZones, key, Utilitaire.deleteExpensionFromValue(this.getSubLabelTable().get(seqSousZones, key)));
                     } else {
-                        zoneToReturn.getSubLabelTable().put(seqSousZones, sousZoneLabelToAdd, this.getSubLabelTable().get(seqSousZones, key));
+                        zoneToReturn.getSubLabelTable().put(seqSousZones, sousZoneLabelToAdd, Utilitaire.deleteExpensionFromValue(this.getSubLabelTable().get(seqSousZones, key)));
                     }
                 }
             } else {

@@ -1,6 +1,7 @@
 package fr.abes.cbs.notices;
 
 import fr.abes.cbs.exception.ZoneException;
+import fr.abes.cbs.utilitaire.Constants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -96,6 +97,14 @@ public class ZoneTest {
 
         Zone zone600 = new Zone("600", TYPE_NOTICE.BIBLIOGRAPHIQUE);
         zone600.addSubLabel("$3", "086200038");
+        zone600.addSubLabel("$a", "Nietzsche");
+        zone600.addSubLabel("$b", "Friedrich");
+        zone600.addSubLabel("$f", "1844-1900");
+        zone600.addSubLabel("$2", "rameau");
+        Assertions.assertEquals("600 $5086200038$aNietzsche$bFriedrich$f1844-1900$2rameau\r", zone600.replaceSousZone("$3", "$5").toString());
+
+        zone600 = new Zone("600", TYPE_NOTICE.BIBLIOGRAPHIQUE);
+        zone600.addSubLabel("$3", "086200038" + Constants.STR_1B + "I@testExpension");
         zone600.addSubLabel("$a", "Nietzsche");
         zone600.addSubLabel("$b", "Friedrich");
         zone600.addSubLabel("$f", "1844-1900");
