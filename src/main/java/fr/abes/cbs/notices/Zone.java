@@ -285,7 +285,7 @@ public class Zone {
             } else {
                 //si la séquence ne contient pas la sous zone à supprimer, on la colle dans la nouvelle zone
                 for (String key : this.getSubLabelTable().row(seqSousZones).keySet()) {
-                    zoneToReturn.getSubLabelTable().put(seqSousZones, key, this.getSubLabelTable().get(seqSousZones, key));
+                    zoneToReturn.getSubLabelTable().put(seqSousZones, key, Utilitaire.deleteExpensionFromValue(this.getSubLabelTable().get(seqSousZones, key)));
                 }
             }
         });
