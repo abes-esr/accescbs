@@ -442,7 +442,7 @@ public class BiblioTest {
                         "304 ##$aTitre provenant de l'écran-titre\r" +
                         "452 ##$0037647482\r" +
                         "532 ##$a@WJR\r" +
-                        "608 ##$302724640X\u001BIPériodiques\u001BN$2rameau\r" +
+                        "608 ##$302724640X$2rameau\r" +
                         "676 ##$a071\r" +
                         "712 02$a@University of Maryland at College Park$bCollege of Journalism$4340\r");
     }
