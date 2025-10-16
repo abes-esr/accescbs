@@ -51,9 +51,12 @@ public class Constants {
     public static final String DOLLAR = "$";
     public static final String DIEZ = "#";
     public static final String LP = "P";
+    public static final String LPP = "LPP";
     public static final String BSA = "\\$a";
     public static final String ERR_NOTICE_NSELECTED = "pas de notice selectionnée ou pas de no d exemplaire";
     public static final String MSG_APPN = "avec PPN ";
+
+
     public static final String STR_03 = String.valueOf((char) 03);
     public static final String STR_29 = String.valueOf((char) 29);
     public static final String STR_1D = String.valueOf((char) 29);
@@ -73,6 +76,9 @@ public class Constants {
     public static final String LMA = new String(new char[] { (char) 27, 'L', 'M', 'A' });
     public static final String CR_152_S = String.valueOf((char) 152);
     public static final String CR_156_S = String.valueOf((char) 156);
+
+    public static final String EDH = Constants.STR_1B + "E" + Constants.STR_1B + "D" + Constants.STR_1B + "H" + Constants.STR_1B;
+
 
     public static final String STR_ZOE = "?\\zoe+";
 
