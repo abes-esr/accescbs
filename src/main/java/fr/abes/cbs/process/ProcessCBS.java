@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 public class ProcessCBS {
@@ -955,6 +957,7 @@ public class ProcessCBS {
             String noticedeb = Utilitaire.recupEntre(resu, Constants.VTXT, Constants.STR_1F);
             return clientCBS.valModLoc(noticedeb, ppnEncours, String.valueOf(lotEncours), vloc);
         } catch (CBSException e) {
+
             throw e;
         } catch (Exception e) {
             throw new IOException(e);
@@ -992,4 +995,15 @@ public class ProcessCBS {
         return clientCBS.valSupL(String.valueOf(lotEncours), ppnEncours);
     }
 
+
+    public List<String> getPpnsFromResultList() throws IOException, CBSException {
+        String trameList = clientCBS.affk("003");
+        Pattern parternPpn = Pattern.compile(Constants.LPP + "(.{9})" + Constants.EDH);
+        Matcher matcher = parternPpn.matcher(trameList);
+        List<String> ppns = new ArrayList<>();
+        while (matcher.find()) {
+            ppns.add(matcher.group(1));
+        }
+        return ppns;
+    }
 }

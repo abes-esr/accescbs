@@ -654,4 +654,18 @@ public class Commandes {
         return connector.tcpReq(query);
     }
 
+    /**
+     * Envoi la commande Aff k
+     *
+     * @param zone la zone à afficher
+     * @return retour du CBS
+     * @throws CBSException Erreur CBS
+     */
+    public String affk(String zone) throws IOException, CBSException {
+        String query = new StringBuilder().append(Constants.VT1).append(Constants.STR_1D).append(Constants.VTI1)
+                .append(Constants.STR_1D).append(Constants.VTAFR).append(Constants.STR_1D).append(Constants.VCUTF8)
+                .append(Constants.STR_1D).append(Constants.CUS).append("aff k").append(zone).append(Constants.STR_1D)
+                .toString();
+        return connector.tcpReq(query);
+    }
 }

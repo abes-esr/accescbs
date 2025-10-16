@@ -12,8 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -21,7 +19,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class CommandesTest {
+class ProcessCBSTest {
 
     private ProcessCBS cmd;
     private Properties prop;
@@ -32,12 +30,12 @@ class CommandesTest {
     @BeforeEach
     void initAll() throws CBSException, IOException {
         prop = new Properties();
-        prop.load(Objects.requireNonNull(CommandesTest.class.getResource("/CommandesTest.properties")).openStream());
+        prop.load(Objects.requireNonNull(ProcessCBSTest.class.getResource("/CommandesTest.properties")).openStream());
         this.ip = prop.getProperty("connect.ip");
         this.port = prop.getProperty("connect.port");
         this.login = prop.getProperty("connect.login");
         this.password = prop.getProperty("connect.password");
-                
+
         cmd = new ProcessCBS();
         cmd.authenticate(ip, port, login, password);
     }
@@ -208,7 +206,7 @@ class CommandesTest {
         String resu = cmd.view("1", true, "UNMA");
 
         //On vérifie que l'on a bien récupéré la bonne notice au format XML
-        String xmlResult = new Scanner(Objects.requireNonNull(CommandesTest.class.getResourceAsStream("/viewXml.txt")), "UTF-8").useDelimiter("\\A").next();
+        String xmlResult = new Scanner(Objects.requireNonNull(ProcessCBSTest.class.getResourceAsStream("/viewXml.txt")), "UTF-8").useDelimiter("\\A").next();
         assertThat(resu).contains(xmlResult);
 
         resu = cmd.view("1", false, "UNMA");
@@ -407,6 +405,16 @@ class CommandesTest {
         cmd.search("che ppn 23073426X");
         cmd.affUnma();
         return cmd.editer("1");
+    }
+
+    @Test
+    @DisplayName("test aff k 003")
+    void affkSurNoticeTCN() throws CBSException, IOException {
+        cmd.search("che mti testtcn");
+        List<String> result = cmd.getPpnsFromResultList();
+        assertThat(result).contains("23309668X");
+        assertThat(result).contains("230721486");
+        assertThat(result.size()).isEqualTo(2);
     }
 
 }

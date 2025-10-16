@@ -90,7 +90,7 @@ class UtilitaireTest {
     @DisplayName("Récupération d'un tag")
     @Test
     void getTag() {
-        String notice = new Scanner(CommandesTest.class.getResourceAsStream("/noticePica.txt"), "UTF-8").useDelimiter("\\A").next();
+        String notice = new Scanner(ProcessCBSTest.class.getResourceAsStream("/noticePica.txt"), "UTF-8").useDelimiter("\\A").next();
         //On vérifie que getTag nous retourne bien la bonne valeur
         assertThat(Utilitaire.getTag(notice, "008", "")).isEqualTo("$aAax");
         assertThat(Utilitaire.getTag(notice, "101", "0#")).isEqualTo("$aeng");
