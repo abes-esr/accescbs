@@ -292,7 +292,7 @@ public class ProcessCBS {
     public String next() throws CBSException, IOException {
         try {
             onEdit = false;
-            pos = pos + 16;
+            pos = pos + Constants.SIZE_PAGE;
             String resu = clientCBS.next(String.valueOf(lotEncours), pos);
 
             String[] lstrecords = resu.split("\r\n|\r|\n");
@@ -1007,8 +1007,8 @@ public class ProcessCBS {
                 ppns.add(matcher.group(1));
             }
 
-            if (size > 15) {
-                trameList = clientCBS.next(String.valueOf(this.lotEncours), ppns.size());
+            if (ppns.size() < size) {
+                trameList = this.next();
             }
         } while (ppns.size() < size);
 
