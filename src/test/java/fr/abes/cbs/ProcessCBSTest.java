@@ -411,10 +411,19 @@ class ProcessCBSTest {
     @DisplayName("test aff k 003")
     void affkSurNoticeTCN() throws CBSException, IOException {
         cmd.search("che mti testtcn");
-        List<String> result = cmd.getPpnsFromResultList();
+        List<String> result = cmd.getPpnsFromResultList(2);
         assertThat(result).contains("23309668X");
         assertThat(result).contains("230721486");
         assertThat(result.size()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("test aff k 003 pagine")
+    void affkSurBouquetPagine() throws CBSException, IOException {
+        cmd.search("che bou EUROPRESSE_GLOBAL_BIBESR");
+        Integer size = cmd.rel();
+        List<String> result = cmd.getPpnsFromResultList(size);
+        assertThat(result.size()).isEqualTo(size);
     }
 
 }

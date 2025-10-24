@@ -996,14 +996,22 @@ public class ProcessCBS {
     }
 
 
-    public List<String> getPpnsFromResultList() throws IOException, CBSException {
+    public List<String> getPpnsFromResultList(Integer size) throws IOException, CBSException {
         String trameList = clientCBS.affk("003");
-        Pattern parternPpn = Pattern.compile(Constants.LPP + "(.{9})" + Constants.EDH);
-        Matcher matcher = parternPpn.matcher(trameList);
         List<String> ppns = new ArrayList<>();
-        while (matcher.find()) {
-            ppns.add(matcher.group(1));
-        }
+        Pattern parternPpn = Pattern.compile(Constants.LPP + "(.{9})" + Constants.EDH);
+
+        do {
+            Matcher matcher = parternPpn.matcher(trameList);
+            while (matcher.find()) {
+                ppns.add(matcher.group(1));
+            }
+
+            if (size > 15) {
+                trameList = clientCBS.next(String.valueOf(this.lotEncours), ppns.size());
+            }
+        } while (ppns.size() < size);
+
         return ppns;
     }
 }
