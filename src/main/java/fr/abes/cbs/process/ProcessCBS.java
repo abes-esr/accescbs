@@ -292,7 +292,7 @@ public class ProcessCBS {
     public String next() throws CBSException, IOException {
         try {
             onEdit = false;
-            pos = pos + 16;
+            pos = pos + Constants.SIZE_PAGE;
             String resu = clientCBS.next(String.valueOf(lotEncours), pos);
 
             String[] lstrecords = resu.split("\r\n|\r|\n");
@@ -996,14 +996,22 @@ public class ProcessCBS {
     }
 
 
-    public List<String> getPpnsFromResultList() throws IOException, CBSException {
+    public List<String> getPpnsFromResultList(Integer size) throws IOException, CBSException {
         String trameList = clientCBS.affk("003");
-        Pattern parternPpn = Pattern.compile(Constants.LPP + "(.{9})" + Constants.EDH);
-        Matcher matcher = parternPpn.matcher(trameList);
         List<String> ppns = new ArrayList<>();
-        while (matcher.find()) {
-            ppns.add(matcher.group(1));
-        }
+        Pattern parternPpn = Pattern.compile(Constants.LPP + "(.{9})" + Constants.EDH);
+
+        do {
+            Matcher matcher = parternPpn.matcher(trameList);
+            while (matcher.find()) {
+                ppns.add(matcher.group(1));
+            }
+
+            if (ppns.size() < size) {
+                trameList = this.next();
+            }
+        } while (ppns.size() < size);
+
         return ppns;
     }
 }

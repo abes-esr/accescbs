@@ -129,6 +129,8 @@ public class Constants {
     /***
      * Constructeur privé permet de rendre la classe non instantiable
      */
+
+    public static final int SIZE_PAGE = 16;
     private Constants() {
     }
 }

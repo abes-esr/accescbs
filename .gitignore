@@ -9,6 +9,8 @@ logs/
 RemoteSystemsTempFiles/
 .settings/
 
+src/test/resources/CommandesTest.properties
+
 ### IntelliJ IDEA ###
 .idea
 *.iws

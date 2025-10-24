@@ -108,7 +108,7 @@ public class Commandes {
      * @return
      */
     public String next(final String lotEncours, final int pos) throws CBSException, IOException {
-        String query = new StringBuilder().append("CUS\\too s").append(lotEncours).append(" ").append(pos)
+        String query = new StringBuilder().append(Constants.CUSTOO).append(lotEncours).append(" ").append(pos)
                 .append(" K").toString();
         return connector.tcpReq(query);
     }
