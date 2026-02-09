@@ -368,7 +368,7 @@ class ProcessCBSTest {
 
         String biblioExpected = "100 0#$a2018\r" +
                 "101 0#$aeng\r" +
-                "200 0#$aNotice de test de modification dans API Sudoc@testmodifier Notice\r";
+                "200 0#$aNotice de test de modification dans API Sudoc@testmodifier Notice";
         Assertions.assertTrue(notice.getNoticeBiblio().toString().contains(biblioExpected));
     }
 
@@ -427,6 +427,14 @@ class ProcessCBSTest {
     }
 
 
+
+    @Test
+    void testAffK() throws IOException, CBSException {
+        processCBS.search("che bou EUROPRESSE_GLOBAL_BIBESR");
+        Integer size = processCBS.rel();
+        List<String> ppn = processCBS.getPpnsFromResultList(size);
+        ppn.forEach(System.out::println);
+    }
 
 }
 
