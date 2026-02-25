@@ -66,7 +66,7 @@ jobs:
       - name: ☕ Set up Maven Central Repository
         uses: actions/setup-java@v3
         with:
-          java-version: '11'
+          java-version: '21'
           distribution: temurin
           server-id: central
           server-username: ${{ secrets.OSSRH_USERNAME }}
