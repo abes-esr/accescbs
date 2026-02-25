@@ -1,9 +1,8 @@
 package fr.abes.cbs.notices;
 
+import fr.abes.cbs.utilitaire.Constants;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import fr.abes.cbs.utilitaire.Constants;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;

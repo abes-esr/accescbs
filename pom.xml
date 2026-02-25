@@ -10,7 +10,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.target>21</maven.compiler.target>
     </properties>
 
     <licenses>
@@ -74,7 +74,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.28</version>
+            <version>1.18.40</version>
             <scope>provided</scope>
         </dependency>
         <!-- LOGS -->
@@ -107,7 +107,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>32.1.2-jre</version>
+            <version>33.5.0-jre</version>
         </dependency>
 
         <dependency>

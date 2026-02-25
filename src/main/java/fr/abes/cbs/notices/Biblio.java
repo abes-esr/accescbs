@@ -56,7 +56,7 @@ public class Biblio extends Notice {
         Pattern standarZoneSansSousZonePattern = Pattern.compile("[0-8][\\d]{2}\\s[^$].*");
         String zonePrecedente = "";
         //variable de gestion de l'index en cas de zone répétée
-        Integer indexZone = 0;
+        int indexZone = 0;
         for (String lineZone : tabBiblio) {
             Matcher standardZoneRegexFinded = standarZoneRegexPattern.matcher(lineZone);
             Matcher standardZoneSansSousZoneFinded = standarZoneSansSousZonePattern.matcher(lineZone);
@@ -74,7 +74,7 @@ public class Biblio extends Notice {
                     if (matcher.group("zStaHash") != null) {
                         indicateurs = matcher.group("zStaHash").toCharArray();
                     }
-                    for (int i = 0; i <= 50; i++) {
+                    for (int i = 0; i <= Constants.NB_SOUS_ZONES_REGEXP_STANDARD; i++) {
                         if (matcher.group("szv" + i) != null) {
                             if (firstSousZone) {
                                 if (indicateurs.length > 0) {

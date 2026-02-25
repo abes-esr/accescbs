@@ -345,5 +345,15 @@ public class Zone {
         return specifications.contains(subLabel.substring(1));
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Zone zone = (Zone) o;
+        return Objects.equals(label, zone.label) && Objects.equals(valeur, zone.valeur) && Objects.deepEquals(indicateurs, zone.indicateurs) && typeNotice == zone.typeNotice && Objects.equals(subLabelTable, zone.subLabelTable);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(label, valeur, Arrays.hashCode(indicateurs), typeNotice, subLabelTable);
+    }
 }

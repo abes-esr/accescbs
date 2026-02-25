@@ -194,7 +194,7 @@ public class Utilitaire {
      */
     private static String suppInutile(final String in) {
         String out;
-        if (in.length() == 0) {
+        if (in.isEmpty()) {
             return in;
         }
         if (in.substring(0, 1).equals(Constants.CR_152_S)) {
