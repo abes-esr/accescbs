@@ -102,7 +102,7 @@ public class NoticeConcrete extends Notice implements INotice {
 
     @Override
     public String getNumEx() {
-        return (this.getExemplaires().size() == 0) ? null : String.format("%02d", this.getExemplaires().size());
+        return (this.getExemplaires().isEmpty()) ? null : String.format("%02d", this.getExemplaires().size());
     }
 
     @Override

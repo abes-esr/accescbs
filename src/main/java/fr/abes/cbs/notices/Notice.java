@@ -227,7 +227,7 @@ public abstract class Notice implements INotice {
                 zonesFinded.add(localZone);
             }
         }
-        if (zonesFinded.size() == 0)
+        if (zonesFinded.isEmpty())
             return null;
         if (index < zonesFinded.size()) {
             return zonesFinded.get(index);
@@ -376,7 +376,7 @@ public abstract class Notice implements INotice {
         Integer i = 0;
         while (it.hasNext()) {
             Zone zonetodelete = it.next();
-            if ((zonetodelete.getLabel().equals(zone) && ((index == null) || (i == index)))) {
+            if ((zonetodelete.getLabel().equals(zone) && ((index == null) || (i.equals(index))))) {
                 it.remove();
             }
             if (zonetodelete.getLabel().equals(zone)) {
